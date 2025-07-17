@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>詳細ワイン記録帳</title>
+    <link rel="stylesheet" href="advanced-style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>詳細ワイン記録帳</h1>
+        
+        <!-- 直近ワイン選択セクション -->
+        <div class="recent-wines-section">
+            <h2>直近のワインから選択</h2>
+            <div id="recentWinesGrid" class="recent-wines-grid">
+                <!-- 直近4本のワインがここに表示 -->
+            </div>
+            <button id="newWineBtn" class="new-wine-btn">新しいワインを記録</button>
+        </div>
+        
+        <!-- メインフォーム -->
+        <div class="wine-form" id="wineForm">
+            <h2 id="formTitle">新しいワインを記録</h2>
+            <form id="wineRecordForm">
+                <input type="hidden" id="isUpdate" value="false">
+                <input type="hidden" id="wineId" value="">
+                
+                <!-- 基本情報 -->
+                <div class="form-section">
+                    <h3>基本情報</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="wineName">ワイン名:</label>
+                            <input type="text" id="wineName" name="wineName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="producer">生産者:</label>
+                            <input type="text" id="producer" name="producer" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="country">生産国:</label>
+                            <input type="text" id="country" name="country" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="region">生産地域:</label>
+                            <input type="text" id="region" name="region">
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="vintage">ヴィンテージ:</label>
+                            <input type="number" id="vintage" name="vintage" min="1900" max="2030">
+                        </div>
+                        <div class="form-group">
+                            <label for="price">価格:</label>
+                            <input type="number" id="price" name="price" min="0" step="100">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="wineType">ワインの種類:</label>
+                        <select id="wineType" name="wineType" required>
+                            <option value="">選択してください</option>
+                            <option value="1">1. 赤ワイン</option>
+                            <option value="2">2. 白ワイン</option>
+                            <option value="3">3. ロゼワイン</option>
+                            <option value="4">4. スパークリングワイン</option>
+                            <option value="5">5. デザートワイン</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="soil">土壌情報:</label>
+                        <input type="text" id="soil" name="soil" placeholder="石灰質、粘土質など">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="history">ワインの歴史・背景:</label>
+                        <textarea id="history" name="history" rows="3" placeholder="ワインの歴史や背景情報"></textarea>
+                    </div>
+                </div>
+                
+                <!-- テイスティング情報 -->
+                <div class="form-section">
+                    <h3>テイスティング情報</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="color">色調:</label>
+                            <select id="color" name="color" required>
+                                <option value="">選択してください</option>
+                                <option value="1">1. 淡い</option>
+                                <option value="2">2. 中程度</option>
+                                <option value="3">3. 濃い</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="taste">味わい:</label>
+                            <select id="taste" name="taste" required>
+                                <option value="">選択してください</option>
+                                <option value="1">1. 辛口</option>
+                                <option value="2">2. 半辛口</option>
+                                <option value="3">3. 半甘口</option>
+                                <option value="4">4. 甘口</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="body">ボディ:</label>
+                            <select id="body" name="body" required>
+                                <option value="">選択してください</option>
+                                <option value="1">1. ライト</option>
+                                <option value="2">2. ミディアム</option>
+                                <option value="3">3. フル</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="complexity">味の複雑さ:</label>
+                            <select id="complexity" name="complexity" required>
+                                <option value="">選択してください</option>
+                                <option value="1">1. シンプル</option>
+                                <option value="2">2. やや複雑</option>
+                                <option value="3">3. 複雑</option>
+                                <option value="4">4. 非常に複雑</option>
+                                <option value="5">5. 極めて複雑</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="rating">総合評価:</label>
+                        <select id="rating" name="rating" required>
+                            <option value="">選択してください</option>
+                            <option value="1">1. 不満</option>
+                            <option value="2">2. 普通</option>
+                            <option value="3">3. 良い</option>
+                            <option value="4">4. 非常に良い</option>
+                            <option value="5">5. 最高</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- 香りカテゴリ評価 -->
+                <div class="form-section">
+                    <h3>香りカテゴリ評価 (1-5点)</h3>
+                    <div class="aroma-scores">
+                        <div class="aroma-score-item">
+                            <label for="fruitScore">果実系:</label>
+                            <input type="range" id="fruitScore" name="fruitScore" min="0" max="5" value="0" step="1">
+                            <span class="score-value">0</span>
+                        </div>
+                        <div class="aroma-score-item">
+                            <label for="floralScore">花系:</label>
+                            <input type="range" id="floralScore" name="floralScore" min="0" max="5" value="0" step="1">
+                            <span class="score-value">0</span>
+                        </div>
+                        <div class="aroma-score-item">
+                            <label for="spiceScore">スパイス系:</label>
+                            <input type="range" id="spiceScore" name="spiceScore" min="0" max="5" value="0" step="1">
+                            <span class="score-value">0</span>
+                        </div>
+                        <div class="aroma-score-item">
+                            <label for="herbScore">ハーブ系:</label>
+                            <input type="range" id="herbScore" name="herbScore" min="0" max="5" value="0" step="1">
+                            <span class="score-value">0</span>
+                        </div>
+                        <div class="aroma-score-item">
+                            <label for="earthScore">土系:</label>
+                            <input type="range" id="earthScore" name="earthScore" min="0" max="5" value="0" step="1">
+                            <span class="score-value">0</span>
+                        </div>
+                        <div class="aroma-score-item">
+                            <label for="woodScore">木系:</label>
+                            <input type="range" id="woodScore" name="woodScore" min="0" max="5" value="0" step="1">
+                            <span class="score-value">0</span>
+                        </div>
+                        <div class="aroma-score-item">
+                            <label for="otherScore">その他:</label>
+                            <input type="range" id="otherScore" name="otherScore" min="0" max="5" value="0" step="1">
+                            <span class="score-value">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 詳細香り分類 -->
+                <div class="form-section">
+                    <h3>詳細香り分類</h3>
+                    <div class="aroma-categories">
+                        <div class="aroma-category">
+                            <h4>果実系</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="fruitAromas" value="赤い果実"> 赤い果実</label>
+                                <label><input type="checkbox" name="fruitAromas" value="黒い果実"> 黒い果実</label>
+                                <label><input type="checkbox" name="fruitAromas" value="柑橘系"> 柑橘系</label>
+                                <label><input type="checkbox" name="fruitAromas" value="トロピカル"> トロピカル</label>
+                                <label><input type="checkbox" name="fruitAromas" value="ドライフルーツ"> ドライフルーツ</label>
+                            </div>
+                        </div>
+                        
+                        <div class="aroma-category">
+                            <h4>花系</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="floralAromas" value="バラ"> バラ</label>
+                                <label><input type="checkbox" name="floralAromas" value="スミレ"> スミレ</label>
+                                <label><input type="checkbox" name="floralAromas" value="ジャスミン"> ジャスミン</label>
+                                <label><input type="checkbox" name="floralAromas" value="ラベンダー"> ラベンダー</label>
+                                <label><input type="checkbox" name="floralAromas" value="アカシア"> アカシア</label>
+                            </div>
+                        </div>
+                        
+                        <div class="aroma-category">
+                            <h4>スパイス系</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="spiceAromas" value="コショウ"> コショウ</label>
+                                <label><input type="checkbox" name="spiceAromas" value="シナモン"> シナモン</label>
+                                <label><input type="checkbox" name="spiceAromas" value="バニラ"> バニラ</label>
+                                <label><input type="checkbox" name="spiceAromas" value="クローブ"> クローブ</label>
+                                <label><input type="checkbox" name="spiceAromas" value="ナツメグ"> ナツメグ</label>
+                            </div>
+                        </div>
+                        
+                        <div class="aroma-category">
+                            <h4>ハーブ系</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="herbAromas" value="ローズマリー"> ローズマリー</label>
+                                <label><input type="checkbox" name="herbAromas" value="タイム"> タイム</label>
+                                <label><input type="checkbox" name="herbAromas" value="ミント"> ミント</label>
+                                <label><input type="checkbox" name="herbAromas" value="ユーカリ"> ユーカリ</label>
+                                <label><input type="checkbox" name="herbAromas" value="ハーブ"> ハーブ</label>
+                            </div>
+                        </div>
+                        
+                        <div class="aroma-category">
+                            <h4>土系</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="earthAromas" value="土"> 土</label>
+                                <label><input type="checkbox" name="earthAromas" value="鉱物"> 鉱物</label>
+                                <label><input type="checkbox" name="earthAromas" value="石灰"> 石灰</label>
+                                <label><input type="checkbox" name="earthAromas" value="粘土"> 粘土</label>
+                                <label><input type="checkbox" name="earthAromas" value="火山灰"> 火山灰</label>
+                            </div>
+                        </div>
+                        
+                        <div class="aroma-category">
+                            <h4>木系</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="woodAromas" value="オーク"> オーク</label>
+                                <label><input type="checkbox" name="woodAromas" value="杉"> 杉</label>
+                                <label><input type="checkbox" name="woodAromas" value="松"> 松</label>
+                                <label><input type="checkbox" name="woodAromas" value="樽"> 樽</label>
+                                <label><input type="checkbox" name="woodAromas" value="燻製"> 燻製</label>
+                            </div>
+                        </div>
+                        
+                        <div class="aroma-category">
+                            <h4>その他</h4>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" name="otherAromas" value="蜂蜜"> 蜂蜜</label>
+                                <label><input type="checkbox" name="otherAromas" value="バター"> バター</label>
+                                <label><input type="checkbox" name="otherAromas" value="ナッツ"> ナッツ</label>
+                                <label><input type="checkbox" name="otherAromas" value="チョコレート"> チョコレート</label>
+                                <label><input type="checkbox" name="otherAromas" value="コーヒー"> コーヒー</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 参考情報 -->
+                <div class="form-section">
+                    <h3>参考情報</h3>
+                    <div class="form-group">
+                        <label for="saleUrl">販売元サイトURL:</label>
+                        <input type="url" id="saleUrl" name="saleUrl" placeholder="https://example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="dlaboUrl">Dラボ動画URL:</label>
+                        <input type="url" id="dlaboUrl" name="dlaboUrl" placeholder="https://example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="referenceUrl">その他参考URL:</label>
+                        <input type="url" id="referenceUrl" name="referenceUrl" placeholder="https://example.com">
+                    </div>
+                </div>
+                
+                <!-- 記録情報 -->
+                <div class="form-section">
+                    <h3>記録情報</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="recordDate">記録日:</label>
+                            <input type="date" id="recordDate" name="recordDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="daysFromOpening">開栓からの日数:</label>
+                            <input type="number" id="daysFromOpening" name="daysFromOpening" min="0" value="0">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="pairing">ペアリング料理:</label>
+                        <input type="text" id="pairing" name="pairing" placeholder="一緒に食べた料理">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">メモ:</label>
+                        <textarea id="notes" name="notes" rows="3" placeholder="その他のメモや感想"></textarea>
+                    </div>
+                </div>
+                
+                <!-- 画像アップロード -->
+                <div class="form-section">
+                    <h3>画像</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="wineImage">ワインの画像:</label>
+                            <input type="file" id="wineImage" name="wineImage" accept="image/*">
+                            <div id="wineImagePreview"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="pairingImage">ペアリングの画像:</label>
+                            <input type="file" id="pairingImage" name="pairingImage" accept="image/*">
+                            <div id="pairingImagePreview"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" id="submitBtn">記録を追加</button>
+                    <button type="button" id="cancelBtn">キャンセル</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- レーダーチャート表示 -->
+        <div class="chart-section">
+            <h2>香りレーダーチャート</h2>
+            <div class="chart-container">
+                <canvas id="aromaChart"></canvas>
+            </div>
+        </div>
+        
+        <!-- 記録一覧 -->
+        <div class="wine-list">
+            <h2>記録されたワイン</h2>
+            <div class="filter-controls">
+                <input type="text" id="searchInput" placeholder="ワイン名で検索...">
+                <select id="sortSelect">
+                    <option value="date">記録日順</option>
+                    <option value="rating">評価順</option>
+                    <option value="name">ワイン名順</option>
+                </select>
+            </div>
+            <div id="wineRecords"></div>
+        </div>
+    </div>
+    
+    <script src="advanced-script.js"></script>
+</body>
+</html>
