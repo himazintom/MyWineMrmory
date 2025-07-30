@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyWineMemory - 超詳細ワイン記録帳</title>
+    <link rel="stylesheet" href="ultra-advanced-style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script type="module" src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header-with-theme">
+            <h1>MyWineMemory</h1>
+            <div class="header-controls">
+                <div class="auth-section" id="authSection">
+                    <!-- 認証状態によって動的に変更 -->
+                    <div id="loginButton" class="auth-button">
+                        <button class="login-btn">ログイン</button>
+                    </div>
+                    <div id="userInfo" class="user-info" style="display: none;">
+                        <span id="userDisplayName"></span>
+                        <button id="logoutButton" class="logout-btn">ログアウト</button>
+                    </div>
+                </div>
+                <div class="theme-toggle-container">
+                    <button id="themeToggle" class="theme-toggle" title="テーマ切り替え">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 認証モーダル -->
+        <div id="authModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close-modal" id="closeAuthModal">&times;</span>
+                <div class="auth-container">
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" data-tab="login">ログイン</button>
+                        <button class="auth-tab" data-tab="register">新規登録</button>
+                    </div>
+                    
+                    <!-- ログインフォーム -->
+                    <div id="loginForm" class="auth-form active">
+                        <h3>ログイン</h3>
+                        <form id="emailLoginForm">
+                            <div class="form-group">
+                                <label for="loginEmail">メールアドレス:</label>
+                                <input type="email" id="loginEmail" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword">パスワード:</label>
+                                <input type="password" id="loginPassword" name="password" required>
+                            </div>
+                            <button type="submit" class="auth-submit-btn">ログイン</button>
+                        </form>
+                        <div class="auth-divider">または</div>
+                        <button id="googleLoginBtn" class="google-login-btn">
+                            <span class="google-icon">G</span>
+                            Googleでログイン
+                        </button>
+                        <div class="auth-links">
+                            <a href="#" id="forgotPasswordLink">パスワードを忘れた方</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 新規登録フォーム -->
+                    <div id="registerForm" class="auth-form">
+                        <h3>新規登録</h3>
+                        <form id="emailRegisterForm">
+                            <div class="form-group">
+                                <label for="registerName">表示名:</label>
+                                <input type="text" id="registerName" name="displayName">
+                            </div>
+                            <div class="form-group">
+                                <label for="registerEmail">メールアドレス:</label>
+                                <input type="email" id="registerEmail" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerPassword">パスワード:</label>
+                                <input type="password" id="registerPassword" name="password" required minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">パスワード確認:</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6">
+                            </div>
+                            <button type="submit" class="auth-submit-btn">登録</button>
+                        </form>
+                        <div class="auth-divider">または</div>
+                        <button id="googleRegisterBtn" class="google-login-btn">
+                            <span class="google-icon">G</span>
+                            Googleで登録
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ローディング表示 -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>データを読み込み中...</p>
+        </div>
+        
+        <!-- 直近ワイン選択セクション -->
+        <div class="recent-wines-section">
+            <h2>直近のワインから選択</h2>
+            <div id="recentWinesGrid" class="recent-wines-grid">
+                <!-- 直近4本のワインがここに表示 -->
+            </div>
+            <button id="newWineBtn" class="new-wine-btn">新しいワインを記録</button>
+        </div>
+        
+        <!-- メインフォーム -->
+        <div class="wine-form" id="wineForm">
+            <h2 id="formTitle">新しいワインを記録</h2>
+            <form id="wineRecordForm">
+                <input type="hidden" id="isUpdate" value="false">
+                <input type="hidden" id="wineId" value="">
+                
+                <!-- 基本情報 -->
+                <div class="form-section">
+                    <h3>基本情報</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="wineName">ワイン名:</label>
+                            <input type="text" id="wineName" name="wineName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="producer">生産者:</label>
+                            <input type="text" id="producer" name="producer" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="country">生産国:</label>
+                            <input type="text" id="country" name="country" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="region">生産地域:</label>
+                            <input type="text" id="region" name="region">
+                        </div>
+                        <div class="form-group">
+                            <label for="vintage">ヴィンテージ:</label>
+                            <input type="number" id="vintage" name="vintage" min="1900" max="2030">
+                        </div>
+                        <div class="form-group">
+                            <label for="price">価格:</label>
+                            <input type="number" id="price" name="price" min="0" step="100">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="wineType">ワインの種類:</label>
+                        <div class="radio-grid">
+                            <label class="radio-item">
+                                <input type="radio" name="wineType" value="red" required>
+                                <span>赤ワイン</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="wineType" value="white">
+                                <span>白ワイン</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="wineType" value="rose">
+                                <span>ロゼワイン</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="wineType" value="sparkling">
+                                <span>スパークリング</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="wineType" value="dessert">
+                                <span>デザートワイン</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="wineType" value="fortified">
+                                <span>酒精強化ワイン</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="grapes">ブドウ品種:</label>
+                            <input type="text" id="grapes" name="grapes" placeholder="カベルネ・ソーヴィニヨン 70%, メルロー 30%">
+                        </div>
+                        <div class="form-group">
+                            <label for="alcohol">アルコール度数 (%):</label>
+                            <input type="number" id="alcohol" name="alcohol" min="0" max="20" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="soil">土壌情報:</label>
+                            <input type="text" id="soil" name="soil" placeholder="石灰質、粘土質など">
+                        </div>
+                        <div class="form-group">
+                            <label for="climate">気候:</label>
+                            <input type="text" id="climate" name="climate" placeholder="地中海性気候、大陸性気候など">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="history">ワインの歴史・背景:</label>
+                        <textarea id="history" name="history" rows="3" placeholder="ワインの歴史や背景情報"></textarea>
+                    </div>
+                </div>
+                
+                <!-- 外観の詳細分析 -->
+                <div class="form-section">
+                    <h3>外観の詳細分析</h3>
+                    <div class="analysis-grid">
+                        <div class="analysis-item">
+                            <h4>色調</h4>
+                            <div class="radio-grid">
+                                <label class="radio-item">
+                                    <input type="radio" name="colorTone" value="purple" required>
+                                    <span>紫がかった</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="colorTone" value="ruby">
+                                    <span>ルビー色</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="colorTone" value="garnet">
+                                    <span>ガーネット色</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="colorTone" value="brick">
+                                    <span>レンガ色</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="colorTone" value="yellow">
+                                    <span>黄色がかった</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="colorTone" value="golden">
+                                    <span>金色</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <h4>濃淡</h4>
+                            <div class="radio-grid">
+                                <label class="radio-item">
+                                    <input type="radio" name="colorIntensity" value="pale" required>
+                                    <span>淡い</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="colorIntensity" value="medium">
+                                    <span>中程度</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="colorIntensity" value="deep">
+                                    <span>濃い</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="colorIntensity" value="opaque">
+                                    <span>不透明</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <h4>透明度</h4>
+                            <div class="radio-grid">
+                                <label class="radio-item">
+                                    <input type="radio" name="clarity" value="brilliant" required>
+                                    <span>澄み切った</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="clarity" value="clear">
+                                    <span>透明</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="clarity" value="hazy">
+                                    <span>やや濁った</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="clarity" value="cloudy">
+                                    <span>濁った</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <h4>粘性</h4>
+                            <div class="radio-grid">
+                                <label class="radio-item">
+                                    <input type="radio" name="viscosity" value="light" required>
+                                    <span>軽い</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="viscosity" value="medium">
+                                    <span>中程度</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="viscosity" value="heavy">
+                                    <span>重い</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="viscosity" value="glyceric">
+                                    <span>グリセリン様</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 香りの段階別分析 -->
+                <div class="form-section">
+                    <h3>香りの段階別分析</h3>
+                    <div class="aroma-phases">
+                        <div class="phase-item">
+                            <h4>第一印象（スワリング前）</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>強度:</label>
+                                    <div class="radio-grid">
+                                        <label class="radio-item">
+                                            <input type="radio" name="firstImpressionIntensity" value="1">
+                                            <span>弱い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="firstImpressionIntensity" value="2">
+                                            <span>やや弱い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="firstImpressionIntensity" value="3">
+                                            <span>中程度</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="firstImpressionIntensity" value="4">
+                                            <span>やや強い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="firstImpressionIntensity" value="5">
+                                            <span>強い</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="firstImpressionNotes">香りのメモ:</label>
+                                    <textarea id="firstImpressionNotes" name="firstImpressionNotes" rows="2" placeholder="第一印象の香りを記録"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="phase-item">
+                            <h4>スワリング後</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>強度:</label>
+                                    <div class="radio-grid">
+                                        <label class="radio-item">
+                                            <input type="radio" name="swirlingIntensity" value="1">
+                                            <span>弱い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="swirlingIntensity" value="2">
+                                            <span>やや弱い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="swirlingIntensity" value="3">
+                                            <span>中程度</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="swirlingIntensity" value="4">
+                                            <span>やや強い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="swirlingIntensity" value="5">
+                                            <span>強い</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="swirlingNotes">香りのメモ:</label>
+                                    <textarea id="swirlingNotes" name="swirlingNotes" rows="2" placeholder="スワリング後の香りを記録"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 香りカテゴリ強度評価 -->
+                <div class="form-section">
+                    <h3>香りカテゴリ強度評価</h3>
+                    <div class="aroma-scores">
+                        <div class="aroma-score-item">
+                            <label>果実系:</label>
+                            <div class="score-selector">
+                                <input type="range" id="fruitScore" name="fruitScore" min="0" max="5" value="0" step="1">
+                                <span class="score-value">0</span>
+                            </div>
+                        </div>
+                        <div class="aroma-score-item">
+                            <label>花系:</label>
+                            <div class="score-selector">
+                                <input type="range" id="floralScore" name="floralScore" min="0" max="5" value="0" step="1">
+                                <span class="score-value">0</span>
+                            </div>
+                        </div>
+                        <div class="aroma-score-item">
+                            <label>スパイス系:</label>
+                            <div class="score-selector">
+                                <input type="range" id="spiceScore" name="spiceScore" min="0" max="5" value="0" step="1">
+                                <span class="score-value">0</span>
+                            </div>
+                        </div>
+                        <div class="aroma-score-item">
+                            <label>ハーブ系:</label>
+                            <div class="score-selector">
+                                <input type="range" id="herbScore" name="herbScore" min="0" max="5" value="0" step="1">
+                                <span class="score-value">0</span>
+                            </div>
+                        </div>
+                        <div class="aroma-score-item">
+                            <label>土系:</label>
+                            <div class="score-selector">
+                                <input type="range" id="earthScore" name="earthScore" min="0" max="5" value="0" step="1">
+                                <span class="score-value">0</span>
+                            </div>
+                        </div>
+                        <div class="aroma-score-item">
+                            <label>木系:</label>
+                            <div class="score-selector">
+                                <input type="range" id="woodScore" name="woodScore" min="0" max="5" value="0" step="1">
+                                <span class="score-value">0</span>
+                            </div>
+                        </div>
+                        <div class="aroma-score-item">
+                            <label>その他:</label>
+                            <div class="score-selector">
+                                <input type="range" id="otherScore" name="otherScore" min="0" max="5" value="0" step="1">
+                                <span class="score-value">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 詳細香り分類 -->
+                <div class="form-section">
+                    <h3>詳細香り分類</h3>
+                    <div class="aroma-categories">
+                        <div class="aroma-category">
+                            <h4>果実系</h4>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="fruitAromas" value="赤い果実">
+                                    <span>赤い果実</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="fruitAromas" value="黒い果実">
+                                    <span>黒い果実</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="fruitAromas" value="柑橘系">
+                                    <span>柑橘系</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="fruitAromas" value="トロピカル">
+                                    <span>トロピカル</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="fruitAromas" value="ドライフルーツ">
+                                    <span>ドライフルーツ</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="fruitAromas" value="ジャム">
+                                    <span>ジャム</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="aroma-category">
+                            <h4>花系</h4>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="floralAromas" value="バラ">
+                                    <span>バラ</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="floralAromas" value="スミレ">
+                                    <span>スミレ</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="floralAromas" value="ジャスミン">
+                                    <span>ジャスミン</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="floralAromas" value="ラベンダー">
+                                    <span>ラベンダー</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="floralAromas" value="アカシア">
+                                    <span>アカシア</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="floralAromas" value="ハチミツ">
+                                    <span>ハチミツ</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="aroma-category">
+                            <h4>スパイス系</h4>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="spiceAromas" value="コショウ">
+                                    <span>コショウ</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="spiceAromas" value="シナモン">
+                                    <span>シナモン</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="spiceAromas" value="バニラ">
+                                    <span>バニラ</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="spiceAromas" value="クローブ">
+                                    <span>クローブ</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="spiceAromas" value="ナツメグ">
+                                    <span>ナツメグ</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="spiceAromas" value="アニス">
+                                    <span>アニス</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="aroma-category">
+                            <h4>ハーブ系</h4>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="herbAromas" value="ローズマリー">
+                                    <span>ローズマリー</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="herbAromas" value="タイム">
+                                    <span>タイム</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="herbAromas" value="ミント">
+                                    <span>ミント</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="herbAromas" value="ユーカリ">
+                                    <span>ユーカリ</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="herbAromas" value="フェンネル">
+                                    <span>フェンネル</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="herbAromas" value="セージ">
+                                    <span>セージ</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="aroma-category">
+                            <h4>土系</h4>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="earthAromas" value="土">
+                                    <span>土</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="earthAromas" value="鉱物">
+                                    <span>鉱物</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="earthAromas" value="石灰">
+                                    <span>石灰</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="earthAromas" value="粘土">
+                                    <span>粘土</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="earthAromas" value="火山灰">
+                                    <span>火山灰</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="earthAromas" value="湿った土">
+                                    <span>湿った土</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="aroma-category">
+                            <h4>木系</h4>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="woodAromas" value="オーク">
+                                    <span>オーク</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="woodAromas" value="杉">
+                                    <span>杉</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="woodAromas" value="樽">
+                                    <span>樽</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="woodAromas" value="燻製">
+                                    <span>燻製</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="woodAromas" value="トースト">
+                                    <span>トースト</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="woodAromas" value="レザー">
+                                    <span>レザー</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="aroma-category">
+                            <h4>その他</h4>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="otherAromas" value="バター">
+                                    <span>バター</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="otherAromas" value="ナッツ">
+                                    <span>ナッツ</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="otherAromas" value="チョコレート">
+                                    <span>チョコレート</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="otherAromas" value="コーヒー">
+                                    <span>コーヒー</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="otherAromas" value="カラメル">
+                                    <span>カラメル</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="otherAromas" value="ヨード">
+                                    <span>ヨード</span>
+                                </label>
+                            </div>
+                            <div class="custom-aroma-input">
+                                <label for="customOtherAromas">その他の香り（自由記入）:</label>
+                                <textarea id="customOtherAromas" name="customOtherAromas" rows="2" placeholder="例：石鹸、ゴム、薬品、動物的、獣臭など"></textarea>
+                                <small>複数の香りがある場合は、カンマ（,）で区切って入力してください</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 味わいの段階別分析 -->
+                <div class="form-section">
+                    <h3>味わいの段階別分析</h3>
+                    <div class="taste-phases">
+                        <div class="phase-item">
+                            <h4>アタック（第一印象）</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>強度:</label>
+                                    <div class="radio-grid">
+                                        <label class="radio-item">
+                                            <input type="radio" name="attackIntensity" value="1">
+                                            <span>弱い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="attackIntensity" value="2">
+                                            <span>やや弱い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="attackIntensity" value="3">
+                                            <span>中程度</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="attackIntensity" value="4">
+                                            <span>やや強い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="attackIntensity" value="5">
+                                            <span>強い</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="attackNotes">アタックのメモ:</label>
+                                    <textarea id="attackNotes" name="attackNotes" rows="2" placeholder="第一印象の味わいを記録"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="phase-item">
+                            <h4>中盤（発展）</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>複雑さ:</label>
+                                    <div class="radio-grid">
+                                        <label class="radio-item">
+                                            <input type="radio" name="middleComplexity" value="1">
+                                            <span>シンプル</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="middleComplexity" value="2">
+                                            <span>やや複雑</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="middleComplexity" value="3">
+                                            <span>複雑</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="middleComplexity" value="4">
+                                            <span>非常に複雑</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="middleComplexity" value="5">
+                                            <span>極めて複雑</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="middleNotes">中盤のメモ:</label>
+                                    <textarea id="middleNotes" name="middleNotes" rows="2" placeholder="中盤の味わいを記録"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="phase-item">
+                            <h4>フィニッシュ（余韻）</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>長さ:</label>
+                                    <div class="radio-grid">
+                                        <label class="radio-item">
+                                            <input type="radio" name="finishLength" value="1">
+                                            <span>短い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="finishLength" value="2">
+                                            <span>やや短い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="finishLength" value="3">
+                                            <span>中程度</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="finishLength" value="4">
+                                            <span>やや長い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="finishLength" value="5">
+                                            <span>長い</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="finishSeconds">余韻の長さ (秒):</label>
+                                    <input type="number" id="finishSeconds" name="finishSeconds" min="0" step="1" placeholder="測定した秒数">
+                                </div>
+                                <div class="form-group">
+                                    <label for="finishNotes">フィニッシュのメモ:</label>
+                                    <textarea id="finishNotes" name="finishNotes" rows="2" placeholder="余韻の味わいを記録"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 構成要素の詳細分析 -->
+                <div class="form-section">
+                    <h3>構成要素の詳細分析</h3>
+                    <div class="components-grid">
+                        <div class="component-item">
+                            <h4>酸味</h4>
+                            <div class="form-group">
+                                <label>強度:</label>
+                                <div class="radio-grid">
+                                    <label class="radio-item">
+                                        <input type="radio" name="acidityLevel" value="1">
+                                        <span>低い</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="acidityLevel" value="2">
+                                        <span>やや低い</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="acidityLevel" value="3">
+                                        <span>中程度</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="acidityLevel" value="4">
+                                        <span>やや高い</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="acidityLevel" value="5">
+                                        <span>高い</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>種類:</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="acidityTypes" value="酒石酸">
+                                        <span>酒石酸</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="acidityTypes" value="リンゴ酸">
+                                        <span>リンゴ酸</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="acidityTypes" value="乳酸">
+                                        <span>乳酸</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="acidityTypes" value="クエン酸">
+                                        <span>クエン酸</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="component-item">
+                            <h4>タンニン</h4>
+                            <div class="form-group">
+                                <label>強度:</label>
+                                <div class="radio-grid">
+                                    <label class="radio-item">
+                                        <input type="radio" name="tanninLevel" value="1">
+                                        <span>低い</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="tanninLevel" value="2">
+                                        <span>やや低い</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="tanninLevel" value="3">
+                                        <span>中程度</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="tanninLevel" value="4">
+                                        <span>やや高い</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="tanninLevel" value="5">
+                                        <span>高い</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>質感:</label>
+                                <div class="checkbox-grid">
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="tanninTypes" value="シルキー">
+                                        <span>シルキー</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="tanninTypes" value="ベルベット">
+                                        <span>ベルベット</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="tanninTypes" value="ざらつき">
+                                        <span>ざらつき</span>
+                                    </label>
+                                    <label class="checkbox-item">
+                                        <input type="checkbox" name="tanninTypes" value="収斂性">
+                                        <span>収斂性</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="component-item">
+                            <h4>甘味</h4>
+                            <div class="form-group">
+                                <label>レベル:</label>
+                                <div class="radio-grid">
+                                    <label class="radio-item">
+                                        <input type="radio" name="sweetnessLevel" value="1">
+                                        <span>辛口</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="sweetnessLevel" value="2">
+                                        <span>半辛口</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="sweetnessLevel" value="3">
+                                        <span>半甘口</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="sweetnessLevel" value="4">
+                                        <span>甘口</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="sweetnessLevel" value="5">
+                                        <span>極甘口</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="component-item">
+                            <h4>ボディ</h4>
+                            <div class="form-group">
+                                <label>重さ:</label>
+                                <div class="radio-grid">
+                                    <label class="radio-item">
+                                        <input type="radio" name="bodyWeight" value="1">
+                                        <span>ライト</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="bodyWeight" value="2">
+                                        <span>ライト+</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="bodyWeight" value="3">
+                                        <span>ミディアム</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="bodyWeight" value="4">
+                                        <span>ミディアム+</span>
+                                    </label>
+                                    <label class="radio-item">
+                                        <input type="radio" name="bodyWeight" value="5">
+                                        <span>フル</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 時間経過による変化 -->
+                <div class="form-section">
+                    <h3>時間経過による変化</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="recordTime">記録時間:</label>
+                            <select id="recordTime" name="recordTime">
+                                <option value="0">開栓直後</option>
+                                <option value="30">30分後</option>
+                                <option value="60">1時間後</option>
+                                <option value="120">2時間後</option>
+                                <option value="1440">1日後</option>
+                                <option value="2880">2日後</option>
+                                <option value="4320">3日後</option>
+                                <option value="custom">カスタム</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="customTime">カスタム時間 (分):</label>
+                            <input type="number" id="customTime" name="customTime" min="0" step="1" disabled>
+                        </div>
+                        <div class="form-group">
+                            <label for="temperature">温度 (℃):</label>
+                            <input type="number" id="temperature" name="temperature" min="0" max="30" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="decanted">デキャンタージュ:</label>
+                            <select id="decanted" name="decanted">
+                                <option value="no">なし</option>
+                                <option value="yes">あり</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="timeChangeNotes">時間変化のメモ:</label>
+                        <textarea id="timeChangeNotes" name="timeChangeNotes" rows="3" placeholder="時間経過による変化を記録"></textarea>
+                    </div>
+                </div>
+                
+                <!-- 環境・状況情報 -->
+                <div class="form-section">
+                    <h3>環境・状況情報</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="ambientTemp">室温 (℃):</label>
+                            <input type="number" id="ambientTemp" name="ambientTemp" min="0" max="40" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label for="humidity">湿度 (%):</label>
+                            <input type="number" id="humidity" name="humidity" min="0" max="100" step="1">
+                        </div>
+                        <div class="form-group">
+                            <label for="lighting">照明:</label>
+                            <select id="lighting" name="lighting">
+                                <option value="">選択してください</option>
+                                <option value="natural">自然光</option>
+                                <option value="warm">暖色系</option>
+                                <option value="cool">寒色系</option>
+                                <option value="candle">キャンドル</option>
+                                <option value="dim">薄暗い</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="mood">気分:</label>
+                            <select id="mood" name="mood">
+                                <option value="">選択してください</option>
+                                <option value="relaxed">リラックス</option>
+                                <option value="excited">興奮</option>
+                                <option value="focused">集中</option>
+                                <option value="tired">疲れ</option>
+                                <option value="happy">幸せ</option>
+                                <option value="stress">ストレス</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="companions">同席者:</label>
+                            <input type="text" id="companions" name="companions" placeholder="一緒に飲んだ人">
+                        </div>
+                        <div class="form-group">
+                            <label for="occasion">特別な機会:</label>
+                            <input type="text" id="occasion" name="occasion" placeholder="記念日、イベントなど">
+                        </div>
+                        <div class="form-group">
+                            <label for="location">場所:</label>
+                            <input type="text" id="location" name="location" placeholder="自宅、レストラン、ワイナリーなど">
+                        </div>
+                        <div class="form-group">
+                            <label for="glassType">グラスの種類:</label>
+                            <select id="glassType" name="glassType">
+                                <option value="">選択してください</option>
+                                <option value="burgundy">ブルゴーニュ</option>
+                                <option value="bordeaux">ボルドー</option>
+                                <option value="chardonnay">シャルドネ</option>
+                                <option value="champagne">シャンパーニュ</option>
+                                <option value="universal">ユニバーサル</option>
+                                <option value="other">その他</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 参考情報 -->
+                <div class="form-section">
+                    <h3>参考情報</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="saleUrl">販売元サイトURL:</label>
+                            <input type="url" id="saleUrl" name="saleUrl" placeholder="https://example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="dlaboUrl">Dラボ動画URL:</label>
+                            <input type="url" id="dlaboUrl" name="dlaboUrl" placeholder="https://example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="referenceUrl">その他参考URL:</label>
+                            <input type="url" id="referenceUrl" name="referenceUrl" placeholder="https://example.com">
+                        </div>
+                        <div class="form-group">
+                            <label for="winemaker">ワインメーカー:</label>
+                            <input type="text" id="winemaker" name="winemaker" placeholder="醸造家名">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 記録情報 -->
+                <div class="form-section">
+                    <h3>記録情報</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="recordDate">記録日:</label>
+                            <input type="date" id="recordDate" name="recordDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="daysFromOpening">開栓からの日数:</label>
+                            <input type="number" id="daysFromOpening" name="daysFromOpening" min="0" value="0">
+                        </div>
+                        <div class="form-group">
+                            <label for="pairing">ペアリング料理:</label>
+                            <input type="text" id="pairing" name="pairing" placeholder="一緒に食べた料理">
+                        </div>
+                        <div class="form-group">
+                            <label for="wineRating">ワイン単体の評価:</label>
+                            <div class="radio-grid">
+                                <label class="radio-item">
+                                    <input type="radio" name="wineRating" value="1" required>
+                                    <span>1 - 不満</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="wineRating" value="2">
+                                    <span>2 - 普通</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="wineRating" value="3">
+                                    <span>3 - 良い</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="wineRating" value="4">
+                                    <span>4 - 非常に良い</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="wineRating" value="5">
+                                    <span>5 - 最高</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="pairingRating">ペアリング込みの評価:</label>
+                            <div class="radio-grid">
+                                <label class="radio-item">
+                                    <input type="radio" name="pairingRating" value="1">
+                                    <span>1 - 不満</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="pairingRating" value="2">
+                                    <span>2 - 普通</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="pairingRating" value="3">
+                                    <span>3 - 良い</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="pairingRating" value="4">
+                                    <span>4 - 非常に良い</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="pairingRating" value="5">
+                                    <span>5 - 最高</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">総合メモ:</label>
+                        <textarea id="notes" name="notes" rows="4" placeholder="その他のメモや感想"></textarea>
+                    </div>
+                </div>
+                
+                <!-- 画像アップロード -->
+                <div class="form-section">
+                    <h3>画像・イラスト</h3>
+                    
+                    <!-- ペイントゾーン -->
+                    <div class="paint-zone">
+                        <h4>ペイントゾーン - 自由にお絵かき</h4>
+                        <div class="paint-controls">
+                            <button type="button" id="clearCanvas">クリア</button>
+                            <label for="brushSize">ブラシサイズ:</label>
+                            <input type="range" id="brushSize" min="1" max="20" value="3">
+                            <span id="brushSizeValue">3</span>
+                            <label for="brushColor">色:</label>
+                            <input type="color" id="brushColor" value="#667eea">
+                            <button type="button" id="saveDrawing">絵を保存</button>
+                        </div>
+                        <canvas id="paintCanvas" width="800" height="400"></canvas>
+                        <div id="savedDrawings" class="saved-drawings"></div>
+                    </div>
+                    
+                    <!-- 複数画像アップロード -->
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="wineImages">ワインの画像（複数可）:</label>
+                            <input type="file" id="wineImages" name="wineImages" accept="image/*" multiple>
+                            <div id="wineImagesPreview" class="multiple-image-preview"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="pairingImages">ペアリング画像（複数可）:</label>
+                            <input type="file" id="pairingImages" name="pairingImages" accept="image/*" multiple>
+                            <div id="pairingImagesPreview" class="multiple-image-preview"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="friendImages">友人との思い出（複数可）:</label>
+                            <input type="file" id="friendImages" name="friendImages" accept="image/*" multiple>
+                            <div id="friendImagesPreview" class="multiple-image-preview"></div>
+                        </div>
+                        <div class="form-group">
+                            <label for="otherImages">その他の画像（複数可）:</label>
+                            <input type="file" id="otherImages" name="otherImages" accept="image/*" multiple>
+                            <div id="otherImagesPreview" class="multiple-image-preview"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" id="submitBtn">記録を追加</button>
+                    <button type="button" id="cancelBtn">キャンセル</button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- レーダーチャート表示 -->
+        <div class="chart-section" style="display: none;">
+            <h2>香りレーダーチャート</h2>
+            <div class="chart-container">
+                <canvas id="aromaChart"></canvas>
+                <div class="chart-controls">
+                    <button class="hide-chart-btn" onclick="hideChart()">チャートを閉じる</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 記録一覧 -->
+        <div class="wine-list">
+            <h2>記録されたワイン</h2>
+            <div class="filter-controls">
+                <input type="text" id="searchInput" placeholder="ワイン名で検索...">
+                <select id="sortSelect">
+                    <option value="name">ワイン名順</option>
+                    <option value="region">地域名順</option>
+                    <option value="producer">生産者順</option>
+                    <option value="random">ランダム順</option>
+                    <option value="wineRating">ワイン単体評価順</option>
+                    <option value="pairingRating">ペアリング評価順</option>
+                    <option value="date">記録日順</option>
+                </select>
+                <select id="itemsPerPage">
+                    <option value="5">5件ずつ表示</option>
+                    <option value="10">10件ずつ表示</option>
+                    <option value="20">20件ずつ表示</option>
+                    <option value="all">すべて表示</option>
+                </select>
+                <button id="exportBtn">データエクスポート</button>
+            </div>
+            <div id="wineRecords"></div>
+            <div class="pagination-controls">
+                <button id="prevPage" disabled>前のページ</button>
+                <span id="pageInfo">1 / 1</span>
+                <button id="nextPage" disabled>次のページ</button>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="ultra-advanced-script-v3-firebase.js"></script>
+</body>
+</html>
