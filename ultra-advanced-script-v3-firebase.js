@@ -52,6 +52,13 @@ let unsubscribeWinesListener = null;
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 MyWineMemory - Firebase版を初期化中...');
     
+    // ページロード時から美しいワインアニメーションを表示
+    showLoadingOverlay(true, 'アプリケーションを準備中...');
+    
+    // 最低3秒間はアニメーションを表示
+    const minimumLoadTime = 3000;
+    const startTime = Date.now();
+    
     // 今日の日付を設定
     const recordDateInput = document.getElementById('recordDate');
     if (recordDateInput) {
@@ -64,17 +71,44 @@ document.addEventListener('DOMContentLoaded', function() {
     // イベントリスナーの設定
     setupEventListeners();
     
-    // 認証状態の監視
-    setupAuthListener();
+    // 認証状態の監視（非同期で実行）
+    setTimeout(async () => {
+        await setupAuthListener();
+        
+        // 最低表示時間を確保
+        const elapsedTime = Date.now() - startTime;
+        const remainingTime = minimumLoadTime - elapsedTime;
+        
+        if (remainingTime > 0) {
+            setTimeout(() => {
+                initializeOtherComponents();
+            }, remainingTime);
+        } else {
+            initializeOtherComponents();
+        }
+    }, 100);
     
+    console.log('✅ 初期化開始');
+});
+
+/**
+ * その他のコンポーネント初期化
+ */
+function initializeOtherComponents() {
     // ペイントキャンバスの初期化
     initializePaintCanvas();
     
     // チャート初期化
     initializeChart();
     
+    // 美しいフェードアウト効果でローディング終了
+    updateLoadingMessage('準備完了！');
+    setTimeout(() => {
+        showLoadingOverlay(false);
+    }, 800);
+    
     console.log('✅ 初期化完了');
-});
+}
 
 // =============================================
 // 認証機能
@@ -83,28 +117,36 @@ document.addEventListener('DOMContentLoaded', function() {
 /**
  * 認証状態の監視設定
  */
-function setupAuthListener() {
-    onAuthChange(async (user) => {
-        currentUser = user;
-        updateAuthUI(user);
-        
-        if (user) {
-            console.log('👤 ユーザーログイン:', user.email);
-            showLoadingOverlay(true);
+async function setupAuthListener() {
+    return new Promise((resolve) => {
+        onAuthChange(async (user) => {
+            currentUser = user;
+            updateAuthUI(user);
             
-            try {
-                // ユーザーデータを読み込み
-                await loadUserData();
-            } catch (error) {
-                console.error('❌ ユーザーデータ読み込みエラー:', error);
-                showNotification('データの読み込みに失敗しました', 'error');
-            } finally {
-                showLoadingOverlay(false);
+            if (user) {
+                console.log('👤 ユーザーログイン:', user.email);
+                // メッセージを更新（ローディングは継続）
+                updateLoadingMessage('ワインデータを読み込み中...');
+                
+                try {
+                    // ユーザーデータを読み込み
+                    await loadUserData();
+                } catch (error) {
+                    console.error('❌ ユーザーデータ読み込みエラー:', error);
+                    showNotification('データの読み込みに失敗しました', 'error');
+                } finally {
+                    // 認証プロセス完了後もローディングは外部で制御
+                    console.log('📊 データ読み込み完了');
+                }
+            } else {
+                console.log('👤 未認証状態');
+                updateLoadingMessage('アプリケーション準備完了');
+                clearUserData();
+                // 未認証でも最低表示時間は維持
             }
-        } else {
-            console.log('👤 ユーザーログアウト');
-            clearUserData();
-        }
+            
+            resolve();
+        });
     });
 }
 
@@ -519,10 +561,27 @@ async function handleForgotPassword(e) {
 /**
  * ローディングオーバーレイの表示/非表示
  */
-function showLoadingOverlay(show) {
+function showLoadingOverlay(show, message = 'ワインのデータを準備中...') {
     const loadingOverlay = document.getElementById('loadingOverlay');
     if (loadingOverlay) {
         loadingOverlay.style.display = show ? 'flex' : 'none';
+        
+        if (show && message) {
+            updateLoadingMessage(message);
+        }
+    }
+}
+
+/**
+ * ローディングメッセージを更新
+ */
+function updateLoadingMessage(message) {
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    if (loadingOverlay) {
+        const messageElement = loadingOverlay.querySelector('p');
+        if (messageElement) {
+            messageElement.textContent = message;
+        }
     }
 }
 
