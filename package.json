@@ -1,17 +1,27 @@
 {
-  "name": "ultra-wine-records",
+  "name": "mywinememory",
   "version": "2.0.0",
-  "description": "超詳細ワイン記録帳 - プロレベルのワインテイスティング記録",
+  "description": "MyWineMemory - プロレベルのワインテイスティング記録帳",
   "main": "ultra-advanced-index.html",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 3000 --open",
     "build": "vite build",
-    "preview": "vite preview --port 3000 --open"
+    "preview": "vite preview --port 3000 --open",
+    "vercel-build": "vite build"
   },
-  "keywords": ["wine", "tasting", "records", "advanced", "professional"],
+  "keywords": [
+    "wine",
+    "tasting",
+    "records",
+    "advanced",
+    "professional"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
     "vite": "^4.4.5"
+  },
+  "dependencies": {
+    "firebase": "^12.0.0"
   }
 }

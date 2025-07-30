@@ -3,19 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>超詳細ワイン記録帳</title>
+    <title>MyWineMemory - 超詳細ワイン記録帳</title>
     <link rel="stylesheet" href="ultra-advanced-style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Firebase App (the core Firebase SDK) -->
+    <script type="module" src="firebase-config.js"></script>
 </head>
 <body>
     <div class="container">
         <div class="header-with-theme">
-            <h1>超詳細ワイン記録帳</h1>
-            <div class="theme-toggle-container">
-                <button id="themeToggle" class="theme-toggle" title="テーマ切り替え">
-                    <span class="theme-icon">🌙</span>
-                </button>
+            <h1>MyWineMemory</h1>
+            <div class="header-controls">
+                <div class="auth-section" id="authSection">
+                    <!-- 認証状態によって動的に変更 -->
+                    <div id="loginButton" class="auth-button">
+                        <button class="login-btn">ログイン</button>
+                    </div>
+                    <div id="userInfo" class="user-info" style="display: none;">
+                        <span id="userDisplayName"></span>
+                        <button id="logoutButton" class="logout-btn">ログアウト</button>
+                    </div>
+                </div>
+                <div class="theme-toggle-container">
+                    <button id="themeToggle" class="theme-toggle" title="テーマ切り替え">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                </div>
             </div>
+        </div>
+        
+        <!-- 認証モーダル -->
+        <div id="authModal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <span class="close-modal" id="closeAuthModal">&times;</span>
+                <div class="auth-container">
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" data-tab="login">ログイン</button>
+                        <button class="auth-tab" data-tab="register">新規登録</button>
+                    </div>
+                    
+                    <!-- ログインフォーム -->
+                    <div id="loginForm" class="auth-form active">
+                        <h3>ログイン</h3>
+                        <form id="emailLoginForm">
+                            <div class="form-group">
+                                <label for="loginEmail">メールアドレス:</label>
+                                <input type="email" id="loginEmail" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="loginPassword">パスワード:</label>
+                                <input type="password" id="loginPassword" name="password" required>
+                            </div>
+                            <button type="submit" class="auth-submit-btn">ログイン</button>
+                        </form>
+                        <div class="auth-divider">または</div>
+                        <button id="googleLoginBtn" class="google-login-btn">
+                            <span class="google-icon">G</span>
+                            Googleでログイン
+                        </button>
+                        <div class="auth-links">
+                            <a href="#" id="forgotPasswordLink">パスワードを忘れた方</a>
+                        </div>
+                    </div>
+                    
+                    <!-- 新規登録フォーム -->
+                    <div id="registerForm" class="auth-form">
+                        <h3>新規登録</h3>
+                        <form id="emailRegisterForm">
+                            <div class="form-group">
+                                <label for="registerName">表示名:</label>
+                                <input type="text" id="registerName" name="displayName">
+                            </div>
+                            <div class="form-group">
+                                <label for="registerEmail">メールアドレス:</label>
+                                <input type="email" id="registerEmail" name="email" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="registerPassword">パスワード:</label>
+                                <input type="password" id="registerPassword" name="password" required minlength="6">
+                            </div>
+                            <div class="form-group">
+                                <label for="confirmPassword">パスワード確認:</label>
+                                <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6">
+                            </div>
+                            <button type="submit" class="auth-submit-btn">登録</button>
+                        </form>
+                        <div class="auth-divider">または</div>
+                        <button id="googleRegisterBtn" class="google-login-btn">
+                            <span class="google-icon">G</span>
+                            Googleで登録
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ローディング表示 -->
+        <div id="loadingOverlay" class="loading-overlay" style="display: none;">
+            <div class="loading-spinner"></div>
+            <p>データを読み込み中...</p>
         </div>
         
         <!-- 直近ワイン選択セクション -->
@@ -1147,6 +1233,6 @@
         </div>
     </div>
     
-    <script src="ultra-advanced-script-v2.js"></script>
+    <script type="module" src="ultra-advanced-script-v3-firebase.js"></script>
 </body>
 </html>
