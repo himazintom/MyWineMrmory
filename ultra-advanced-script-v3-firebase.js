@@ -46,6 +46,45 @@ let isDrawing = false;
 let savedDrawings = [];
 let unsubscribeWinesListener = null;
 
+// 自動保存機能
+const AutoSave = {
+    key: 'wine_form_draft',
+    save: function(formData) {
+        try {
+            localStorage.setItem(this.key, JSON.stringify({
+                data: formData,
+                timestamp: new Date().toISOString(),
+                userId: currentUser?.uid || 'anonymous'
+            }));
+            console.log('📝 フォームデータを自動保存しました');
+        } catch (error) {
+            console.warn('⚠️ 自動保存に失敗:', error);
+        }
+    },
+    load: function() {
+        try {
+            const saved = localStorage.getItem(this.key);
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                // ユーザーが変わっていたら古いデータは使わない
+                if (parsed.userId === (currentUser?.uid || 'anonymous')) {
+                    return parsed.data;
+                }
+            }
+        } catch (error) {
+            console.warn('⚠️ 自動保存データの読み込みに失敗:', error);
+        }
+        return null;
+    },
+    clear: function() {
+        localStorage.removeItem(this.key);
+        console.log('🗑️ 自動保存データをクリアしました');
+    },
+    hasData: function() {
+        return !!this.load();
+    }
+};
+
 // =============================================
 // 初期化
 // =============================================
@@ -245,6 +284,9 @@ function setupEventListeners() {
     const wineRecordForm = document.getElementById('wineRecordForm');
     if (wineRecordForm) {
         wineRecordForm.addEventListener('submit', handleFormSubmit);
+        
+        // 自動保存のためのイベントリスナー
+        setupAutoSaveListeners(wineRecordForm);
     }
     
     // 複数画像アップロード
@@ -701,6 +743,141 @@ function displayWineRecords() {
 }
 
 // =============================================
+// 自動保存とバリデーション機能
+// =============================================
+
+/**
+ * 自動保存のイベントリスナー設定
+ */
+function setupAutoSaveListeners(form) {
+    let autoSaveTimer;
+    
+    // フォームの全ての入力要素に対してイベントリスナーを設定
+    const inputs = form.querySelectorAll('input, select, textarea');
+    inputs.forEach(input => {
+        ['input', 'change', 'blur'].forEach(eventType => {
+            input.addEventListener(eventType, () => {
+                // デバウンス処理（1秒後に保存）
+                clearTimeout(autoSaveTimer);
+                autoSaveTimer = setTimeout(() => {
+                    saveFormData();
+                }, 1000);
+            });
+        });
+    });
+}
+
+/**
+ * フォームデータを自動保存
+ */
+function saveFormData() {
+    const form = document.getElementById('wineRecordForm');
+    if (!form) return;
+    
+    const formData = new FormData(form);
+    const data = {};
+    
+    // FormDataをオブジェクトに変換
+    for (const [key, value] of formData.entries()) {
+        if (data[key]) {
+            // 同じキーが複数ある場合は配列にする
+            if (Array.isArray(data[key])) {
+                data[key].push(value);
+            } else {
+                data[key] = [data[key], value];
+            }
+        } else {
+            data[key] = value;
+        }
+    }
+    
+    AutoSave.save(data);
+}
+
+/**
+ * 保存されたフォームデータを復元
+ */
+function restoreFormData() {
+    const savedData = AutoSave.load();
+    if (!savedData) return false;
+    
+    const form = document.getElementById('wineRecordForm');
+    if (!form) return false;
+    
+    try {
+        Object.entries(savedData).forEach(([key, value]) => {
+            const elements = form.querySelectorAll(`[name="${key}"]`);
+            elements.forEach(element => {
+                if (element.type === 'checkbox' || element.type === 'radio') {
+                    if (Array.isArray(value)) {
+                        element.checked = value.includes(element.value);
+                    } else {
+                        element.checked = element.value === value;
+                    }
+                } else {
+                    element.value = Array.isArray(value) ? value[0] : value;
+                }
+            });
+        });
+        
+        console.log('📋 フォームデータを復元しました');
+        showNotification('前回の入力内容を復元しました', 'info');
+        return true;
+    } catch (error) {
+        console.warn('⚠️ フォームデータの復元に失敗:', error);
+        return false;
+    }
+}
+
+/**
+ * 緩いバリデーション（必須項目 + 内容が全く空でない確認）
+ */
+function validateForm(formData) {
+    const errors = [];
+    
+    // 必須項目チェック
+    const wineName = formData.get('wineName')?.trim();
+    const recordDate = formData.get('recordDate');
+    
+    if (!wineName) {
+        errors.push('ワイン名は必須です');
+    }
+    
+    if (!recordDate) {
+        errors.push('記録日は必須です');
+    }
+    
+    // 最低限の内容チェック（何かしらの情報があるか）
+    const contentFields = [
+        'producer', 'country', 'region', 'wineType', 'grapes',
+        'notes', 'pairing', 'wineRating', 'pairingRating'
+    ];
+    
+    const hasContent = contentFields.some(field => {
+        const value = formData.get(field);
+        return value && value.toString().trim() !== '' && value !== '0';
+    });
+    
+    if (!hasContent) {
+        errors.push('生産者、産地、ワインタイプ、ノート、評価のいずれかは入力してください');
+    }
+    
+    return {
+        isValid: errors.length === 0,
+        errors: errors
+    };
+}
+
+/**
+ * バリデーションエラーを表示
+ */
+function showValidationErrors(errors) {
+    errors.forEach(error => {
+        showNotification(error, 'error');
+    });
+}
+
+// =============================================
 // フォーム処理（Firebase版）
 // =============================================
 
@@ -716,10 +893,17 @@ async function handleFormSubmit(e) {
         return;
     }
     
+    const formData = new FormData(e.target);
+    
+    // バリデーション実行
+    const validation = validateForm(formData);
+    if (!validation.isValid) {
+        showValidationErrors(validation.errors);
+        return;
+    }
+    
     try {
         showLoadingOverlay(true);
-        
-        const formData = new FormData(e.target);
         
         if (isUpdateMode && currentRecordId) {
             // 既存記録の更新
@@ -732,6 +916,8 @@ async function handleFormSubmit(e) {
             await createNewRecord(formData);
         }
         
+        // 成功時は自動保存データをクリア
+        AutoSave.clear();
         hideForm();
         showNotification('記録が保存されました', 'success');
         
@@ -971,6 +1157,17 @@ function showNewWineForm() {
     document.querySelectorAll('.recent-wine-card').forEach(card => {
         card.classList.remove('selected');
     });
+    
+    // 自動保存データがあるかチェックして復元
+    if (AutoSave.hasData()) {
+        setTimeout(() => {
+            if (confirm('前回の入力途中のデータがあります。復元しますか？')) {
+                restoreFormData();
+            } else {
+                AutoSave.clear();
+            }
+        }, 500);
+    }
 }
 
 function hideForm() {

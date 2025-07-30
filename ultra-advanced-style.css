@@ -2270,31 +2270,334 @@ h4 {
     color: #333;
 }
 
-/* レスポンシブ対応 */
+/* スマホ対応の強化 */
+@media (max-width: 768px) {
+    /* ヘッダーのモバイル最適化 */
+    .header-with-theme {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    h1 {
+        font-size: 2.2em;
+    }
+    
+    .header-controls {
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+        gap: 15px;
+    }
+    
+    /* 認証ボタンのモバイル最適化 */
+    .login-btn,
+    .logout-btn {
+        padding: 12px 20px;
+        font-size: 1em;
+        border-radius: 25px;
+        min-width: 100px;
+        touch-action: manipulation;
+    }
+    
+    .user-info {
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+    }
+    
+    /* テーマ切り替えボタンのサイズ調整 */
+    .theme-toggle {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .theme-icon {
+        font-size: 20px;
+    }
+    
+    /* フォームのモバイル最適化 */
+    .wine-form {
+        padding: 20px;
+        margin: 10px;
+        border-radius: 15px;
+    }
+    
+    .form-section {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    /* 入力フィールドのタッチ最適化 */
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 16px;
+        font-size: 16px; /* iOS Safari のズームを防ぐ */
+        border-radius: 8px;
+        touch-action: manipulation;
+    }
+    
+    /* ラジオボタンとチェックボックスのタッチ領域拡大 */
+    .radio-item,
+    .checkbox-item {
+        padding: 16px;
+        min-height: 60px;
+        font-size: 1em;
+        touch-action: manipulation;
+    }
+    
+    .radio-item input[type="radio"],
+    .checkbox-item input[type="checkbox"] {
+        width: 24px;
+        height: 24px;
+        margin-right: 12px;
+    }
+    
+    /* フォームボタンのモバイル最適化 */
+    .form-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .form-actions button {
+        padding: 18px;
+        font-size: 1.1em;
+        border-radius: 25px;
+        min-height: 56px;
+        touch-action: manipulation;
+    }
+    
+    .new-wine-btn {
+        padding: 18px;
+        font-size: 1.1em;
+        border-radius: 25px;
+        min-height: 56px;
+        touch-action: manipulation;
+    }
+    
+    /* 香りスコアのモバイル最適化 */
+    .aroma-score-item {
+        flex-direction: column;
+        gap: 10px;
+        padding: 20px;
+        min-height: auto;
+    }
+    
+    .aroma-score-item label {
+        min-width: auto;
+        text-align: center;
+        font-size: 1.1em;
+    }
+    
+    .score-selector {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .aroma-score-item input[type="range"] {
+        height: 12px;
+        min-width: 200px;
+    }
+    
+    .score-value {
+        font-size: 1.2em;
+        padding: 8px 12px;
+        min-width: 40px;
+    }
+    
+    /* ペイントコントロールのモバイル最適化 */
+    .paint-controls {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+    
+    .paint-controls button {
+        padding: 12px;
+        font-size: 1em;
+        min-height: 48px;
+        touch-action: manipulation;
+    }
+    
+    .paint-controls input[type="range"] {
+        width: 100%;
+    }
+    
+    /* ワイン記録カードのモバイル最適化 */
+    .recent-wine-card {
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        touch-action: manipulation;
+    }
+    
+    .recent-wine-card h4 {
+        font-size: 1.3em;
+        margin-bottom: 12px;
+    }
+    
+    .recent-wine-card p {
+        font-size: 1em;
+        margin: 10px 0;
+    }
+    
+    /* フィルターコントロールのモバイル最適化 */
+    .filter-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .filter-controls input,
+    .filter-controls select {
+        padding: 16px;
+        font-size: 16px;
+        border-radius: 8px;
+        touch-action: manipulation;
+    }
+    
+    #exportBtn {
+        padding: 16px;
+        font-size: 1.1em;
+        border-radius: 25px;
+        min-height: 56px;
+        touch-action: manipulation;
+    }
+    
+    /* ページネーションのモバイル最適化 */
+    .pagination-controls button {
+        padding: 12px 16px;
+        font-size: 1em;
+        min-height: 48px;
+        touch-action: manipulation;
+    }
+    
+    /* 通知のモバイル最適化 */
+    .notification {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        padding: 16px;
+        font-size: 1em;
+        border-radius: 8px;
+    }
+}
+
+/* 極小画面（320px以下）への対応 */
 @media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        padding: 0;
+    }
+    
     .modal-content {
         width: 95%;
         margin: 10px;
     }
     
     .auth-container {
-        padding: 20px;
-        padding-top: 40px;
+        padding: 15px;
+        padding-top: 35px;
     }
     
-    .header-controls {
+    h1 {
+        font-size: 1.8em;
+    }
+    
+    /* フォームをさらにコンパクトに */
+    .wine-form {
+        padding: 15px;
+        margin: 5px;
+    }
+    
+    .form-section {
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+    
+    /* グリッドを1列に強制 */
+    .form-grid,
+    .aroma-scores,
+    .aroma-categories,
+    .analysis-grid,
+    .aroma-phases,
+    .taste-phases,
+    .components-grid,
+    .wine-info,
+    .recent-wines-grid {
+        grid-template-columns: 1fr !important;
         gap: 10px;
     }
     
-    .login-btn,
-    .logout-btn {
-        padding: 6px 12px;
-        font-size: 0.8em;
+    /* 複数画像プレビューのモバイル最適化 */
+    .multiple-image-preview {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 8px;
+        padding: 8px;
     }
     
-    .notification {
-        right: 10px;
-        left: 10px;
-        max-width: none;
+    .image-preview-item img {
+        height: 80px;
+    }
+    
+    /* ローディングアニメーションのモバイル最適化 */
+    .wine-loading-animation {
+        width: 150px;
+        height: 150px;
+        margin-bottom: 20px;
+    }
+    
+    .wine-glass {
+        width: 60px;
+        height: 90px;
+    }
+    
+    .glass-rim {
+        width: 60px;
+    }
+    
+    .glass-bowl {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .wine-in-glass {
+        width: 54px;
+    }
+    
+    .wine-bottle {
+        width: 16px;
+        height: 55px;
+        right: 22px;
+    }
+    
+    .wine-stream {
+        top: 45px;
+        left: 56px;
+        width: 2px;
+    }
+    
+    .aroma-lines {
+        top: 60px;
+        width: 60px;
+        height: 35px;
+    }
+    
+    .aroma-line {
+        width: 2px;
+        height: 12px;
+    }
+    
+    .sparkle {
+        width: 3px;
+        height: 3px;
+    }
+    
+    .loading-overlay p {
+        font-size: 1em;
+        padding: 0 20px;
     }
 }
