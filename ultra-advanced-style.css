@@ -1925,8 +1925,9 @@ h4 {
     top: 0;
     width: 80px;
     height: 3px;
-    background: rgba(255, 255, 255, 0.9);
+    background: linear-gradient(90deg, #e3f2fd 0%, #ffffff 50%, #e3f2fd 100%);
     border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(255, 255, 255, 0.4);
 }
 
 .glass-bowl {
@@ -1935,10 +1936,11 @@ h4 {
     width: 80px;
     height: 80px;
     background: transparent;
-    border: 3px solid rgba(255, 255, 255, 0.8);
+    border: 3px solid rgba(255, 255, 255, 0.9);
     border-top: none;
     border-radius: 0 0 40px 40px;
     overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
 }
 
 .glass-stem {
@@ -1948,7 +1950,7 @@ h4 {
     transform: translateX(-50%);
     width: 4px;
     height: 25px;
-    background: rgba(255, 255, 255, 0.8);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
 }
 
 .glass-base {
@@ -1958,21 +1960,23 @@ h4 {
     transform: translateX(-50%);
     width: 40px;
     height: 15px;
-    background: rgba(255, 255, 255, 0.8);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 0.7) 100%);
     border-radius: 20px;
+    box-shadow: 0 2px 5px rgba(255, 255, 255, 0.3);
 }
 
 /* ワインボトル */
 .wine-bottle {
     position: absolute;
-    top: 0;
-    right: 20px;
-    width: 20px;
-    height: 80px;
-    background: linear-gradient(135deg, #2d5016 0%, #4a7c59 100%);
-    border-radius: 2px 2px 0 0;
-    transform: rotate(-15deg);
+    top: 10px;
+    right: 30px;
+    width: 22px;
+    height: 75px;
+    background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #4caf50 100%);
+    border-radius: 3px 3px 0 0;
+    transform: rotate(-25deg);
     transform-origin: bottom;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .bottle-neck {
@@ -1982,7 +1986,8 @@ h4 {
     transform: translateX(-50%);
     width: 8px;
     height: 15px;
-    background: linear-gradient(135deg, #2d5016 0%, #4a7c59 100%);
+    background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+    border-radius: 1px;
 }
 
 .bottle-cork {
@@ -1992,135 +1997,144 @@ h4 {
     transform: translateX(-50%);
     width: 10px;
     height: 8px;
-    background: #8b4513;
+    background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
     border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
-/* ワインの流れ */
+/* ワインの流れ - 位置を正確に調整 */
 .wine-stream {
     position: absolute;
-    top: 65px;
-    right: 15px;
-    width: 4px;
+    top: 60px;
+    left: 75px;
+    width: 3px;
     height: 0;
-    background: linear-gradient(180deg, #722f37 0%, #8b1538 50%, #a91b4a 100%);
+    background: linear-gradient(180deg, #e91e63 0%, #c2185b 30%, #880e4f 70%, #4a148c 100%);
     border-radius: 2px;
     animation: pourWine 3s ease-in-out infinite;
     transform-origin: top;
+    transform: rotate(-25deg);
 }
 
-/* グラス内のワイン */
+/* グラス内のワイン - より鮮やかに */
 .wine-in-glass {
     position: absolute;
     bottom: 0;
     left: 3px;
     width: 74px;
     height: 0;
-    background: linear-gradient(180deg, #722f37 0%, #8b1538 50%, #a91b4a 100%);
+    background: linear-gradient(180deg, #e91e63 0%, #c2185b 40%, #880e4f 80%, #4a148c 100%);
     border-radius: 0 0 37px 37px;
     animation: fillGlass 3s ease-in-out infinite;
     animation-delay: 0.5s;
+    box-shadow: inset 0 0 15px rgba(233, 30, 99, 0.4);
 }
 
-/* ワインの波紋効果 */
+/* ワインの波紋効果 - 位置とサイズ調整 */
 .wine-ripple {
     position: absolute;
-    top: 0;
+    top: -2px;
     left: 50%;
     transform: translateX(-50%);
-    width: 60px;
-    height: 2px;
-    background: rgba(255, 255, 255, 0.2);
+    width: 70px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 192, 203, 0.6) 50%, transparent 100%);
     border-radius: 50%;
     opacity: 0;
     animation: wineRipple 3s ease-in-out infinite;
     animation-delay: 1s;
 }
 
-/* 香りの線 */
+/* 香りの線 - グラスの上から立ち上がるように調整 */
 .aroma-lines {
     position: absolute;
-    top: -10px;
+    top: 80px;
     left: 50%;
     transform: translateX(-50%);
-    width: 100px;
-    height: 40px;
+    width: 80px;
+    height: 50px;
 }
 
 .aroma-line {
     position: absolute;
-    width: 2px;
-    height: 15px;
-    background: rgba(255, 255, 255, 0.4);
-    border-radius: 1px;
+    width: 3px;
+    height: 18px;
+    background: linear-gradient(180deg, rgba(255, 182, 193, 0.8) 0%, rgba(255, 105, 180, 0.6) 50%, rgba(138, 43, 226, 0.4) 100%);
+    border-radius: 2px;
     opacity: 0;
-    animation: aromaFloat 2s ease-in-out infinite;
+    animation: aromaFloat 2.5s ease-in-out infinite;
+    box-shadow: 0 0 6px rgba(255, 105, 180, 0.3);
 }
 
 .aroma-line:nth-child(1) {
-    left: 20px;
-    animation-delay: 0.2s;
+    left: 15px;
+    animation-delay: 0.3s;
+    transform: rotate(-5deg);
 }
 
 .aroma-line:nth-child(2) {
-    left: 40px;
-    animation-delay: 0.6s;
+    left: 32px;
+    animation-delay: 0.7s;
+    transform: rotate(2deg);
 }
 
 .aroma-line:nth-child(3) {
-    left: 60px;
-    animation-delay: 1s;
+    left: 48px;
+    animation-delay: 1.1s;
+    transform: rotate(-3deg);
 }
 
 .aroma-line:nth-child(4) {
-    left: 80px;
-    animation-delay: 1.4s;
+    left: 65px;
+    animation-delay: 1.5s;
+    transform: rotate(4deg);
 }
 
-/* キラキラ効果 */
+/* キラキラ効果 - より鮮やかに */
 .sparkle {
     position: absolute;
-    width: 4px;
-    height: 4px;
-    background: rgba(255, 255, 255, 0.8);
+    width: 5px;
+    height: 5px;
+    background: radial-gradient(circle, #ffd700 0%, #ffeb3b 40%, #ff9800 80%, transparent 100%);
     border-radius: 50%;
     opacity: 0;
-    animation: sparkleEffect 2s ease-in-out infinite;
+    animation: sparkleEffect 2.5s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
 }
 
 .sparkle:nth-child(1) {
-    top: 30px;
-    left: 30px;
-    animation-delay: 0.3s;
+    top: 25px;
+    left: 35px;
+    animation-delay: 0.4s;
 }
 
 .sparkle:nth-child(2) {
-    top: 60px;
-    right: 40px;
-    animation-delay: 0.8s;
+    top: 45px;
+    right: 45px;
+    animation-delay: 0.9s;
 }
 
 .sparkle:nth-child(3) {
-    bottom: 40px;
-    left: 50%;
-    animation-delay: 1.2s;
+    bottom: 35px;
+    left: 45%;
+    animation-delay: 1.3s;
 }
 
 /* アニメーションキーフレーム */
 @keyframes pourWine {
-    0%, 20% {
+    0%, 15% {
         height: 0;
         opacity: 0;
     }
-    25% {
-        opacity: 1;
+    20% {
+        opacity: 0.8;
     }
-    30%, 70% {
-        height: 45px;
+    25%, 70% {
+        height: 40px;
         opacity: 1;
     }
     75% {
-        opacity: 0.8;
+        opacity: 0.6;
     }
     80%, 100% {
         height: 0;
@@ -2129,11 +2143,14 @@ h4 {
 }
 
 @keyframes fillGlass {
-    0%, 30% {
+    0%, 25% {
         height: 0;
     }
+    30% {
+        height: 10px;
+    }
     35%, 75% {
-        height: 50px;
+        height: 55px;
     }
     80%, 100% {
         height: 0;
@@ -2143,44 +2160,61 @@ h4 {
 @keyframes wineRipple {
     0%, 35% {
         opacity: 0;
-        transform: translateX(-50%) scale(0.5);
+        transform: translateX(-50%) scale(0.3);
     }
-    40%, 70% {
+    40% {
+        opacity: 0.8;
+        transform: translateX(-50%) scale(0.8);
+    }
+    50%, 70% {
         opacity: 0.6;
         transform: translateX(-50%) scale(1);
     }
     75%, 100% {
         opacity: 0;
-        transform: translateX(-50%) scale(1.2);
+        transform: translateX(-50%) scale(1.3);
     }
 }
 
 @keyframes aromaFloat {
     0% {
         opacity: 0;
-        transform: translateY(0);
+        transform: translateY(0) scale(0.8);
     }
-    30% {
-        opacity: 0.6;
+    20% {
+        opacity: 0.7;
+        transform: translateY(-5px) scale(1);
+    }
+    60% {
+        opacity: 0.5;
+        transform: translateY(-15px) scale(1.1);
     }
     100% {
         opacity: 0;
-        transform: translateY(-20px);
+        transform: translateY(-30px) scale(0.6);
     }
 }
 
 @keyframes sparkleEffect {
-    0%, 70% {
+    0%, 60% {
         opacity: 0;
-        transform: scale(0);
+        transform: scale(0) rotate(0deg);
+    }
+    70% {
+        opacity: 0.8;
+        transform: scale(0.8) rotate(180deg);
     }
     80% {
         opacity: 1;
-        transform: scale(1);
+        transform: scale(1) rotate(270deg);
+    }
+    90% {
+        opacity: 0.6;
+        transform: scale(1.2) rotate(360deg);
     }
     100% {
         opacity: 0;
-        transform: scale(0);
+        transform: scale(0) rotate(450deg);
     }
 }
 
