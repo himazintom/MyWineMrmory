@@ -177,6 +177,9 @@ function clearUserData() {
     if (wineRecordsDiv) {
         wineRecordsDiv.innerHTML = '<div class="no-records">ログインしてワインを記録しましょう</div>';
     }
+    
+    // フォームを非表示
+    hideForm();
 }
 
 // =============================================
@@ -891,12 +894,110 @@ function selectRecentWine(wineId) {
 
 function showNewWineForm() {
     console.log('📝 新規ワインフォーム表示');
-    // TODO: 実装
+    
+    if (!isLoggedIn()) {
+        showNotification('ログインが必要です', 'error');
+        showAuthModal();
+        return;
+    }
+    
+    resetForm();
+    enableAllFormSections();
+    showForm('新しいワインを記録');
+    currentWineId = null;
+    isUpdateMode = false;
+    isEditingWine = false;
+    
+    // 選択を解除
+    document.querySelectorAll('.recent-wine-card').forEach(card => {
+        card.classList.remove('selected');
+    });
 }
 
 function hideForm() {
     console.log('❌ フォーム非表示');
-    // TODO: 実装
+    const wineForm = document.getElementById('wineForm');
+    if (wineForm) {
+        wineForm.classList.remove('active');
+    }
+    resetForm();
+}
+
+function showForm(title) {
+    const formTitle = document.getElementById('formTitle');
+    const wineForm = document.getElementById('wineForm');
+    
+    if (formTitle) {
+        formTitle.textContent = title;
+    }
+    
+    if (wineForm) {
+        wineForm.classList.add('active');
+        wineForm.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+function resetForm() {
+    const wineRecordForm = document.getElementById('wineRecordForm');
+    if (wineRecordForm) {
+        wineRecordForm.reset();
+    }
+    
+    // 今日の日付を設定
+    const recordDateInput = document.getElementById('recordDate');
+    if (recordDateInput) {
+        recordDateInput.valueAsDate = new Date();
+    }
+    
+    // 画像プレビューをクリア
+    ['wineImagesPreview', 'pairingImagesPreview', 'friendImagesPreview', 'otherImagesPreview'].forEach(id => {
+        const preview = document.getElementById(id);
+        if (preview) {
+            preview.innerHTML = '';
+            preview.classList.add('empty');
+        }
+    });
+    
+    // 香りスコアをリセット
+    const scoreSliders = document.querySelectorAll('input[type="range"]');
+    scoreSliders.forEach(slider => {
+        slider.value = 0;
+        updateScoreDisplay(slider);
+    });
+    
+    // 詳細フィールドをリセット
+    document.querySelectorAll('input[type="radio"]').forEach(radio => radio.checked = false);
+    document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => checkbox.checked = false);
+    
+    // カスタム時間入力を無効化
+    const customTimeInput = document.getElementById('customTime');
+    if (customTimeInput) {
+        customTimeInput.disabled = true;
+        customTimeInput.required = false;
+        customTimeInput.value = '';
+    }
+    
+    // 編集モードをリセット
+    currentWineId = null;
+    currentRecordId = null;
+    isUpdateMode = false;
+    isEditingWine = false;
+}
+
+function enableAllFormSections() {
+    // 全てのセクションを表示
+    const allSections = document.querySelectorAll('.form-section');
+    allSections.forEach(section => {
+        section.style.display = 'block';
+        section.style.opacity = '1';
+    });
+    
+    // 全てのフィールドを有効化
+    const allInputs = document.querySelectorAll('input, select, textarea');
+    allInputs.forEach(input => {
+        input.disabled = false;
+        input.style.opacity = '1';
+    });
 }
 
 function initializeTheme() {
