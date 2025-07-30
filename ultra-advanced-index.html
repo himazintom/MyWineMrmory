@@ -1106,10 +1106,13 @@
         </div>
         
         <!-- レーダーチャート表示 -->
-        <div class="chart-section">
+        <div class="chart-section" style="display: none;">
             <h2>香りレーダーチャート</h2>
             <div class="chart-container">
                 <canvas id="aromaChart"></canvas>
+                <div class="chart-controls">
+                    <button class="hide-chart-btn" onclick="hideChart()">チャートを閉じる</button>
+                </div>
             </div>
         </div>
         

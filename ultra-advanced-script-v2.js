@@ -1086,6 +1086,9 @@ function createWineGroupHTML(group) {
                     </div>
                 </div>
                 <div class="wine-group-actions">
+                    <button class="chart-btn" onclick="showComparisonChart(['${group.records.map(r => r.id).join("','")}']); event.stopPropagation();" title="香りプロファイル比較">
+                        📊 比較
+                    </button>
                     <button class="edit-wine-btn" onclick="editWineInfo('${group.wineName}-${group.producer}'); event.stopPropagation();">
                         ワイン編集
                     </button>
@@ -1133,6 +1136,7 @@ function createTimelineRecordHTML(record) {
                     ${record.recordTime ? ` - ${optionMappings.recordTime[record.recordTime] || record.recordTime + '分後'}` : ''}
                 </div>
                 <div class="timeline-record-actions">
+                    <button class="chart-btn" onclick="showAromaChart('${record.id}')" title="香りチャートを表示">📊</button>
                     <button class="edit-record-btn" onclick="editRecord('${record.id}')">編集</button>
                     <button class="delete-record-btn" onclick="deleteRecord('${record.id}')">削除</button>
                 </div>
@@ -1856,6 +1860,227 @@ function initializeChart() {
     
     // Chart.jsの実装は後で追加
     console.log('Chart initialized');
+}
+
+// 香りレーダーチャートの表示
+function showAromaChart(recordId) {
+    const record = wineRecords.find(r => r.id === recordId);
+    if (!record || !record.aromaScores) {
+        alert('香りデータが見つかりません');
+        return;
+    }
+    
+    const ctx = document.getElementById('aromaChart');
+    if (!ctx) return;
+    
+    // 既存のチャートを破棄
+    if (aromaChart) {
+        aromaChart.destroy();
+    }
+    
+    // 香りスコアのデータを準備
+    const aromaData = {
+        labels: ['果実', '花', 'スパイス', 'ハーブ', '土・鉱物', '木', 'その他'],
+        datasets: [{
+            label: `${record.wineName} (${record.recordDate})`,
+            data: [
+                record.aromaScores.fruit || 0,
+                record.aromaScores.floral || 0,
+                record.aromaScores.spice || 0,
+                record.aromaScores.herb || 0,
+                record.aromaScores.earth || 0,
+                record.aromaScores.wood || 0,
+                record.aromaScores.other || 0
+            ],
+            backgroundColor: 'rgba(102, 126, 234, 0.2)',
+            borderColor: 'rgba(102, 126, 234, 1)',
+            borderWidth: 2,
+            pointBackgroundColor: 'rgba(102, 126, 234, 1)',
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            pointRadius: 5
+        }]
+    };
+    
+    // チャートの設定
+    const config = {
+        type: 'radar',
+        data: aromaData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '香りプロファイル',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    color: getCurrentTheme() === 'dark' ? '#ffffff' : '#333333'
+                },
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: getCurrentTheme() === 'dark' ? '#ffffff' : '#333333'
+                    }
+                }
+            },
+            scales: {
+                r: {
+                    min: 0,
+                    max: 10,
+                    ticks: {
+                        stepSize: 2,
+                        color: getCurrentTheme() === 'dark' ? '#b0b0b0' : '#666666'
+                    },
+                    grid: {
+                        color: getCurrentTheme() === 'dark' ? '#404040' : '#e0e0e0'
+                    },
+                    pointLabels: {
+                        color: getCurrentTheme() === 'dark' ? '#ffffff' : '#333333',
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            }
+        }
+    };
+    
+    // チャートを作成
+    aromaChart = new Chart(ctx, config);
+    
+    // チャートセクションを表示
+    const chartSection = document.querySelector('.chart-section');
+    if (chartSection) {
+        chartSection.style.display = 'block';
+        chartSection.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+// 複数の記録を比較するレーダーチャート
+function showComparisonChart(recordIds) {
+    const ctx = document.getElementById('aromaChart');
+    if (!ctx) return;
+    
+    // 既存のチャートを破棄
+    if (aromaChart) {
+        aromaChart.destroy();
+    }
+    
+    const datasets = [];
+    const colors = [
+        'rgba(102, 126, 234, 0.2)',
+        'rgba(255, 99, 132, 0.2)',
+        'rgba(54, 162, 235, 0.2)',
+        'rgba(255, 206, 86, 0.2)',
+        'rgba(75, 192, 192, 0.2)'
+    ];
+    
+    const borderColors = [
+        'rgba(102, 126, 234, 1)',
+        'rgba(255, 99, 132, 1)',
+        'rgba(54, 162, 235, 1)',
+        'rgba(255, 206, 86, 1)',
+        'rgba(75, 192, 192, 1)'
+    ];
+    
+    recordIds.forEach((recordId, index) => {
+        const record = wineRecords.find(r => r.id === recordId);
+        if (record && record.aromaScores) {
+            datasets.push({
+                label: `${record.wineName} (${record.recordDate})`,
+                data: [
+                    record.aromaScores.fruit || 0,
+                    record.aromaScores.floral || 0,
+                    record.aromaScores.spice || 0,
+                    record.aromaScores.herb || 0,
+                    record.aromaScores.earth || 0,
+                    record.aromaScores.wood || 0,
+                    record.aromaScores.other || 0
+                ],
+                backgroundColor: colors[index % colors.length],
+                borderColor: borderColors[index % borderColors.length],
+                borderWidth: 2,
+                pointBackgroundColor: borderColors[index % borderColors.length],
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 4
+            });
+        }
+    });
+    
+    const aromaData = {
+        labels: ['果実', '花', 'スパイス', 'ハーブ', '土・鉱物', '木', 'その他'],
+        datasets: datasets
+    };
+    
+    const config = {
+        type: 'radar',
+        data: aromaData,
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: '香りプロファイル比較',
+                    font: {
+                        size: 16,
+                        weight: 'bold'
+                    },
+                    color: getCurrentTheme() === 'dark' ? '#ffffff' : '#333333'
+                },
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        color: getCurrentTheme() === 'dark' ? '#ffffff' : '#333333'
+                    }
+                }
+            },
+            scales: {
+                r: {
+                    min: 0,
+                    max: 10,
+                    ticks: {
+                        stepSize: 2,
+                        color: getCurrentTheme() === 'dark' ? '#b0b0b0' : '#666666'
+                    },
+                    grid: {
+                        color: getCurrentTheme() === 'dark' ? '#404040' : '#e0e0e0'
+                    },
+                    pointLabels: {
+                        color: getCurrentTheme() === 'dark' ? '#ffffff' : '#333333',
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            }
+        }
+    };
+    
+    aromaChart = new Chart(ctx, config);
+    
+    const chartSection = document.querySelector('.chart-section');
+    if (chartSection) {
+        chartSection.style.display = 'block';
+        chartSection.scrollIntoView({ behavior: 'smooth' });
+    }
+}
+
+// チャートセクションを非表示
+function hideChart() {
+    const chartSection = document.querySelector('.chart-section');
+    if (chartSection) {
+        chartSection.style.display = 'none';
+    }
+    
+    if (aromaChart) {
+        aromaChart.destroy();
+        aromaChart = null;
+    }
 }
 
 // テーマ管理機能

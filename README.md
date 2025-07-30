@@ -24,16 +24,13 @@ npm run preview
 wine/
 ├── ultra-advanced-index.html    # メインHTMLファイル
 ├── ultra-advanced-style.css     # スタイルシート
-├── ultra-advanced-script.js     # JavaScript機能
-├── index.html                   # リダイレクトページ
+├── ultra-advanced-script-v2.js  # JavaScript機能（最新版）
 ├── package.json                 # プロジェクト設定
 ├── vite.config.js               # Vite設定
-├── .gitignore                   # Git除外設定
 ├── README.md                    # このファイル
-├── deployment-guide.md          # デプロイガイド
-├── cloudflare-deploy.md         # Cloudflareデプロイ手順
-├── aws-deploy.md                # AWSデプロイ手順
-└── firebase-setup.md            # Firebase設定ガイド
+├── firebase-setup.md            # Firebase設定ガイド
+├── wine_inform.txt              # ワイン情報データ
+└── node_modules/                # 依存関係
 ```
 
 ## ✨ 主な機能
@@ -126,8 +123,8 @@ wine/
 - **Vite**: 高速な開発サーバー・ビルドツール
 
 ### データ保存
-- **ローカルストレージ**: ブラウザ内データ保存
-- **Firebase対応**: クラウドストレージオプション
+- **ローカルストレージ**: ブラウザ内データ保存（現在）
+- **Firebase Firestore**: クラウドデータベース（移行予定）
 - **JSON形式**: データエクスポート・インポート
 
 ### 画像処理
@@ -253,30 +250,19 @@ npm run dev
 ```
 
 ### 本番環境
-複数のデプロイオプションから選択可能：
 
-1. **Cloudflare Pages** (推奨)
-   - 完全無料
-   - 自動HTTPS
-   - 世界最速のCDN
-   - Git連携で自動デプロイ
+**Firebase Hosting** (推奨)
+- Google製の高品質CDN
+- Firestoreとの統合が容易
+- 無料枠あり
+- 簡単な設定
 
-2. **AWS S3 + CloudFront**
-   - 企業レベルの可用性
-   - 詳細な設定オプション
-   - 月額$1-20程度
+その他のオプション：
+- **Cloudflare Pages**: 無料・高速CDN
+- **Netlify**: 無料で高機能
+- **Vercel**: React/Next.js最適化
 
-3. **Firebase Hosting**
-   - Google製の高品質CDN
-   - 無料枠あり
-   - 簡単な設定
-
-4. **Netlify**
-   - 無料で高機能
-   - 豊富なプラグイン
-   - フォーム処理機能
-
-詳細は各デプロイガイドを参照してください。
+詳細は `firebase-setup.md` を参照してください。
 
 ## 🔒 セキュリティ
 
@@ -374,21 +360,25 @@ console.log('LocalStorage usage:', usage, 'bytes');
 - CDNリソースの読み込み状況
 - 画像ファイルの読み込み状況
 
-## 🚀 今後の拡張予定
+## 🚀 開発ロードマップ
 
-### v3.0 予定機能
-- **認証システム**: ユーザー管理機能
-- **クラウド同期**: 複数デバイス間での同期
-- **ソーシャル機能**: 記録の共有・コメント
+### Phase 1: Firebase移行 (進行中)
+- **Firebase Firestore**: ローカルストレージからクラウドDBへ移行
+- **データ構造最適化**: 正規化とパフォーマンス向上
+- **既存データ移行**: ローカルデータのFirestore移行機能
+- **認証システム**: Firebase Authによるユーザー管理
+
+### Phase 2: 機能拡張
+- **デバイス間同期**: 複数デバイスでのデータ共有
+- **画像管理**: Firebase Storageによる画像最適化
+- **リアルタイム更新**: 複数端末での同期機能
+- **オフライン対応**: PWA化とオフラインキャッシュ
+
+### Phase 3: 高度機能
 - **AI分析**: 味わい予測・推奨機能
+- **データ分析**: 統計・傾向分析
 - **エクスポート拡張**: PDF、CSV、Excel形式
-
-### v4.0 予定機能
-- **ワイナリー情報**: 地図連携・詳細情報
-- **価格追跡**: 価格変動のトラッキング
-- **在庫管理**: セラー管理機能
-- **コミュニティ**: ユーザー間交流
-- **モバイルアプリ**: PWA対応
+- **ソーシャル機能**: 記録の共有・コメント
 
 ## 🤝 貢献
 
