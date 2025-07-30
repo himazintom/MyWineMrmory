@@ -7,13 +7,13 @@ import { getAnalytics } from "firebase/analytics";
 
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyB6jnGUsdR9JDTZoDUq_QhM4Gr_gLVp3qA",
-  authDomain: "mywinememory.firebaseapp.com",
-  projectId: "mywinememory",
-  storageBucket: "mywinememory.firebasestorage.app",
-  messagingSenderId: "179280253269",
-  appId: "1:179280253269:web:58330b5938412fafc21fdc",
-  measurementId: "G-PP1B5425FD"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY || "AIzaSyB6jnGUsdR9JDTZoDUq_QhM4Gr_gLVp3qA",
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || "mywinememory.firebaseapp.com",
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || "mywinememory",
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || "mywinememory.firebasestorage.app",
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || "179280253269",
+  appId: import.meta.env.VITE_FIREBASE_APP_ID || "1:179280253269:web:58330b5938412fafc21fdc",
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID || "G-PP1B5425FD"
 };
 
 // Initialize Firebase
