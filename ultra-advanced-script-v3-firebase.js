@@ -146,6 +146,9 @@ function initializeOtherComponents() {
         showLoadingOverlay(false);
     }, 800);
     
+    // 必須項目のマーク表示
+    addRequiredMarks();
+    
     console.log('✅ 初期化完了');
 }
 
@@ -384,6 +387,9 @@ function setupEventListeners() {
     if (themeToggle) {
         themeToggle.addEventListener('click', toggleTheme);
     }
+    
+    // ワインタイプ別の選択肢変更
+    setupWineTypeHandlers();
 }
 
 /**
@@ -740,6 +746,140 @@ function displayWineRecords() {
     // ここに記録表示のロジックを実装
     // 既存のコードを適用するか、新しい表示形式を作成
     recordsDiv.innerHTML = `<p>記録数: ${wineRecords.length}件</p>`;
+}
+
+/**
+ * 必須項目にマーク表示
+ */
+function addRequiredMarks() {
+    const requiredFields = ['wineName', 'recordDate'];
+    
+    requiredFields.forEach(fieldId => {
+        const label = document.querySelector(`label[for="${fieldId}"]`);
+        if (label && !label.querySelector('.required-mark')) {
+            const mark = document.createElement('span');
+            mark.className = 'required-mark';
+            mark.textContent = ' *';
+            mark.style.color = '#e91e63';
+            mark.style.fontWeight = 'bold';
+            label.appendChild(mark);
+        }
+    });
+}
+
+/**
+ * ワインタイプ別の選択肢データ
+ */
+const wineTypeOptions = {
+    '赤ワイン': {
+        colors: [
+            { value: 'deep-purple', label: '深い紫', color: '#4a148c' },
+            { value: 'ruby-red', label: 'ルビー色', color: '#c62828' },
+            { value: 'garnet-red', label: 'ガーネット色', color: '#8d2635' },
+            { value: 'brick-red', label: 'レンガ色', color: '#a0522d' },
+            { value: 'brown-red', label: '茶褐色', color: '#8b4513' }
+        ],
+        aromas: ['blackberry', 'cherry', 'plum', 'vanilla', 'oak', 'tobacco', 'leather', 'earth']
+    },
+    '白ワイン': {
+        colors: [
+            { value: 'light-yellow', label: '淡い黄色', color: '#fffacd' },
+            { value: 'straw-yellow', label: '麦藁色', color: '#f0e68c' },
+            { value: 'golden-yellow', label: '黄金色', color: '#ffd700' },
+            { value: 'amber-yellow', label: '琥珀色', color: '#ffbf00' },
+            { value: 'bronze-yellow', label: 'ブロンズ色', color: '#cd7f32' }
+        ],
+        aromas: ['citrus', 'apple', 'pear', 'peach', 'mineral', 'honey', 'butter', 'oak']
+    },
+    'ロゼワイン': {
+        colors: [
+            { value: 'pale-pink', label: '淡いピンク', color: '#ffc0cb' },
+            { value: 'salmon-pink', label: 'サーモンピンク', color: '#fa8072' },
+            { value: 'rose-pink', label: 'ローズピンク', color: '#ff69b4' },
+            { value: 'coral-pink', label: 'コーラルピンク', color: '#ff7f50' },
+            { value: 'deep-pink', label: '濃いピンク', color: '#ff1493' }
+        ],
+        aromas: ['strawberry', 'raspberry', 'rose', 'citrus', 'mineral', 'herbs']
+    },
+    'スパークリングワイン': {
+        colors: [
+            { value: 'pale-yellow', label: '淡い黄色', color: '#fffacd' },
+            { value: 'golden-yellow', label: '黄金色', color: '#ffd700' },
+            { value: 'rose-spark', label: 'ロゼ', color: '#ffc0cb' },
+            { value: 'white-spark', label: '白', color: '#f8f8ff' }
+        ],
+        aromas: ['apple', 'pear', 'citrus', 'bread', 'yeast', 'mineral', 'flowers']
+    }
+};
+
+/**
+ * ワインタイプ変更時の処理
+ */
+function setupWineTypeHandlers() {
+    const wineTypeInputs = document.querySelectorAll('input[name="wineType"]');
+    wineTypeInputs.forEach(input => {
+        input.addEventListener('change', function() {
+            if (this.checked) {
+                updateOptionsForWineType(this.value);
+            }
+        });
+    });
+}
+
+/**
+ * ワインタイプに応じて選択肢を更新
+ */
+function updateOptionsForWineType(wineType) {
+    console.log('🍷 ワインタイプ変更:', wineType);
+    
+    const options = wineTypeOptions[wineType];
+    if (!options) return;
+    
+    // 色の選択肢を更新
+    updateColorOptions(options.colors);
+    
+    // 香りの選択肢を更新（将来的な拡張用）
+    // updateAromaOptions(options.aromas);
+}
+
+/**
+ * 色選択肢を更新
+ */
+function updateColorOptions(colors) {
+    const colorCheckboxes = document.querySelector('.checkbox-grid');
+    if (!colorCheckboxes) return;
+    
+    // 既存の色オプションを削除
+    const existingColors = colorCheckboxes.querySelectorAll('.checkbox-item[data-type="color"]');
+    existingColors.forEach(item => item.remove());
+    
+    // 新しい色オプションを追加
+    colors.forEach(color => {
+        const colorItem = document.createElement('div');
+        colorItem.className = 'checkbox-item';
+        colorItem.setAttribute('data-type', 'color');
+        colorItem.style.backgroundColor = color.color;
+        colorItem.style.color = isLightColor(color.color) ? '#333' : '#fff';
+        
+        colorItem.innerHTML = `
+            <input type="checkbox" id="color_${color.value}" name="appearance" value="${color.label}">
+            <span>${color.label}</span>
+        `;
+        
+        colorCheckboxes.appendChild(colorItem);
+    });
+}
+
+/**
+ * 色が明るいかどうかを判定
+ */
+function isLightColor(color) {
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    const brightness = ((r * 299) + (g * 587) + (b * 114)) / 1000;
+    return brightness > 155;
 }
 
 // =============================================
@@ -1268,7 +1408,117 @@ function toggleTheme() {
 
 function initializePaintCanvas() {
     console.log('🎨 ペイントキャンバス初期化');
-    // TODO: 実装
+    
+    paintCanvas = document.getElementById('paintCanvas');
+    if (!paintCanvas) return;
+    
+    paintCtx = paintCanvas.getContext('2d');
+    
+    // キャンバスサイズ設定
+    paintCanvas.width = 400;
+    paintCanvas.height = 300;
+    
+    // 背景を白に設定
+    paintCtx.fillStyle = 'white';
+    paintCtx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
+    
+    // 描画設定
+    paintCtx.lineCap = 'round';
+    paintCtx.lineJoin = 'round';
+    
+    // マウスイベント
+    paintCanvas.addEventListener('mousedown', startDrawing);
+    paintCanvas.addEventListener('mousemove', draw);
+    paintCanvas.addEventListener('mouseup', stopDrawing);
+    paintCanvas.addEventListener('mouseout', stopDrawing);
+    
+    // タッチイベント（スマホ対応）
+    paintCanvas.addEventListener('touchstart', handleTouchStart, { passive: false });
+    paintCanvas.addEventListener('touchmove', handleTouchMove, { passive: false });
+    paintCanvas.addEventListener('touchend', handleTouchEnd, { passive: false });
+    
+    // ペイントコントロールのイベントリスナー
+    const clearBtn = document.getElementById('clearCanvas');
+    if (clearBtn) {
+        clearBtn.addEventListener('click', clearCanvas);
+    }
+    
+    const saveBtn = document.getElementById('saveDrawing');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveDrawing);
+    }
+}
+
+function startDrawing(e) {
+    isDrawing = true;
+    const rect = paintCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    paintCtx.beginPath();
+    paintCtx.moveTo(x, y);
+    updateDrawingSettings();
+}
+
+function draw(e) {
+    if (!isDrawing) return;
+    
+    const rect = paintCanvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    
+    paintCtx.lineTo(x, y);
+    paintCtx.stroke();
+}
+
+function stopDrawing() {
+    isDrawing = false;
+    paintCtx.beginPath();
+}
+
+// タッチイベントハンドラー（スマホ対応）
+function handleTouchStart(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const mouseEvent = new MouseEvent('mousedown', {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+    paintCanvas.dispatchEvent(mouseEvent);
+}
+
+function handleTouchMove(e) {
+    e.preventDefault();
+    const touch = e.touches[0];
+    const mouseEvent = new MouseEvent('mousemove', {
+        clientX: touch.clientX,
+        clientY: touch.clientY
+    });
+    paintCanvas.dispatchEvent(mouseEvent);
+}
+
+function handleTouchEnd(e) {
+    e.preventDefault();
+    const mouseEvent = new MouseEvent('mouseup', {});
+    paintCanvas.dispatchEvent(mouseEvent);
+}
+
+function updateDrawingSettings() {
+    const brushSize = document.getElementById('brushSize');
+    const brushColor = document.getElementById('brushColor');
+    
+    if (brushSize) {
+        paintCtx.lineWidth = brushSize.value;
+    }
+    
+    if (brushColor) {
+        paintCtx.strokeStyle = brushColor.value;
+    }
+}
+
+function displaySavedDrawings() {
+    // 保存された絵の表示処理（将来の実装用）
+    console.log('💾 保存された絵を表示:', savedDrawings.length, '件');
 }
 
 function initializeChart() {
@@ -1282,28 +1532,63 @@ function showMultipleImagePreview(input, previewId) {
 }
 
 function updateScoreDisplay(slider) {
-    console.log('📊 スコア表示更新');
-    // TODO: 実装
+    console.log('📊 スコア表示更新:', slider.id, slider.value);
+    
+    // スライダーに対応する数値表示要素を探す
+    const scoreValueId = slider.id.replace('Score', 'Value');
+    const scoreValueElement = document.getElementById(scoreValueId);
+    
+    if (scoreValueElement) {
+        scoreValueElement.textContent = slider.value;
+    } else {
+        // IDが見つからない場合、隣接する.score-value要素を探す
+        const parentElement = slider.closest('.aroma-score-item');
+        if (parentElement) {
+            const scoreValue = parentElement.querySelector('.score-value');
+            if (scoreValue) {
+                scoreValue.textContent = slider.value;
+            }
+        }
+    }
 }
 
 function clearCanvas() {
     console.log('🎨 キャンバスクリア');
-    // TODO: 実装
+    if (paintCanvas && paintCtx) {
+        paintCtx.clearRect(0, 0, paintCanvas.width, paintCanvas.height);
+        paintCtx.fillStyle = 'white';
+        paintCtx.fillRect(0, 0, paintCanvas.width, paintCanvas.height);
+    }
 }
 
 function saveDrawing() {
     console.log('🎨 絵を保存');
-    // TODO: 実装
+    if (paintCanvas) {
+        const imageData = paintCanvas.toDataURL('image/png');
+        const timestamp = new Date().toISOString();
+        const drawingData = {
+            data: imageData,
+            timestamp: timestamp
+        };
+        
+        savedDrawings.push(drawingData);
+        displaySavedDrawings();
+        showNotification('絵を保存しました', 'success');
+    }
 }
 
 function updateBrushSize() {
-    console.log('🖌️ ブラシサイズ更新');
-    // TODO: 実装
+    const brushSizeSlider = document.getElementById('brushSize');
+    const brushSizeValue = document.getElementById('brushSizeValue');
+    
+    if (brushSizeSlider && brushSizeValue) {
+        brushSizeValue.textContent = brushSizeSlider.value;
+    }
 }
 
 function updateBrushColor() {
     console.log('🎨 ブラシカラー更新');
-    // TODO: 実装
+    // 色は描画時に取得するため、特別な処理は不要
 }
 
 function filterRecords() {
