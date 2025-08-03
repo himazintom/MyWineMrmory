@@ -1,34 +1,27 @@
 // MyWineMemory - Firebase統合版メインスクリプト
-import { auth, db } from './firebase-config.js';
-import { 
-    onAuthChange, 
-    signInWithEmail, 
-    signUpWithEmail, 
-    signInWithGoogle, 
-    signOutUser,
-    resetPassword,
-    isLoggedIn,
-    getCurrentUser,
-    updateUserPrivacy,
-    getUserPrivacy,
-    generateShareUrl
-} from './auth-service.js';
-import {
-    createWine,
-    getWine,
-    getAllWines,
-    updateWine,
-    deleteWine,
-    createRecord,
-    getWineRecords,
-    getAllRecords,
-    updateRecord,
-    deleteRecord,
-    searchWines,
-    onWinesChange,
-    exportUserData,
-    searchWinesByNameAndProducer
-} from './firestore-service.js';
+// Firebase はすでに window.firebaseAuth, window.firebaseDb で利用可能
+
+// Firebase Auth と Firestore を参照
+const auth = window.firebaseAuth;
+const db = window.firebaseDb;
+
+// Firebase Auth functions を CDN から動的インポート
+let authFunctions = {};
+let firestoreFunctions = {};
+
+// Firebase functions を非同期で読み込み
+async function loadFirebaseFunctions() {
+    const authModule = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js');
+    const firestoreModule = await import('https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js');
+    
+    authFunctions = authModule;
+    firestoreFunctions = firestoreModule;
+    
+    console.log('Firebase functions loaded successfully');
+    
+    // 初期化完了後にアプリを開始
+    initializeApp();
+}
 
 // =============================================
 // グローバル変数
