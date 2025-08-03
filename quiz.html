@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ワインクイズ - MyWineMemory</title>
+    
+    <!-- PWA設定 -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="WineMemory">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .quiz-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+
+        .quiz-progress {
+            background: #f0f0f0;
+            border-radius: 10px;
+            height: 8px;
+            flex: 1;
+            margin: 0 20px;
+            overflow: hidden;
+        }
+
+        .quiz-progress-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .quiz-question {
+            margin-bottom: 30px;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .wine-info {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .wine-info h3 {
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .answer-options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .answer-option {
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .answer-option:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .answer-option.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .answer-option.correct {
+            border-color: #4CAF50;
+            background: #4CAF50;
+            color: white;
+        }
+
+        .answer-option.incorrect {
+            border-color: #f44336;
+            background: #f44336;
+            color: white;
+        }
+
+        .text-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .text-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px;
+            transition: transform 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quiz-feedback {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .quiz-feedback.correct {
+            border-color: #4CAF50;
+            background: #e8f5e8;
+        }
+
+        .quiz-feedback.incorrect {
+            border-color: #f44336;
+            background: #ffeaea;
+        }
+
+        .quiz-results {
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 3rem;
+            font-weight: bold;
+            color: #667eea;
+            margin: 20px 0;
+        }
+
+        .streak-info {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #667eea;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .quiz-types {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .quiz-type-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .quiz-type-card:hover {
+            transform: translateY(-5px);
+            border-color: #667eea;
+        }
+
+        .quiz-type-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .back-btn {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <button class="back-btn" onclick="goHome()">← ホームに戻る</button>
+            <h1>🍷 ワインクイズ</h1>
+            <p>知識を深めて、ワインマスターを目指しましょう！</p>
+        </div>
+
+        <!-- クイズタイプ選択 -->
+        <div class="quiz-container" id="quizTypeSelection">
+            <h2>クイズの種類を選択してください</h2>
+            <div class="quiz-types">
+                <div class="quiz-type-card" onclick="startQuiz('general')">
+                    <div class="quiz-type-icon">🌍</div>
+                    <h3>一般ワイン知識</h3>
+                    <p>ワインの基本知識から専門的な内容まで</p>
+                </div>
+                
+                <div class="quiz-type-card" onclick="startQuiz('personal')">
+                    <div class="quiz-type-icon">📚</div>
+                    <h3>マイワインクイズ</h3>
+                    <p>あなたが記録したワインから出題</p>
+                </div>
+                
+                <div class="quiz-type-card" onclick="startQuiz('daily')">
+                    <div class="quiz-type-icon">📅</div>
+                    <h3>今日のクイズ</h3>
+                    <p>毎日更新される特別なクイズ</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ローディング画面 -->
+        <div class="quiz-container loading hidden" id="loadingScreen">
+            <div class="spinner"></div>
+            <p>クイズを準備中...</p>
+        </div>
+
+        <!-- クイズ画面 -->
+        <div class="quiz-container hidden" id="quizContainer">
+            <div class="quiz-header">
+                <span id="questionNumber">問題 1/10</span>
+                <div class="quiz-progress">
+                    <div class="quiz-progress-bar" id="progressBar" style="width: 10%"></div>
+                </div>
+                <span id="quizScore">スコア: 0</span>
+            </div>
+
+            <div class="quiz-question" id="questionContainer">
+                <!-- 問題がここに表示される -->
+            </div>
+
+            <div id="feedbackContainer" class="quiz-feedback hidden">
+                <!-- フィードバックがここに表示される -->
+            </div>
+
+            <div class="quiz-actions">
+                <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>次の問題</button>
+                <button class="btn" id="submitBtn" onclick="submitAnswer()" disabled>回答</button>
+            </div>
+        </div>
+
+        <!-- 結果画面 -->
+        <div class="quiz-container quiz-results hidden" id="resultsContainer">
+            <h2>クイズ完了！</h2>
+            <div class="score-display" id="finalScore">8/10</div>
+            <p id="scoreMessage">素晴らしい結果です！</p>
+            
+            <div class="streak-info">
+                <h3>🔥 連続記録</h3>
+                <p id="streakDisplay">7日連続でクイズに挑戦中！</p>
+            </div>
+            
+            <div>
+                <button class="btn" onclick="startNewQuiz()">もう一度挑戦</button>
+                <button class="btn" onclick="goHome()">ホームに戻る</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (CDN) -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6jnGUsdR9JDTZoDUq_QhM4Gr_gLVp3qA",
+            authDomain: "mywinememory.firebaseapp.com",
+            projectId: "mywinememory",
+            storageBucket: "mywinememory.firebasestorage.app",
+            messagingSenderId: "179280253269",
+            appId: "1:179280253269:web:58330b5938412fafc21fdc",
+            measurementId: "G-PP1B5425FD"
+        };
+
+        // Firebase初期化
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // グローバル変数
+        let currentUser = null;
+        let currentQuiz = null;
+        let currentQuestionIndex = 0;
+        let userAnswers = [];
+        let quizScore = 0;
+        let quizType = '';
+
+        // 認証状態の監視
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (!user) {
+                // ログインしていない場合はホームページにリダイレクト
+                window.location.href = '/';
+            }
+        });
+
+        // 一般的なワイン知識問題データ
+        const generalQuestions = [
+            {
+                type: 'multiple_choice',
+                question: 'フランスのボルドー地方で最も有名な赤ワイン用ブドウ品種は？',
+                options: ['ピノ・ノワール', 'カベルネ・ソーヴィニヨン', 'シラー', 'サンジョヴェーゼ'],
+                correct: 1,
+                explanation: 'カベルネ・ソーヴィニヨンはボルドー地方の代表的な品種で、力強い赤ワインを生み出します。'
+            },
+            {
+                type: 'true_false',
+                question: 'シャンパーニュは、フランスのシャンパーニュ地方で作られたスパークリングワインのみを指す。',
+                correct: true,
+                explanation: 'シャンパーニュは原産地統制呼称で、フランスのシャンパーニュ地方で特定の製法で作られたもののみが名乗れます。'
+            },
+            {
+                type: 'multiple_choice',
+                question: 'ワインの「タンニン」とは何に由来する成分ですか？',
+                options: ['ブドウの実', 'ブドウの皮や種', '発酵過程で生まれる', '樽から抽出される'],
+                correct: 1,
+                explanation: 'タンニンは主にブドウの皮や種、茎から抽出される渋み成分です。樽からも抽出されることがあります。'
+            },
+            {
+                type: 'free_input',
+                question: 'イタリアのトスカーナ州で生産される、サンジョヴェーゼを主体とした有名な赤ワインの名前を答えてください。',
+                keywords: ['キャンティ', 'chianti'],
+                explanation: 'キャンティは、トスカーナ州のキャンティ地区で生産される、サンジョヴェーゼを主体とした赤ワインです。'
+            },
+            {
+                type: 'multiple_choice',
+                question: 'ワインの適切な保存温度は一般的に何度程度ですか？',
+                options: ['5-8℃', '12-15℃', '18-20℃', '25-28℃'],
+                correct: 1,
+                explanation: '12-15℃がワインの長期保存に最も適した温度です。温度が高すぎると劣化が進み、低すぎると味わいが閉じてしまいます。'
+            }
+        ];
+
+        // クイズ開始
+        window.startQuiz = async function(type) {
+            quizType = type;
+            currentQuestionIndex = 0;
+            userAnswers = [];
+            quizScore = 0;
+
+            document.getElementById('quizTypeSelection').classList.add('hidden');
+            document.getElementById('loadingScreen').classList.remove('hidden');
+
+            try {
+                if (type === 'personal') {
+                    currentQuiz = await generatePersonalQuiz();
+                } else if (type === 'daily') {
+                    currentQuiz = await generateDailyQuiz();
+                } else {
+                    currentQuiz = generateGeneralQuiz();
+                }
+
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').classList.add('hidden');
+                    document.getElementById('quizContainer').classList.remove('hidden');
+                    showQuestion();
+                }, 1500);
+
+            } catch (error) {
+                console.error('クイズ生成エラー:', error);
+                alert('クイズの準備に失敗しました。もう一度お試しください。');
+                resetQuiz();
+            }
+        }
+
+        // 一般クイズ生成
+        function generateGeneralQuiz() {
+            return {
+                title: '一般ワイン知識クイズ',
+                questions: [...generalQuestions].sort(() => Math.random() - 0.5).slice(0, 5)
+            };
+        }
+
+        // 個人クイズ生成
+        async function generatePersonalQuiz() {
+            if (!currentUser) throw new Error('ログインが必要です');
+
+            const q = query(
+                collection(db, 'wine_records'),
+                where('userId', '==', currentUser.uid),
+                orderBy('createdAt', 'desc'),
+                limit(10)
+            );
+
+            const snapshot = await getDocs(q);
+            const wines = [];
+            snapshot.forEach(doc => wines.push(doc.data()));
+
+            if (wines.length < 3) {
+                throw new Error('クイズ生成には最低3本のワイン記録が必要です');
+            }
+
+            const questions = wines.slice(0, 5).map(wine => ({
+                type: 'multiple_choice',
+                question: `${wine.wineName}について、あなたはどんな評価をつけましたか？`,
+                wineInfo: {
+                    name: wine.wineName,
+                    producer: wine.producer,
+                    vintage: wine.vintage,
+                    notes: wine.notes
+                },
+                options: ['1点', '2点', '3点', '4点', '5点'],
+                correct: wine.wineRating - 1,
+                explanation: `あなたは${wine.wineName}に${wine.wineRating}点をつけました。${wine.notes ? `メモ: ${wine.notes}` : ''}`
+            }));
+
+            return {
+                title: 'マイワインクイズ',
+                questions: questions
+            };
+        }
+
+        // 今日のクイズ生成
+        async function generateDailyQuiz() {
+            // 日付をシードとしてランダム問題を選択
+            const today = new Date().toDateString();
+            const seed = today.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+            
+            const shuffled = [...generalQuestions];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = (seed + i) % (i + 1);
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+
+            return {
+                title: '今日のワインクイズ',
+                questions: shuffled.slice(0, 3)
+            };
+        }
+
+        // 問題表示
+        function showQuestion() {
+            if (currentQuestionIndex >= currentQuiz.questions.length) {
+                showResults();
+                return;
+            }
+
+            const question = currentQuiz.questions[currentQuestionIndex];
+            const questionContainer = document.getElementById('questionContainer');
+            
+            // プログレス更新
+            const progress = ((currentQuestionIndex + 1) / currentQuiz.questions.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+            document.getElementById('questionNumber').textContent = 
+                `問題 ${currentQuestionIndex + 1}/${currentQuiz.questions.length}`;
+            document.getElementById('quizScore').textContent = `スコア: ${quizScore}`;
+
+            // 問題HTML生成
+            let questionHTML = '';
+            
+            // ワイン情報があれば表示
+            if (question.wineInfo) {
+                questionHTML += `
+                    <div class="wine-info">
+                        <h3>${question.wineInfo.name}</h3>
+                        <p><strong>生産者:</strong> ${question.wineInfo.producer}</p>
+                        ${question.wineInfo.vintage ? `<p><strong>ヴィンテージ:</strong> ${question.wineInfo.vintage}</p>` : ''}
+                        ${question.wineInfo.notes ? `<p><strong>あなたのメモ:</strong> ${question.wineInfo.notes}</p>` : ''}
+                    </div>
+                `;
+            }
+
+            questionHTML += `<div class="question-text">${question.question}</div>`;
+
+            if (question.type === 'multiple_choice') {
+                questionHTML += '<div class="answer-options">';
+                question.options.forEach((option, index) => {
+                    questionHTML += `
+                        <div class="answer-option" onclick="selectAnswer(${index})">
+                            ${option}
+                        </div>
+                    `;
+                });
+                questionHTML += '</div>';
+            } else if (question.type === 'true_false') {
+                questionHTML += `
+                    <div class="answer-options">
+                        <div class="answer-option" onclick="selectAnswer(true)">正しい</div>
+                        <div class="answer-option" onclick="selectAnswer(false)">間違い</div>
+                    </div>
+                `;
+            } else if (question.type === 'free_input') {
+                questionHTML += `
+                    <textarea class="text-input" id="freeAnswer" placeholder="あなたの答えを入力してください..."></textarea>
+                `;
+            }
+
+            questionContainer.innerHTML = questionHTML;
+            
+            // ボタン状態リセット
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = true;
+            document.getElementById('feedbackContainer').classList.add('hidden');
+        }
+
+        // 答え選択
+        window.selectAnswer = function(answer) {
+            // 前の選択をクリア
+            document.querySelectorAll('.answer-option').forEach(opt => {
+                opt.classList.remove('selected');
+            });
+
+            // 新しい選択をマーク
+            if (typeof answer === 'number') {
+                document.querySelectorAll('.answer-option')[answer].classList.add('selected');
+            } else {
+                const options = document.querySelectorAll('.answer-option');
+                if (answer === true) options[0].classList.add('selected');
+                else options[1].classList.add('selected');
+            }
+
+            userAnswers[currentQuestionIndex] = answer;
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        // 回答提出
+        window.submitAnswer = async function() {
+            const question = currentQuiz.questions[currentQuestionIndex];
+            let userAnswer = userAnswers[currentQuestionIndex];
+            
+            // 自由入力の場合
+            if (question.type === 'free_input') {
+                userAnswer = document.getElementById('freeAnswer').value.trim();
+                userAnswers[currentQuestionIndex] = userAnswer;
+            }
+
+            // 答えをチェック
+            let isCorrect = false;
+            if (question.type === 'multiple_choice') {
+                isCorrect = userAnswer === question.correct;
+            } else if (question.type === 'true_false') {
+                isCorrect = userAnswer === question.correct;
+            } else if (question.type === 'free_input') {
+                // キーワードマッチングで判定
+                const keywords = question.keywords || [];
+                isCorrect = keywords.some(keyword => 
+                    userAnswer.toLowerCase().includes(keyword.toLowerCase())
+                );
+            }
+
+            if (isCorrect) {
+                quizScore++;
+            }
+
+            // フィードバック表示
+            showFeedback(isCorrect, question);
+            
+            // ボタン状態更新
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('nextBtn').disabled = false;
+        }
+
+        // フィードバック表示
+        function showFeedback(isCorrect, question) {
+            const feedbackContainer = document.getElementById('feedbackContainer');
+            feedbackContainer.className = `quiz-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+            
+            let feedbackHTML = `
+                <h4>${isCorrect ? '✅ 正解！' : '❌ 不正解'}</h4>
+                <p>${question.explanation}</p>
+            `;
+
+            // 選択肢の正解を表示
+            if (question.type === 'multiple_choice') {
+                document.querySelectorAll('.answer-option').forEach((opt, index) => {
+                    if (index === question.correct) {
+                        opt.classList.add('correct');
+                    } else if (opt.classList.contains('selected')) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+            }
+
+            feedbackContainer.innerHTML = feedbackHTML;
+            feedbackContainer.classList.remove('hidden');
+        }
+
+        // 次の問題
+        window.nextQuestion = function() {
+            currentQuestionIndex++;
+            showQuestion();
+        }
+
+        // 結果表示
+        function showResults() {
+            document.getElementById('quizContainer').classList.add('hidden');
+            document.getElementById('resultsContainer').classList.remove('hidden');
+
+            const totalQuestions = currentQuiz.questions.length;
+            const scorePercentage = Math.round((quizScore / totalQuestions) * 100);
+
+            document.getElementById('finalScore').textContent = `${quizScore}/${totalQuestions}`;
+            
+            let message = '';
+            if (scorePercentage >= 90) message = '完璧です！ワインマスターレベルです！';
+            else if (scorePercentage >= 70) message = '素晴らしい結果です！';
+            else if (scorePercentage >= 50) message = '良い成績です。さらに学習を続けましょう！';
+            else message = '頑張りましょう！継続が大切です。';
+
+            document.getElementById('scoreMessage').textContent = message;
+
+            // 結果をFirestoreに保存
+            saveQuizResult();
+        }
+
+        // クイズ結果保存
+        async function saveQuizResult() {
+            if (!currentUser) return;
+
+            try {
+                await addDoc(collection(db, 'quiz_results'), {
+                    userId: currentUser.uid,
+                    quizType: quizType,
+                    score: quizScore,
+                    totalQuestions: currentQuiz.questions.length,
+                    percentage: Math.round((quizScore / currentQuiz.questions.length) * 100),
+                    answers: userAnswers,
+                    completedAt: new Date()
+                });
+
+                console.log('クイズ結果が保存されました');
+            } catch (error) {
+                console.error('結果保存エラー:', error);
+            }
+        }
+
+        // 新しいクイズ開始
+        window.startNewQuiz = function() {
+            resetQuiz();
+        }
+
+        // クイズリセット
+        function resetQuiz() {
+            document.getElementById('resultsContainer').classList.add('hidden');
+            document.getElementById('quizContainer').classList.add('hidden');
+            document.getElementById('quizTypeSelection').classList.remove('hidden');
+        }
+
+        // ホームに戻る
+        window.goHome = function() {
+            window.location.href = '/';
+        }
+
+        console.log('🍷 Quiz system initialized');
+    </script>
+
+    <!-- Service Worker登録 -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(() => console.log('Service Worker registered'))
+                .catch(err => console.log('Service Worker registration failed'));
+        }
+    </script>
+</body>
+</html>

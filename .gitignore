@@ -1,18 +1,20 @@
-# Dependencies
-node_modules/
-npm-debug.log*
-
-# Build outputs
-dist/
-.vercel/
+# Firebase Admin SDK keys
+firebase-adminsdk*.json
+.firebase/
 
 # Environment variables
 .env
 .env.local
-.env.production.local
-.env.development.local
+.env.production
 
-firebase-adminsdk.json
+# Dependencies
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Archive/backup files
+archive/
 
 # OS generated files
 .DS_Store
@@ -23,39 +25,12 @@ firebase-adminsdk.json
 ehthumbs.db
 Thumbs.db
 
-# IDE
+# IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
 
 # Logs
+logs
 *.log
-
-# Cache
-.cache/
-.parcel-cache/
-
-# Firebase cache
-.firebase/
-firebase-debug.log
-firestore-debug.log
-
-# Service Account Keys (NEVER COMMIT THESE)
-service-account-key.json
-*service-account*.json
-*.key.json
-firebase-adminsdk-*.json
-
-# Firebase directory with secrets
-.firebase/
-firebase-debug.log*
-
-# Prevent any JSON keys in sensitive locations
-**/*service-account*.json
-**/*firebase-adminsdk*.json
-**/credentials*.json
-
-# Other
-*.tgz
-*.tar.gz

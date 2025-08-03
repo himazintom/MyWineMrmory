@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyWineMemory - シンプル版</title>
+    <title>MyWineMemory - ワイン記録&クイズアプリ</title>
     
     <!-- PWA設定 -->
     <link rel="manifest" href="/manifest.json">
@@ -155,8 +155,11 @@
             
             <div id="userView" class="hidden">
                 <h2>ようこそ、<span id="userName"></span>さん</h2>
-                <button class="btn" onclick="showWineForm()">新しいワインを記録</button>
-                <button class="btn" onclick="signOut()">ログアウト</button>
+                <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
+                    <button class="btn" onclick="showWineForm()">新しいワインを記録</button>
+                    <button class="btn" onclick="goToQuiz()">🧠 ワインクイズ</button>
+                    <button class="btn" onclick="signOut()">ログアウト</button>
+                </div>
             </div>
         </div>
 
@@ -379,6 +382,11 @@
             setTimeout(() => {
                 statusEl.classList.add('hidden');
             }, 3000);
+        }
+
+        // クイズページへ移動
+        window.goToQuiz = function() {
+            window.location.href = '/quiz.html';
         }
 
         console.log('🍷 MyWineMemory initialized successfully');
