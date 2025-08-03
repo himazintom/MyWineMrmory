@@ -636,36 +636,12 @@ async function handleForgotPassword(e) {
 function checkAndOfferFormRestore() {
     // 自動保存されたフォームデータがあれば復元を提案
     if (AutoSave.hasData()) {
-        const savedData = AutoSave.load();
-        if (savedData && confirm('前回入力途中のデータがあります。復元しますか？')) {
-            restoreFormData(savedData);
+        if (confirm('前回入力途中のデータがあります。復元しますか？')) {
+            restoreFormData();
         }
     }
 }
 
-/**
- * フォームデータ復元機能
- */
-function restoreFormData(savedData) {
-    const form = document.getElementById('wineRecordForm');
-    if (!form || !savedData) return;
-    
-    Object.entries(savedData).forEach(([key, value]) => {
-        const element = form.elements[key];
-        if (element) {
-            if (element.type === 'radio' || element.type === 'checkbox') {
-                if (element.value === value) {
-                    element.checked = true;
-                }
-            } else {
-                element.value = value;
-            }
-        }
-    });
-    
-    showNotification('前回の入力内容を復元しました', 'success');
-    console.log('📝 フォームデータを復元しました');
-}
 
 // =============================================
 // プライバシー機能
