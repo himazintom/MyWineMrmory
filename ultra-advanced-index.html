@@ -14,6 +14,14 @@
         <div class="header-with-theme">
             <h1>MyWineMemory</h1>
             <div class="header-controls">
+                <div class="privacy-section" id="privacySection" style="display: none;">
+                    <div class="privacy-toggle">
+                        <button id="privacyToggleBtn" class="privacy-btn private" title="記録の公開/非公開を切り替え">
+                            <span class="privacy-icon">🔒</span>
+                            <span class="privacy-text">非公開</span>
+                        </button>
+                    </div>
+                </div>
                 <div class="auth-section" id="authSection">
                     <!-- 認証状態によって動的に変更 -->
                     <div id="loginButton" class="auth-button">
@@ -1256,7 +1264,6 @@
                     <option value="all">すべて表示</option>
                 </select>
                 <button id="exportBtn">データエクスポート</button>
-                <button id="migrationBtn" onclick="startManualMigration()" style="background: linear-gradient(135deg, #ff9800, #f57c00); margin-left: 10px;">localStorage移行</button>
             </div>
             <div id="wineRecords"></div>
             <div class="pagination-controls">

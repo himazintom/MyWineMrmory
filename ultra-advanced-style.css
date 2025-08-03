@@ -1609,6 +1609,64 @@ h4 {
     gap: 20px;
 }
 
+/* プライバシー設定 */
+.privacy-section {
+    display: flex;
+    align-items: center;
+}
+
+.privacy-toggle {
+    display: flex;
+    align-items: center;
+}
+
+.privacy-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 30px;
+    padding: 8px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    color: var(--text-color);
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.privacy-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+
+.privacy-btn.private {
+    background: rgba(255, 59, 48, 0.2);
+    border-color: rgba(255, 59, 48, 0.4);
+}
+
+.privacy-btn.public {
+    background: rgba(52, 199, 89, 0.2);
+    border-color: rgba(52, 199, 89, 0.4);
+}
+
+.privacy-btn.private:hover {
+    background: rgba(255, 59, 48, 0.3);
+}
+
+.privacy-btn.public:hover {
+    background: rgba(52, 199, 89, 0.3);
+}
+
+.privacy-icon {
+    font-size: 16px;
+}
+
+.privacy-text {
+    font-size: 0.85em;
+}
+
 .auth-section {
     display: flex;
     align-items: center;

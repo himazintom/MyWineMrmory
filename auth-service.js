@@ -219,6 +219,12 @@ const saveUserToFirestore = async (user, additionalData = {}) => {
         defaultGlassType: 'universal',
         units: 'metric'
       };
+      userData.privacy = {
+        isPublic: false,  // 初期設定は非公開
+        shareUrl: null,   // 共有URL（公開時に生成）
+        allowComments: false,
+        allowRatings: false
+      };
     }
     
     await setDoc(userDoc, userData, { merge: true });
@@ -248,6 +254,64 @@ export const getUserFromFirestore = async (userId = null) => {
     console.error('❌ ユーザー情報取得エラー:', error);
     throw error;
   }
+};
+
+/**
+ * ユーザーのプライバシー設定を更新
+ */
+export const updateUserPrivacy = async (privacySettings) => {
+  const user = auth.currentUser;
+  if (!user) throw new Error('ログインが必要です');
+  
+  try {
+    const userDoc = doc(db, 'users', user.uid);
+    await setDoc(userDoc, {
+      privacy: privacySettings,
+      updatedAt: serverTimestamp()
+    }, { merge: true });
+    
+    console.log('🔒 プライバシー設定を更新しました');
+    return true;
+  } catch (error) {
+    console.error('❌ プライバシー設定更新エラー:', error);
+    throw error;
+  }
+};
+
+/**
+ * ユーザーのプライバシー設定を取得
+ */
+export const getUserPrivacy = async (userId = null) => {
+  const uid = userId || auth.currentUser?.uid;
+  if (!uid) throw new Error('ユーザーIDが指定されていません');
+  
+  try {
+    const userDoc = doc(db, 'users', uid);
+    const docSnap = await getDoc(userDoc);
+    
+    if (docSnap.exists()) {
+      const userData = docSnap.data();
+      return userData.privacy || {
+        isPublic: false,
+        shareUrl: null,
+        allowComments: false,
+        allowRatings: false
+      };
+    } else {
+      throw new Error('ユーザー情報が見つかりません');
+    }
+  } catch (error) {
+    console.error('❌ プライバシー設定取得エラー:', error);
+    throw error;
+  }
+};
+
+/**
+ * 共有URLを生成
+ */
+export const generateShareUrl = (userId) => {
+  const baseUrl = window.location.origin + window.location.pathname;
+  return `${baseUrl}?share=${userId}`;
 };
 
 // =============================================
