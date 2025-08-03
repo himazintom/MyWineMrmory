@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI分析 - MyWineMemory</title>
+    
+    <!-- PWA設定 -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="WineMemory">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    
+    <!-- 高度なスタイル -->
+    <link rel="stylesheet" href="/advanced-style.css">
+    
+    <style>
+        .ai-analysis-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .ai-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        
+        .ai-input-section {
+            margin-bottom: 30px;
+        }
+        
+        .tasting-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 16px;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+        
+        .tasting-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .analyze-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        
+        .analyze-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .analyze-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading-spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .analysis-result {
+            margin-top: 24px;
+            padding: 20px;
+            background: var(--secondary-bg);
+            border-radius: 8px;
+            border-left: 4px solid var(--accent-color);
+        }
+        
+        .analysis-section {
+            margin-bottom: 20px;
+        }
+        
+        .analysis-section h4 {
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-size: 18px;
+        }
+        
+        .analysis-content {
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+        
+        .confidence-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
+            transition: width 0.5s ease;
+        }
+        
+        .wine-recommendations {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        .recommendation-card {
+            background: var(--card-bg);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .recommendation-card h5 {
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        
+        .improvement-tips {
+            background: var(--info-bg);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+        
+        .improvement-tips h4 {
+            color: var(--info-color);
+            margin-bottom: 12px;
+        }
+        
+        .tip-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .tip-icon {
+            color: var(--success-color);
+            margin-top: 2px;
+        }
+        
+        .error-message {
+            background: var(--error-bg);
+            color: var(--error-color);
+            padding: 16px;
+            border-radius: 8px;
+            margin-top: 16px;
+        }
+        
+        .sample-notes {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .sample-note {
+            padding: 12px;
+            background: var(--secondary-bg);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+        
+        .sample-note:hover {
+            border-color: var(--primary-color);
+            background: var(--card-bg);
+        }
+        
+        .sample-note-title {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 4px;
+        }
+        
+        .sample-note-text {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Professional Navigation Header -->
+    <nav class="main-navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <span class="brand-icon">🍷</span>
+                <span class="brand-text">MyWineMemory</span>
+            </div>
+            
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="メニューを開く">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            
+            <div class="navbar-menu" id="navbarMenu">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link">
+                            <span class="nav-icon">🏠</span>
+                            <span class="nav-text">ホーム</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/quiz.html" class="nav-link">
+                            <span class="nav-icon">🧠</span>
+                            <span class="nav-text">クイズ</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/analytics.html" class="nav-link">
+                            <span class="nav-icon">📊</span>
+                            <span class="nav-text">分析</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/ai-evaluation.html" class="nav-link active">
+                            <span class="nav-icon">🤖</span>
+                            <span class="nav-text">AI分析</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/learning-progress.html" class="nav-link">
+                            <span class="nav-icon">📈</span>
+                            <span class="nav-text">学習進捗</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <button id="theme-toggle" class="theme-toggle nav-link nav-button" aria-label="テーマ切り替え">
+                            <span class="theme-icon">🌙</span>
+                            <span class="nav-text">テーマ</span>
+                        </button>
+                    </li>
+                    <li class="nav-item auth-nav" id="authNavItem">
+                        <!-- ログイン前表示 -->
+                        <div id="loginNavView" class="auth-nav-content">
+                            <button class="nav-link nav-button auth-button" onclick="signInWithGoogle()">
+                                <span class="nav-icon">👤</span>
+                                <span class="nav-text">ログイン</span>
+                            </button>
+                        </div>
+                        
+                        <!-- ログイン後表示 -->
+                        <div id="userNavView" class="auth-nav-content hidden">
+                            <div class="user-nav-info">
+                                <img id="userAvatar" class="user-avatar" src="" alt="ユーザーアバター" style="display: none;">
+                                <div class="user-details">
+                                    <span class="user-name" id="userNavName">ユーザー</span>
+                                    <span class="user-email" id="userNavEmail"></span>
+                                </div>
+                                <button id="privacyToggle" class="privacy-toggle-btn" onclick="togglePrivacy()" title="記録の公開/非公開を切り替え">
+                                    <span id="privacyIcon">🔒</span>
+                                </button>
+                                <button class="logout-btn" onclick="confirmSignOut()" title="ログアウト">
+                                    <span>🚪</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- ステータス表示 -->
+                        <div id="authNavStatus" class="auth-status hidden"></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="ai-analysis-container">
+            <div class="ai-card">
+                <h1>🤖 AI テイスティング分析</h1>
+                <p>あなたのテイスティングノートをAIが分析し、専門的な評価とアドバイスを提供します</p>
+            </div>
+            
+            <!-- ログイン必要メッセージ -->
+            <div id="loginRequired" class="ai-card" style="text-align: center;">
+                <h2>🔐 ログインが必要です</h2>
+                <p>AI分析機能を利用するには、ログインしてください</p>
+                <button class="btn primary-btn" onclick="signInWithGoogle()">
+                    <span class="btn-icon">G</span>
+                    Googleでログイン
+                </button>
+            </div>
+            
+            <!-- AI分析コンテンツ -->
+            <div id="aiAnalysisContent" class="hidden">
+                <!-- サンプルノート -->
+                <div class="ai-card">
+                    <h3>📝 サンプルテイスティングノート</h3>
+                    <p>以下のサンプルをクリックして試してみてください：</p>
+                    <div class="sample-notes">
+                        <div class="sample-note" onclick="loadSampleNote(0)">
+                            <div class="sample-note-title">初心者レベル</div>
+                            <div class="sample-note-text">美味しい赤ワイン。少し酸っぱいけど飲みやすい。</div>
+                        </div>
+                        <div class="sample-note" onclick="loadSampleNote(1)">
+                            <div class="sample-note-title">中級レベル</div>
+                            <div class="sample-note-text">深いルビー色。ブラックベリーの香りが強く、タンニンがしっかりしている。</div>
+                        </div>
+                        <div class="sample-note" onclick="loadSampleNote(2)">
+                            <div class="sample-note-title">上級レベル</div>
+                            <div class="sample-note-text">濃いガーネット色、エッジは僅かにオレンジがかっている。第一アロマはカシスとブラックベリー、第二アロマでバニラとスパイスのニュアンス。</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- テイスティングノート入力 -->
+                <div class="ai-card">
+                    <div class="ai-input-section">
+                        <h3>🍷 テイスティングノートを入力</h3>
+                        <textarea 
+                            id="tastingNote" 
+                            class="tasting-input"
+                            placeholder="ワインの外観、香り、味わい、フィニッシュについて自由に記述してください&#10;&#10;例：&#10;・外観：深いルビー色、透明度は高い&#10;・香り：ブラックベリー、カシスの果実香に、バニラやスパイスのニュアンス&#10;・味わい：豊かな果実味、しっかりしたタンニン、適度な酸味&#10;・フィニッシュ：長く、余韻に心地よいスパイス感"
+                        ></textarea>
+                        <button id="analyzeBtn" class="analyze-btn" onclick="analyzeWine()">
+                            <span id="analyzeIcon">🤖</span>
+                            <span id="analyzeText">AI分析を開始</span>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- 分析結果 -->
+                <div id="analysisResults" class="ai-card hidden">
+                    <h3>📊 AI分析結果</h3>
+                    <div id="analysisContent"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK と JavaScript -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6jnGUsdR9JDTZoDUq_QhM4Gr_gLVp3qA",
+            authDomain: "mywinememory.firebaseapp.com",
+            projectId: "mywinememory",
+            storageBucket: "mywinememory.firebasestorage.app",
+            messagingSenderId: "179280253269",
+            appId: "1:179280253269:web:58330b5938412fafc21fdc",
+            measurementId: "G-PP1B5425FD"
+        };
+
+        // Firebase初期化
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // グローバル変数
+        let currentUser = null;
+
+        // サンプルノート
+        const sampleNotes = [
+            "美味しい赤ワイン。少し酸っぱいけど飲みやすい。フルーツの味がする。",
+            "深いルビー色。ブラックベリーの香りが強く、タンニンがしっかりしている。酸味とのバランスが良い。",
+            "濃いガーネット色、エッジは僅かにオレンジがかっている。第一アロマはカシスとブラックベリー、第二アロマでバニラとスパイスのニュアンス。口当たりは滑らかで、凝縮した果実味とシルキーなタンニンが調和している。フィニッシュは長く、余韻にダークチョコレートとコーヒーの香りが残る。"
+        ];
+
+        // 認証状態の監視
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            updateUI();
+        });
+
+        // UI更新
+        function updateUI() {
+            const loginNavView = document.getElementById('loginNavView');
+            const userNavView = document.getElementById('userNavView');
+            const userNavName = document.getElementById('userNavName');
+            const userNavEmail = document.getElementById('userNavEmail');
+            const userAvatar = document.getElementById('userAvatar');
+            const loginRequired = document.getElementById('loginRequired');
+            const aiAnalysisContent = document.getElementById('aiAnalysisContent');
+
+            if (currentUser) {
+                // ログイン後のナビ表示
+                loginNavView.classList.add('hidden');
+                userNavView.classList.remove('hidden');
+                
+                // ユーザー情報を設定
+                userNavName.textContent = currentUser.displayName || 'ユーザー';
+                userNavEmail.textContent = currentUser.email || '';
+                
+                // アバター画像があれば表示
+                if (currentUser.photoURL) {
+                    userAvatar.src = currentUser.photoURL;
+                    userAvatar.style.display = 'block';
+                } else {
+                    userAvatar.style.display = 'none';
+                }
+                
+                // AI分析コンテンツを表示
+                loginRequired.style.display = 'none';
+                aiAnalysisContent.classList.remove('hidden');
+            } else {
+                // ログイン前のナビ表示
+                loginNavView.classList.remove('hidden');
+                userNavView.classList.add('hidden');
+                
+                // ログイン要求を表示
+                loginRequired.style.display = 'block';
+                aiAnalysisContent.classList.add('hidden');
+            }
+        }
+
+        // サンプルノート読み込み
+        window.loadSampleNote = function(index) {
+            document.getElementById('tastingNote').value = sampleNotes[index];
+        }
+
+        // AI分析実行
+        window.analyzeWine = async function() {
+            const tastingNote = document.getElementById('tastingNote').value.trim();
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const analyzeIcon = document.getElementById('analyzeIcon');
+            const analyzeText = document.getElementById('analyzeText');
+            const analysisResults = document.getElementById('analysisResults');
+            const analysisContent = document.getElementById('analysisContent');
+
+            if (!tastingNote) {
+                showStatus('テイスティングノートを入力してください', 'error');
+                return;
+            }
+
+            if (!currentUser) {
+                showStatus('ログインが必要です', 'error');
+                return;
+            }
+
+            // ローディング状態
+            analyzeBtn.disabled = true;
+            analyzeIcon.innerHTML = '<div class="loading-spinner"></div>';
+            analyzeText.textContent = '分析中...';
+
+            try {
+                // AI分析を実行（モックアップ）
+                const analysis = await performAIAnalysis(tastingNote);
+                
+                // 結果を表示
+                displayAnalysisResults(analysis);
+                analysisResults.classList.remove('hidden');
+                
+                // 分析履歴をFirestoreに保存
+                await saveAnalysisHistory(tastingNote, analysis);
+                
+                showStatus('AI分析が完了しました', 'success');
+                
+            } catch (error) {
+                console.error('AI分析エラー:', error);
+                analysisContent.innerHTML = `
+                    <div class="error-message">
+                        <h4>⚠️ 分析エラー</h4>
+                        <p>AI分析中にエラーが発生しました。しばらく時間をおいて再試行してください。</p>
+                        <p>エラー詳細: ${error.message}</p>
+                    </div>
+                `;
+                analysisResults.classList.remove('hidden');
+                showStatus('分析に失敗しました', 'error');
+            } finally {
+                // ローディング解除
+                analyzeBtn.disabled = false;
+                analyzeIcon.textContent = '🤖';
+                analyzeText.textContent = 'AI分析を開始';
+            }
+        }
+
+        // AI分析実行（モックアップ実装）
+        async function performAIAnalysis(tastingNote) {
+            // シミュレート遅延
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // テキストの複雑さを分析
+            const wordCount = tastingNote.split(/\s+/).length;
+            const hasColorDescription = /色|ルビー|ガーネット|紫|透明/.test(tastingNote);
+            const hasAromaDescription = /香り|アロマ|果実|花|スパイス|バニラ|オーク/.test(tastingNote);
+            const hasTasteDescription = /味|酸味|甘味|タンニン|ボディ|口当たり/.test(tastingNote);
+            const hasFinishDescription = /余韻|フィニッシュ|後味/.test(tastingNote);
+            
+            // 専門用語の使用度
+            const technicalTerms = ['タンニン', 'アロマ', 'ブーケ', 'フィニッシュ', 'ボディ', 'アシディティ', 'ミネラル'];
+            const technicalTermCount = technicalTerms.filter(term => tastingNote.includes(term)).length;
+            
+            // 分析レベル判定
+            let level = 'beginner';
+            let confidence = 60;
+            
+            if (wordCount > 50 && technicalTermCount >= 3 && hasColorDescription && hasAromaDescription && hasTasteDescription) {
+                level = 'advanced';
+                confidence = 90;
+            } else if (wordCount > 20 && technicalTermCount >= 1 && (hasAromaDescription || hasTasteDescription)) {
+                level = 'intermediate';
+                confidence = 75;
+            }
+
+            return {
+                level: level,
+                confidence: confidence,
+                wordCount: wordCount,
+                technicalTermCount: technicalTermCount,
+                hasColorDescription: hasColorDescription,
+                hasAromaDescription: hasAromaDescription,
+                hasTasteDescription: hasTasteDescription,
+                hasFinishDescription: hasFinishDescription,
+                suggestions: generateSuggestions(level, tastingNote),
+                wineStyle: analyzeWineStyle(tastingNote),
+                improvements: generateImprovements(level)
+            };
+        }
+
+        // ワインスタイル分析
+        function analyzeWineStyle(note) {
+            const redKeywords = ['赤', 'ルビー', 'ガーネット', 'タンニン', 'カシス', 'ブラックベリー'];
+            const whiteKeywords = ['白', '黄金', 'シトラス', '酸味', '爽やか', 'ミネラル'];
+            const sparklingKeywords = ['泡', 'スパークリング', 'シュワシュワ', '発泡'];
+            
+            const redScore = redKeywords.filter(keyword => note.includes(keyword)).length;
+            const whiteScore = whiteKeywords.filter(keyword => note.includes(keyword)).length;
+            const sparklingScore = sparklingKeywords.filter(keyword => note.includes(keyword)).length;
+            
+            if (sparklingScore > 0) return 'スパークリングワイン';
+            if (redScore > whiteScore) return '赤ワイン';
+            if (whiteScore > 0) return '白ワイン';
+            return '不明';
+        }
+
+        // 改善提案生成
+        function generateSuggestions(level, note) {
+            const suggestions = [];
+            
+            if (level === 'beginner') {
+                suggestions.push({
+                    title: '外観の記述を追加',
+                    content: 'ワインの色、透明度、粘性について詳しく記述してみましょう'
+                });
+                suggestions.push({
+                    title: '香りの表現を豊かに',
+                    content: '果実、花、スパイスなど具体的な香りの要素を探してみてください'
+                });
+            } else if (level === 'intermediate') {
+                suggestions.push({
+                    title: 'フィニッシュの記述',
+                    content: '余韻の長さや変化について記述すると、より完全な評価になります'
+                });
+                suggestions.push({
+                    title: '構造の分析',
+                    content: '酸味、タンニン、アルコール感のバランスについて言及してみてください'
+                });
+            } else {
+                suggestions.push({
+                    title: '時間経過での変化',
+                    content: 'グラスの中での香りや味の変化について観察してみてください'
+                });
+                suggestions.push({
+                    title: 'ペアリング提案',
+                    content: 'このワインに合う料理や食材について考察を加えてみましょう'
+                });
+            }
+            
+            return suggestions;
+        }
+
+        // 改善アドバイス生成
+        function generateImprovements(level) {
+            const improvements = {
+                beginner: [
+                    '色を観察する時は、白い背景で45度に傾けて見てみましょう',
+                    '香りは最初に軽く回してから、深く嗅いでみてください',
+                    '味わいは口の中全体で感じ、温度変化も意識してみましょう'
+                ],
+                intermediate: [
+                    '第一アロマ（果実）と第二アロマ（発酵・熟成）を区別してみましょう',
+                    'タンニンの質（粗いか滑らかか）について評価してみてください',
+                    '酸味の種類（フレッシュ、まろやか等）を表現してみましょう'
+                ],
+                advanced: [
+                    'テロワールの表現について考察を深めてみてください',
+                    '醸造技術が味わいに与える影響について分析してみましょう',
+                    '他のヴィンテージとの比較を含めてみてください'
+                ]
+            };
+            
+            return improvements[level] || improvements.beginner;
+        }
+
+        // 分析結果表示
+        function displayAnalysisResults(analysis) {
+            const analysisContent = document.getElementById('analysisContent');
+            
+            const levelNames = {
+                beginner: '初級',
+                intermediate: '中級', 
+                advanced: '上級'
+            };
+            
+            const levelColors = {
+                beginner: '#ef4444',
+                intermediate: '#f59e0b',
+                advanced: '#10b981'
+            };
+
+            analysisContent.innerHTML = `
+                <div class="analysis-result">
+                    <div class="analysis-section">
+                        <h4>📈 テイスティングレベル</h4>
+                        <div class="analysis-content">
+                            <p><strong>${levelNames[analysis.level]}レベル</strong> (信頼度: ${analysis.confidence}%)</p>
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: ${analysis.confidence}%; background-color: ${levelColors[analysis.level]};"></div>
+                            </div>
+                            <p style="margin-top: 8px; font-size: 14px; color: var(--text-secondary);">
+                                単語数: ${analysis.wordCount} | 専門用語: ${analysis.technicalTermCount}個使用
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-section">
+                        <h4>🍷 ワインスタイル予測</h4>
+                        <div class="analysis-content">
+                            <p>${analysis.wineStyle}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-section">
+                        <h4>🎯 評価要素</h4>
+                        <div class="analysis-content">
+                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px;">
+                                <div>👁️ 外観描写: ${analysis.hasColorDescription ? '✅' : '❌'}</div>
+                                <div>👃 香り描写: ${analysis.hasAromaDescription ? '✅' : '❌'}</div>
+                                <div>👅 味わい描写: ${analysis.hasTasteDescription ? '✅' : '❌'}</div>
+                                <div>⏱️ フィニッシュ: ${analysis.hasFinishDescription ? '✅' : '❌'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="analysis-section">
+                        <h4>💡 改善提案</h4>
+                        <div class="wine-recommendations">
+                            ${analysis.suggestions.map(suggestion => `
+                                <div class="recommendation-card">
+                                    <h5>${suggestion.title}</h5>
+                                    <p>${suggestion.content}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="improvement-tips">
+                        <h4>🎓 次のレベルへのヒント</h4>
+                        ${analysis.improvements.map(tip => `
+                            <div class="tip-item">
+                                <span class="tip-icon">💡</span>
+                                <span>${tip}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        // 分析履歴保存
+        async function saveAnalysisHistory(note, analysis) {
+            if (!currentUser) return;
+            
+            try {
+                await addDoc(collection(db, 'ai_analysis_history'), {
+                    userId: currentUser.uid,
+                    tastingNote: note,
+                    analysisResult: analysis,
+                    createdAt: serverTimestamp()
+                });
+            } catch (error) {
+                console.error('分析履歴の保存に失敗:', error);
+            }
+        }
+
+        // 共通のユーティリティ関数
+        window.signInWithGoogle = async function() {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+                showStatus('ログインに成功しました', 'success');
+            } catch (error) {
+                console.error('Google login failed:', error);
+                showStatus('ログインに失敗しました: ' + error.message, 'error');
+            }
+        }
+
+        window.confirmSignOut = function() {
+            if (confirm('ログアウトしますか？')) {
+                firebaseSignOut(auth);
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('authNavStatus');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.className = `auth-status ${type}`;
+                statusEl.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    statusEl.classList.add('hidden');
+                }, 3000);
+            }
+        }
+
+        // テーマとモバイルメニューの初期化
+        function initTheme() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.querySelector('.theme-icon');
+            
+            const savedTheme = localStorage.getItem('theme') || 
+                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            
+            setTheme(savedTheme);
+            
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                setTheme(newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+            
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
+        }
+
+        function initMobileMenu() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const navbarMenu = document.getElementById('navbarMenu');
+            
+            if (mobileMenuToggle && navbarMenu) {
+                mobileMenuToggle.addEventListener('click', () => {
+                    mobileMenuToggle.classList.toggle('active');
+                    navbarMenu.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!mobileMenuToggle.contains(e.target) && !navbarMenu.contains(e.target)) {
+                        mobileMenuToggle.classList.remove('active');
+                        navbarMenu.classList.remove('active');
+                    }
+                });
+            }
+        }
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            initMobileMenu();
+        });
+    </script>
+</body>
+</html>
