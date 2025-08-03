@@ -1,6 +1,6 @@
-const CACHE_NAME = 'wine-memory-v6';
-const STATIC_CACHE = 'wine-memory-static-v6';
-const DYNAMIC_CACHE = 'wine-memory-dynamic-v6';
+const CACHE_NAME = 'wine-memory-v7';
+const STATIC_CACHE = 'wine-memory-static-v7';
+const DYNAMIC_CACHE = 'wine-memory-dynamic-v7';
 
 // 重要で変更頻度の低いファイル
 const staticAssets = [
