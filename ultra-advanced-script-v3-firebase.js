@@ -86,6 +86,298 @@ const AutoSave = {
     }
 };
 
+// localStorage データ移行機能
+const DataMigration = {
+    // 既知のlocalStorageキー
+    legacyKeys: [
+        'wineRecords',           // 基本的なワイン記録
+        'wineMemories',          // 詳細ワイン記録
+        'savedWineData',         // 保存されたワインデータ
+        'myWineMemory',          // MyWineMemoryアプリデータ
+        'wine_tasting_records',  // テイスティング記録
+        'wine_database'          // ワインデータベース
+    ],
+    
+    /**
+     * localStorageデータの存在チェック
+     */
+    hasLegacyData: function() {
+        return this.legacyKeys.some(key => {
+            const data = localStorage.getItem(key);
+            return data && data !== 'null' && data !== '[]' && data !== '{}';
+        });
+    },
+    
+    /**
+     * レガシーデータをスキャン
+     */
+    scanLegacyData: function() {
+        const foundData = {};
+        let totalRecords = 0;
+        
+        this.legacyKeys.forEach(key => {
+            try {
+                const data = localStorage.getItem(key);
+                if (data && data !== 'null' && data !== '[]' && data !== '{}') {
+                    const parsed = JSON.parse(data);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        foundData[key] = parsed;
+                        totalRecords += parsed.length;
+                    } else if (typeof parsed === 'object' && Object.keys(parsed).length > 0) {
+                        foundData[key] = parsed;
+                        totalRecords += Object.keys(parsed).length;
+                    }
+                }
+            } catch (error) {
+                console.warn(`⚠️ ${key} の解析に失敗:`, error);
+            }
+        });
+        
+        return { foundData, totalRecords };
+    },
+    
+    /**
+     * データを正規化
+     */
+    normalizeRecord: function(record, sourceKey) {
+        // 基本的な構造を作成
+        const normalized = {
+            wineName: this.extractValue(record, ['wineName', 'name', 'wine', 'title']),
+            producer: this.extractValue(record, ['producer', 'winery', 'maker']),
+            country: this.extractValue(record, ['country', 'origin', 'region']),
+            region: this.extractValue(record, ['region', 'area', 'subRegion']),
+            vintage: this.parseYear(this.extractValue(record, ['vintage', 'year'])),
+            wineType: this.extractValue(record, ['wineType', 'type', 'color']),
+            recordDate: this.normalizeDate(this.extractValue(record, ['date', 'recordDate', 'created', 'timestamp'])),
+            notes: this.extractValue(record, ['notes', 'comment', 'description', 'memo']),
+            rating: this.parseRating(this.extractValue(record, ['rating', 'score', 'evaluation'])),
+            source: sourceKey
+        };
+        
+        // 詳細データがあれば追加
+        if (record.aroma) {
+            normalized.aroma = record.aroma;
+        }
+        if (record.taste) {
+            normalized.taste = record.taste;
+        }
+        if (record.appearance) {
+            normalized.appearance = record.appearance;
+        }
+        
+        return normalized;
+    },
+    
+    /**
+     * 値を抽出するヘルパー
+     */
+    extractValue: function(obj, keys) {
+        for (const key of keys) {
+            if (obj && obj[key] !== undefined && obj[key] !== null && obj[key] !== '') {
+                return obj[key];
+            }
+        }
+        return '';
+    },
+    
+    /**
+     * 年をパース
+     */
+    parseYear: function(value) {
+        if (!value) return null;
+        const year = parseInt(value);
+        return (year >= 1800 && year <= new Date().getFullYear() + 5) ? year : null;
+    },
+    
+    /**
+     * 評価をパース
+     */
+    parseRating: function(value) {
+        if (!value) return null;
+        const rating = parseFloat(value);
+        return (rating >= 0 && rating <= 5) ? rating : null;
+    },
+    
+    /**
+     * 日付を正規化
+     */
+    normalizeDate: function(value) {
+        if (!value) return new Date().toISOString().split('T')[0];
+        
+        try {
+            const date = new Date(value);
+            if (isNaN(date.getTime())) {
+                return new Date().toISOString().split('T')[0];
+            }
+            return date.toISOString().split('T')[0];
+        } catch {
+            return new Date().toISOString().split('T')[0];
+        }
+    },
+    
+    /**
+     * 完全な移行処理
+     */
+    migrate: async function() {
+        if (!currentUser) {
+            throw new Error('ログインが必要です');
+        }
+        
+        const { foundData, totalRecords } = this.scanLegacyData();
+        
+        if (totalRecords === 0) {
+            throw new Error('移行できるデータが見つかりません');
+        }
+        
+        let successCount = 0;
+        let errorCount = 0;
+        const errors = [];
+        
+        console.log(`🔄 ${totalRecords}件のレコードの移行を開始...`);
+        
+        for (const [sourceKey, data] of Object.entries(foundData)) {
+            console.log(`📂 ${sourceKey} からの移行開始...`);
+            
+            const records = Array.isArray(data) ? data : Object.values(data);
+            
+            for (const record of records) {
+                try {
+                    const normalized = this.normalizeRecord(record, sourceKey);
+                    
+                    if (!normalized.wineName) {
+                        console.warn('⚠️ ワイン名がないレコードをスキップ:', record);
+                        continue;
+                    }
+                    
+                    // Firestoreに保存
+                    await this.saveToFirestore(normalized);
+                    successCount++;
+                    
+                    console.log(`✅ 移行完了: ${normalized.wineName}`);
+                    
+                } catch (error) {
+                    errorCount++;
+                    errors.push({
+                        record: record,
+                        error: error.message
+                    });
+                    console.error('❌ 移行エラー:', error);
+                }
+            }
+        }
+        
+        return {
+            totalRecords,
+            successCount,
+            errorCount,
+            errors
+        };
+    },
+    
+    /**
+     * Firestoreに保存
+     */
+    saveToFirestore: async function(normalized) {
+        // ワインデータを構築
+        const wineData = {
+            wineName: normalized.wineName,
+            producer: normalized.producer || '',
+            country: normalized.country || '',
+            region: normalized.region || '',
+            vintage: normalized.vintage || null,
+            wineType: normalized.wineType || '',
+            grapes: '',
+            alcohol: null,
+            price: null
+        };
+        
+        // 重複チェック
+        let wineId = null;
+        if (normalized.wineName && normalized.producer) {
+            const existing = await searchWinesByNameAndProducer(
+                normalized.wineName, 
+                normalized.producer
+            );
+            if (existing.length > 0) {
+                wineId = existing[0].id;
+            }
+        }
+        
+        // ワインが存在しない場合は作成
+        if (!wineId) {
+            wineId = await createWine(wineData);
+        }
+        
+        // 記録データを構築
+        const recordData = {
+            recordDate: normalized.recordDate,
+            notes: normalized.notes || '',
+            wineRating: normalized.rating || null,
+            pairingRating: null,
+            pairing: '',
+            daysFromOpening: 0,
+            
+            // 詳細データがあれば使用、なければデフォルト
+            appearance: normalized.appearance || {
+                colorTone: '',
+                colorIntensity: '',
+                clarity: '',
+                viscosity: ''
+            },
+            aroma: normalized.aroma || {
+                firstImpression: { intensity: '', notes: '' },
+                afterSwirling: { intensity: '', notes: '' },
+                scores: {
+                    fruit: 0, floral: 0, spice: 0, herb: 0, earth: 0, wood: 0, other: 0
+                },
+                detailed: {
+                    fruit: [], floral: [], spice: [], herb: [], earth: [], wood: [], other: []
+                },
+                customNotes: ''
+            },
+            taste: normalized.taste || {
+                attack: { intensity: '', notes: '' },
+                middle: { complexity: '', notes: '' },
+                finish: { length: '', seconds: 0, notes: '' }
+            },
+            components: {
+                acidity: { level: '', types: [] },
+                tannin: { level: '', types: [] },
+                sweetness: '',
+                body: ''
+            },
+            conditions: {
+                recordTime: '',
+                temperature: null,
+                decanted: '',
+                timeChangeNotes: '',
+                environment: {
+                    ambientTemp: null,
+                    humidity: null,
+                    lighting: '',
+                    mood: '',
+                    companions: '',
+                    occasion: '',
+                    location: '',
+                    glassType: ''
+                }
+            },
+            images: {
+                wine: [], pairing: [], friends: [], other: []
+            },
+            drawings: [],
+            metadata: {
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                version: '3.0',
+                migratedFrom: normalized.source
+            }
+        };
+        
+        await createRecord(wineId, recordData);
+    }
+};
+
 // =============================================
 // 初期化
 // =============================================
@@ -174,6 +466,12 @@ async function setupAuthListener() {
                 try {
                     // ユーザーデータを読み込み
                     await loadUserData();
+                    
+                    // localStorage移行データチェック
+                    setTimeout(() => {
+                        checkAndOfferMigration();
+                    }, 1000);
+                    
                 } catch (error) {
                     console.error('❌ ユーザーデータ読み込みエラー:', error);
                     showNotification('データの読み込みに失敗しました', 'error');
@@ -602,6 +900,115 @@ async function handleForgotPassword(e) {
         showNotification(error.message, 'error');
     }
 }
+
+// =============================================
+// データ移行機能
+// =============================================
+
+/**
+ * 移行データの存在チェックと提案
+ */
+function checkAndOfferMigration() {
+    if (!DataMigration.hasLegacyData()) {
+        return;
+    }
+    
+    const { foundData, totalRecords } = DataMigration.scanLegacyData();
+    
+    console.log('📦 localStorage に移行可能なデータを発見:', { foundData, totalRecords });
+    
+    // 移行済みかチェック（移行済みマーカーがあるか）
+    const migrationMarker = localStorage.getItem('wine_data_migrated');
+    if (migrationMarker) {
+        console.log('✅ データは既に移行済みです');
+        return;
+    }
+    
+    // 移行提案ダイアログ
+    const sourceKeys = Object.keys(foundData);
+    const message = 
+        `🍷 ローカルストレージにワインデータが${totalRecords}件見つかりました！\n\n` +
+        `データソース:\n${sourceKeys.map(key => `• ${key}`).join('\n')}\n\n` +
+        `このデータをクラウド（Firestore）に移行しますか？\n\n` +
+        `✅ メリット:\n` +
+        `• デバイス間でデータ共有\n` +
+        `• データの永続化・バックアップ\n` +
+        `• 高度な検索・分析機能\n\n` +
+        `⚠️ 注意:\n` +
+        `• 移行には数分かかる場合があります\n` +
+        `• 移行後、ローカルデータは保持されます`;
+    
+    if (confirm(message)) {
+        performMigration();
+    } else {
+        // 後で移行するオプション
+        const later = confirm('後で移行することもできます。\n\n今は移行をスキップしますか？');
+        if (later) {
+            showNotification('データ移行はいつでも手動で実行できます', 'info');
+        }
+    }
+}
+
+/**
+ * 移行実行
+ */
+async function performMigration() {
+    try {
+        showLoadingOverlay(true, 'データ移行中...');
+        
+        const result = await DataMigration.migrate();
+        
+        // 移行完了のマーカーを設定
+        localStorage.setItem('wine_data_migrated', new Date().toISOString());
+        
+        // 結果通知
+        const successMessage = 
+            `🎉 データ移行完了！\n\n` +
+            `✅ 成功: ${result.successCount}件\n` +
+            `❌ エラー: ${result.errorCount}件\n` +
+            `📊 総数: ${result.totalRecords}件`;
+        
+        showNotification(successMessage, 'success');
+        
+        if (result.errorCount > 0) {
+            console.warn('⚠️ 移行エラー詳細:', result.errors);
+            showNotification(`${result.errorCount}件のエラーがありました。詳細はコンソールを確認してください。`, 'warning');
+        }
+        
+        // データを再読み込み
+        await loadUserData();
+        
+    } catch (error) {
+        console.error('❌ データ移行エラー:', error);
+        showNotification(`移行に失敗しました: ${error.message}`, 'error');
+    } finally {
+        showLoadingOverlay(false);
+    }
+}
+
+/**
+ * 手動移行ボタン用の関数
+ */
+function startManualMigration() {
+    if (!currentUser) {
+        showNotification('ログインが必要です', 'error');
+        return;
+    }
+    
+    if (!DataMigration.hasLegacyData()) {
+        showNotification('移行できるデータが見つかりません', 'info');
+        return;
+    }
+    
+    const { totalRecords } = DataMigration.scanLegacyData();
+    
+    if (confirm(`${totalRecords}件のデータを移行しますか？\n\n⚠️ この処理は数分かかる場合があります。`)) {
+        performMigration();
+    }
+}
+
+// グローバルアクセス用
+window.startManualMigration = startManualMigration;
 
 // =============================================
 // UI機能
