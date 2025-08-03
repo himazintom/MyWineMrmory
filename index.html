@@ -3,6 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>MyWineMemory - ワイン記録&クイズアプリ</title>
     
     <!-- PWA設定 -->
@@ -270,11 +273,14 @@
 
         // Googleログイン
         window.signInWithGoogle = async function() {
+            console.log('🔐 Google login attempt started');
             const provider = new GoogleAuthProvider();
             try {
                 await signInWithPopup(auth, provider);
+                console.log('✅ Google login successful');
                 showStatus('ログインに成功しました', 'success');
             } catch (error) {
+                console.error('❌ Google login failed:', error);
                 showStatus('ログインに失敗しました: ' + error.message, 'error');
             }
         }
@@ -292,6 +298,7 @@
 
         // フォーム表示/非表示
         window.showWineForm = function() {
+            console.log('📝 Show wine form clicked');
             document.getElementById('wineForm').style.display = 'block';
         }
 
@@ -386,6 +393,7 @@
 
         // クイズページへ移動
         window.goToQuiz = function() {
+            console.log('🧠 Quiz button clicked');
             window.location.href = '/quiz.html';
         }
 

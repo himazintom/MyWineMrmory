@@ -1,11 +1,11 @@
-const CACHE_NAME = 'wine-memory-v1';
+const CACHE_NAME = 'wine-memory-v2';
 const urlsToCache = [
   '/',
   '/index.html',
-  '/ultra-advanced-style.css',
-  '/ultra-advanced-script-v3-firebase.js',
   '/manifest.json',
   '/quiz.html',
+  '/icons/icon-192.png',
+  '/icons/icon-512.png',
   // Firebase SDKのキャッシュは動的に追加
 ];
 
@@ -17,6 +17,22 @@ self.addEventListener('install', (event) => {
         console.log('Cache opened');
         return cache.addAll(urlsToCache);
       })
+  );
+});
+
+// Service Worker アクティベート（古いキャッシュを削除）
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cacheName) => {
+          if (cacheName !== CACHE_NAME) {
+            console.log('Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
   );
 });
 
