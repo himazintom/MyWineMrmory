@@ -36,11 +36,13 @@
       }
     ]
   },
-  "functions": {
-    "source": "functions",
-    "runtime": "nodejs18",
-    "region": "asia-northeast1"
-  },
+  "functions": [
+    {
+      "source": "functions",
+      "runtime": "nodejs18",
+      "region": "asia-northeast1"
+    }
+  ],
   "firestore": {
     "rules": "firestore.rules",
     "indexes": "firestore.indexes.json"
