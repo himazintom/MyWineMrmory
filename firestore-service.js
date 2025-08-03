@@ -411,3 +411,31 @@ export const exportUserData = async () => {
   console.log('📤 データエクスポート完了');
   return exportData;
 };
+
+/**
+ * ワイン名と生産者で検索
+ */
+export const searchWinesByNameAndProducer = async (wineName, producer) => {
+  const userId = getCurrentUserId();
+  const winesCollection = collection(db, 'users', userId, 'wines');
+  
+  let q = query(winesCollection);
+  
+  if (wineName) {
+    q = query(q, where('wineName', '==', wineName));
+  }
+  
+  if (producer) {
+    q = query(q, where('producer', '==', producer));
+  }
+  
+  const querySnapshot = await getDocs(q);
+  const wines = [];
+  
+  querySnapshot.forEach((doc) => {
+    wines.push({ id: doc.id, ...doc.data() });
+  });
+  
+  console.log(`🔍 検索結果: ${wines.length}件`, { wineName, producer });
+  return wines;
+};

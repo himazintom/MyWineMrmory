@@ -23,7 +23,8 @@ import {
     deleteRecord,
     searchWines,
     onWinesChange,
-    exportUserData
+    exportUserData,
+    searchWinesByNameAndProducer
 } from './firestore-service.js';
 
 // =============================================
@@ -846,27 +847,63 @@ function updateOptionsForWineType(wineType) {
  * 色選択肢を更新
  */
 function updateColorOptions(colors) {
-    const colorCheckboxes = document.querySelector('.checkbox-grid');
-    if (!colorCheckboxes) return;
+    // 色調のラジオボタン要素を探す
+    const colorToneGrid = document.querySelector('.radio-grid');
+    if (!colorToneGrid) return;
     
-    // 既存の色オプションを削除
-    const existingColors = colorCheckboxes.querySelectorAll('.checkbox-item[data-type="color"]');
+    // 既存の色オプションを削除（動的に追加されたもののみ）
+    const existingColors = colorToneGrid.querySelectorAll('.radio-item[data-type="dynamic-color"]');
     existingColors.forEach(item => item.remove());
+    
+    // 既存の静的な色オプションも隠す
+    const staticColors = colorToneGrid.querySelectorAll('.radio-item:not([data-type])');
+    staticColors.forEach(item => item.style.display = 'none');
     
     // 新しい色オプションを追加
     colors.forEach(color => {
-        const colorItem = document.createElement('div');
-        colorItem.className = 'checkbox-item';
-        colorItem.setAttribute('data-type', 'color');
+        const colorItem = document.createElement('label');
+        colorItem.className = 'radio-item';
+        colorItem.setAttribute('data-type', 'dynamic-color');
         colorItem.style.backgroundColor = color.color;
         colorItem.style.color = isLightColor(color.color) ? '#333' : '#fff';
+        colorItem.style.border = `2px solid ${color.color}`;
+        colorItem.style.transition = 'all 0.3s ease';
         
         colorItem.innerHTML = `
-            <input type="checkbox" id="color_${color.value}" name="appearance" value="${color.label}">
+            <input type="radio" name="colorTone" value="${color.value}">
             <span>${color.label}</span>
         `;
         
-        colorCheckboxes.appendChild(colorItem);
+        // ホバー効果を追加
+        colorItem.addEventListener('mouseenter', () => {
+            colorItem.style.boxShadow = `0 0 15px ${color.color}`;
+            colorItem.style.transform = 'scale(1.05)';
+        });
+        
+        colorItem.addEventListener('mouseleave', () => {
+            colorItem.style.boxShadow = 'none';
+            colorItem.style.transform = 'scale(1)';
+        });
+        
+        // 選択時の効果
+        const radioInput = colorItem.querySelector('input[type="radio"]');
+        radioInput.addEventListener('change', () => {
+            if (radioInput.checked) {
+                // 他の選択を解除
+                const allColorItems = colorToneGrid.querySelectorAll('.radio-item[data-type="dynamic-color"]');
+                allColorItems.forEach(item => {
+                    item.style.borderWidth = '2px';
+                    item.style.fontWeight = 'normal';
+                });
+                
+                // 現在の選択を強調
+                colorItem.style.borderWidth = '4px';
+                colorItem.style.fontWeight = 'bold';
+                colorItem.style.boxShadow = `0 0 20px ${color.color}`;
+            }
+        });
+        
+        colorToneGrid.appendChild(colorItem);
     });
 }
 
@@ -1079,13 +1116,60 @@ async function createNewRecord(formData) {
     let wineId = currentWineId;
     
     if (!wineId) {
-        // 新しいワインを作成
+        // ワインデータを抽出
         const wineData = extractWineDataFromForm(formData);
-        wineId = await createWine(wineData);
+        
+        // 重複チェック
+        const existingWineId = await checkDuplicateWine(wineData);
+        
+        if (existingWineId) {
+            // 既存のワインが見つかった場合
+            const confirmUse = confirm(
+                `同じワイン「${wineData.wineName}」（${wineData.producer}）が既に存在します。\n` +
+                '既存のワインに記録を追加しますか？\n\n' +
+                '「OK」: 既存のワインに追加\n' +
+                '「キャンセル」: 新しいワインとして作成'
+            );
+            
+            if (confirmUse) {
+                wineId = existingWineId;
+                showNotification('既存のワインに記録を追加します', 'info');
+            } else {
+                // 新しいワインを作成
+                wineId = await createWine(wineData);
+                showNotification('新しいワインとして作成しました', 'success');
+            }
+        } else {
+            // 新しいワインを作成
+            wineId = await createWine(wineData);
+        }
     }
     
     // 記録を作成
     await createRecord(wineId, recordData);
+}
+
+/**
+ * 重複ワインをチェック
+ */
+async function checkDuplicateWine(wineData) {
+    try {
+        // ワイン名と生産者で検索
+        const duplicates = await searchWinesByNameAndProducer(
+            wineData.wineName, 
+            wineData.producer
+        );
+        
+        if (duplicates.length > 0) {
+            console.log('🔍 重複ワイン発見:', duplicates[0].id);
+            return duplicates[0].id;
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('❌ 重複チェックエラー:', error);
+        return null;
+    }
 }
 
 /**
@@ -1261,8 +1345,75 @@ async function buildRecordDataFromForm(formData) {
                 location: formData.get('location') || '',
                 glassType: formData.get('glassType') || ''
             }
+        },
+        
+        // 画像データ
+        images: {
+            wine: await processImageFiles(formData.getAll('wineImages')),
+            pairing: await processImageFiles(formData.getAll('pairingImages')),
+            friends: await processImageFiles(formData.getAll('friendImages')),
+            other: await processImageFiles(formData.getAll('otherImages'))
+        },
+        
+        // ペイント画像
+        drawings: savedDrawings.map(drawing => ({
+            data: drawing.data,
+            timestamp: drawing.timestamp
+        })),
+        
+        // メタデータ
+        metadata: {
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            version: '3.0'
         }
     };
+}
+
+/**
+ * 画像ファイルを処理
+ */
+async function processImageFiles(files) {
+    const processedImages = [];
+    
+    for (const file of files) {
+        if (file && file.size > 0) {
+            try {
+                // ファイルサイズチェック (5MB制限)
+                if (file.size > 5 * 1024 * 1024) {
+                    showNotification(`${file.name} は5MBを超えています`, 'warning');
+                    continue;
+                }
+                
+                // Base64に変換
+                const base64Data = await fileToBase64(file);
+                processedImages.push({
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    data: base64Data,
+                    uploadedAt: new Date().toISOString()
+                });
+            } catch (error) {
+                console.error('画像処理エラー:', error);
+                showNotification(`${file.name} の処理に失敗しました`, 'error');
+            }
+        }
+    }
+    
+    return processedImages;
+}
+
+/**
+ * ファイルをBase64に変換
+ */
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+    });
 }
 
 // =============================================
