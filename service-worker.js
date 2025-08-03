@@ -1,4 +1,4 @@
-const CACHE_NAME = 'wine-memory-v2';
+const CACHE_NAME = 'wine-memory-v3';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -11,6 +11,7 @@ const urlsToCache = [
 
 // Service Worker インストール
 self.addEventListener('install', (event) => {
+  console.log('Service Worker installing');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
@@ -18,10 +19,13 @@ self.addEventListener('install', (event) => {
         return cache.addAll(urlsToCache);
       })
   );
+  // 即座に新しいService Workerをアクティブにする
+  self.skipWaiting();
 });
 
 // Service Worker アクティベート（古いキャッシュを削除）
 self.addEventListener('activate', (event) => {
+  console.log('Service Worker activating');
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -32,6 +36,9 @@ self.addEventListener('activate', (event) => {
           }
         })
       );
+    }).then(() => {
+      // 即座に新しいService Workerを全てのクライアントで使用開始
+      return self.clients.claim();
     })
   );
 });
