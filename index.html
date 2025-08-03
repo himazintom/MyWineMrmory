@@ -80,6 +80,12 @@
                             <span class="nav-text">テーマ</span>
                         </button>
                     </li>
+                    <li class="nav-item auth-nav" id="authNavItem">
+                        <button class="nav-link nav-button" id="authNavButton" onclick="signInWithGoogle()">
+                            <span class="nav-icon">👤</span>
+                            <span class="nav-text">ログイン</span>
+                        </button>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -108,40 +114,24 @@
                 </div>
             </div>
 
-            <!-- 認証セクション -->
-            <div class="auth-section" id="authSection">
-                <div id="loginView">
-                    <div class="auth-card">
-                        <h2>ログインしてワインを記録</h2>
-                        <p>ワインの記録を保存し、クイズで知識を深めましょう</p>
-                        <button class="btn primary-btn" onclick="signInWithGoogle()">
-                            <span class="btn-icon">G</span>
-                            Googleでログイン
-                        </button>
-                        <div id="authStatus" class="status hidden"></div>
+            <!-- ワイン機能セクション -->
+            <div class="wine-features" id="wineFeaturesSection">
+                <div class="feature-cards">
+                    <div class="feature-card" onclick="showUltraAdvancedForm()">
+                        <div class="feature-icon">📝</div>
+                        <h3>詳細ワイン記録</h3>
+                        <p>プロレベルのテイスティングノートを記録</p>
+                    </div>
+                    
+                    <div class="feature-card" onclick="showSection('analytics')">
+                        <div class="feature-icon">📊</div>
+                        <h3>分析ダッシュボード</h3>
+                        <p>あなたのワイン傾向を詳しく分析</p>
                     </div>
                 </div>
                 
-                <div id="userView" class="hidden">
-                    <div class="user-welcome">
-                        <h2>ようこそ、<span id="userName"></span>さん</h2>
-                        <div class="action-buttons">
-                            <button class="btn primary-btn" onclick="showUltraAdvancedForm()">
-                                <span class="btn-icon">📝</span>
-                                詳細ワイン記録
-                            </button>
-                            <button class="btn secondary-btn" onclick="showSection('quiz')">
-                                <span class="btn-icon">🧠</span>
-                                ワインクイズ
-                            </button>
-                            <button class="btn secondary-btn" onclick="showSection('analytics')">
-                                <span class="btn-icon">📊</span>
-                                分析ダッシュボード
-                            </button>
-                            <button class="btn outline-btn" onclick="signOut()">ログアウト</button>
-                        </div>
-                    </div>
-                </div>
+                <!-- ステータス表示エリア -->
+                <div id="authStatus" class="status hidden"></div>
             </div>
 
             <!-- ワイン一覧 -->
@@ -699,17 +689,36 @@
 
         // UI更新
         function updateUI() {
-            const loginView = document.getElementById('loginView');
-            const userView = document.getElementById('userView');
-            const userName = document.getElementById('userName');
+            const authNavButton = document.getElementById('authNavButton');
+            const authNavIcon = authNavButton.querySelector('.nav-icon');
+            const authNavText = authNavButton.querySelector('.nav-text');
+            const wineFeaturesSection = document.getElementById('wineFeaturesSection');
 
             if (currentUser) {
-                loginView.classList.add('hidden');
-                userView.classList.remove('hidden');
-                userName.textContent = currentUser.displayName || currentUser.email;
+                // ヘッダーをユーザー情報＋ログアウトに変更
+                authNavIcon.textContent = '👋';
+                authNavText.textContent = currentUser.displayName?.split(' ')[0] || 'ユーザー';
+                authNavButton.onclick = () => {
+                    if (confirm('ログアウトしますか？')) {
+                        signOut();
+                    }
+                };
+                
+                // ワイン機能を表示
+                wineFeaturesSection.style.display = 'block';
             } else {
-                loginView.classList.remove('hidden');
-                userView.classList.add('hidden');
+                // ヘッダーをログインボタンに変更
+                authNavIcon.textContent = '👤';
+                authNavText.textContent = 'ログイン';
+                authNavButton.onclick = signInWithGoogle;
+                
+                // ワイン機能を非表示（ログインが必要メッセージ表示）
+                wineFeaturesSection.innerHTML = `
+                    <div class="login-required">
+                        <h2>🍷 MyWineMemory</h2>
+                        <p>ワインの記録と分析を始めるには、ヘッダーからログインしてください</p>
+                    </div>
+                `;
             }
         }
 
@@ -759,7 +768,7 @@
         // 超詳細フォーム表示
         window.showUltraAdvancedForm = function() {
             if (!currentUser) {
-                showStatus('ログインが必要です', 'error');
+                showStatus('ヘッダーからログインしてください', 'error');
                 return;
             }
             document.getElementById('ultraAdvancedForm').style.display = 'block';
