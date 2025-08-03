@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyWineMemory - ワイン記録&クイズアプリ</title>
+    <title>MyWineMemory - 超詳細ワイン記録&クイズアプリ</title>
     
     <!-- PWA設定 -->
     <link rel="manifest" href="/manifest.json">
@@ -16,8 +16,24 @@
     
     <!-- 高度なスタイル -->
     <link rel="stylesheet" href="/advanced-style.css">
+    
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loading-content">
+            <div class="wine-glass-animation">
+                <div class="glass">
+                    <div class="wine"></div>
+                </div>
+            </div>
+            <div class="loading-text">MyWineMemory</div>
+            <div class="loading-subtext">最高のワイン体験をお届けします</div>
+        </div>
+    </div>
+
     <!-- Professional Navigation Header -->
     <nav class="main-navbar">
         <div class="navbar-container">
@@ -35,21 +51,27 @@
             <div class="navbar-menu" id="navbarMenu">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a href="/" class="nav-link active">
+                        <button class="nav-link nav-button" onclick="showSection('home')">
                             <span class="nav-icon">🏠</span>
                             <span class="nav-text">ホーム</span>
-                        </a>
+                        </button>
                     </li>
                     <li class="nav-item">
-                        <a href="/quiz.html" class="nav-link">
+                        <button class="nav-link nav-button" onclick="showSection('quiz')">
                             <span class="nav-icon">🧠</span>
                             <span class="nav-text">クイズ</span>
-                        </a>
+                        </button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link nav-button" onclick="showWineForm()">
+                        <button class="nav-link nav-button" onclick="showSection('analytics')">
+                            <span class="nav-icon">📊</span>
+                            <span class="nav-text">分析</span>
+                        </button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link nav-button" onclick="showUltraAdvancedForm()">
                             <span class="nav-icon">📝</span>
-                            <span class="nav-text">記録</span>
+                            <span class="nav-text">詳細記録</span>
                         </button>
                     </li>
                     <li class="nav-item">
@@ -63,79 +85,484 @@
         </div>
     </nav>
 
-    <div class="container">
-        <div class="hero-section">
-            <h1>🍷 MyWineMemory</h1>
-            <p>あなたのワイン体験を記録し、知識を深めましょう</p>
+    <!-- Main Container -->
+    <div class="main-container">
+        <!-- Home Section -->
+        <div id="homeSection" class="section active">
+            <div class="hero-section">
+                <h1 class="hero-title">🍷 MyWineMemory</h1>
+                <p class="hero-subtitle">あなたのワイン体験を記録し、知識を深めましょう</p>
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <span class="stat-number" id="totalWines">0</span>
+                        <span class="stat-label">記録数</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="avgRating">0.0</span>
+                        <span class="stat-label">平均評価</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-number" id="quizScore">0</span>
+                        <span class="stat-label">クイズスコア</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 認証セクション -->
+            <div class="auth-section" id="authSection">
+                <div id="loginView">
+                    <div class="auth-card">
+                        <h2>ログインしてワインを記録</h2>
+                        <p>ワインの記録を保存し、クイズで知識を深めましょう</p>
+                        <button class="btn primary-btn" onclick="signInWithGoogle()">
+                            <span class="btn-icon">G</span>
+                            Googleでログイン
+                        </button>
+                        <div id="authStatus" class="status hidden"></div>
+                    </div>
+                </div>
+                
+                <div id="userView" class="hidden">
+                    <div class="user-welcome">
+                        <h2>ようこそ、<span id="userName"></span>さん</h2>
+                        <div class="action-buttons">
+                            <button class="btn primary-btn" onclick="showUltraAdvancedForm()">
+                                <span class="btn-icon">📝</span>
+                                詳細ワイン記録
+                            </button>
+                            <button class="btn secondary-btn" onclick="showSection('quiz')">
+                                <span class="btn-icon">🧠</span>
+                                ワインクイズ
+                            </button>
+                            <button class="btn secondary-btn" onclick="showSection('analytics')">
+                                <span class="btn-icon">📊</span>
+                                分析ダッシュボード
+                            </button>
+                            <button class="btn outline-btn" onclick="signOut()">ログアウト</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ワイン一覧 -->
+            <div class="wine-showcase" id="wineShowcase">
+                <h2>最近の記録</h2>
+                <div id="recentWines" class="wine-grid">
+                    <p class="empty-state">ログインしてワインを記録しましょう</p>
+                </div>
+            </div>
         </div>
 
-        <!-- 認証セクション -->
-        <div class="auth-section" id="authSection">
-            <div id="loginView">
-                <h2>ログインしてワインを記録</h2>
-                <p>ワインの記録を保存するにはログインが必要です</p>
-                <button class="btn" onclick="signInWithGoogle()">Googleでログイン</button>
-                <div id="authStatus" class="status hidden"></div>
+        <!-- Quiz Section -->
+        <div id="quizSection" class="section">
+            <div class="quiz-container">
+                <div class="quiz-header">
+                    <h1>🧠 ワイン知識クイズ</h1>
+                    <p>あなたのワイン知識をテストし、スキルを向上させましょう</p>
+                </div>
+                
+                <div class="quiz-types">
+                    <div class="quiz-type-card" onclick="startQuiz('basic')">
+                        <div class="quiz-icon">🍇</div>
+                        <h3>基本クイズ</h3>
+                        <p>ワインの基礎知識をテスト</p>
+                    </div>
+                    <div class="quiz-type-card" onclick="startQuiz('advanced')">
+                        <div class="quiz-icon">🏆</div>
+                        <h3>上級クイズ</h3>
+                        <p>上級者向けの難しい問題</p>
+                    </div>
+                    <div class="quiz-type-card" onclick="startQuiz('regions')">
+                        <div class="quiz-icon">🌍</div>
+                        <h3>産地クイズ</h3>
+                        <p>世界のワイン産地について</p>
+                    </div>
+                    <div class="quiz-type-card" onclick="startQuiz('tasting')">
+                        <div class="quiz-icon">👅</div>
+                        <h3>テイスティング</h3>
+                        <p>味わいや香りの特徴</p>
+                    </div>
+                </div>
+                
+                <div id="quizGame" class="quiz-game hidden">
+                    <div class="quiz-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progressFill"></div>
+                        </div>
+                        <span class="progress-text" id="progressText">1/10</span>
+                    </div>
+                    
+                    <div class="quiz-question">
+                        <h2 id="questionText"></h2>
+                        <div id="questionOptions" class="quiz-options"></div>
+                    </div>
+                    
+                    <div class="quiz-controls">
+                        <button id="nextButton" class="btn primary-btn" onclick="nextQuestion()" disabled>次へ</button>
+                        <button class="btn outline-btn" onclick="endQuiz()">終了</button>
+                    </div>
+                </div>
+                
+                <div id="quizResults" class="quiz-results hidden">
+                    <h2>クイズ結果</h2>
+                    <div class="result-score">
+                        <span class="score-number" id="finalScore">0</span>
+                        <span class="score-total">/10</span>
+                    </div>
+                    <div class="result-message" id="resultMessage"></div>
+                    <div class="result-actions">
+                        <button class="btn primary-btn" onclick="restartQuiz()">もう一度</button>
+                        <button class="btn outline-btn" onclick="showSection('home')">ホームへ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Section -->
+        <div id="analyticsSection" class="section">
+            <div class="analytics-container">
+                <h1>📊 ワイン分析ダッシュボード</h1>
+                
+                <div class="analytics-grid">
+                    <div class="analytics-card">
+                        <h3>評価分布</h3>
+                        <canvas id="ratingChart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>ワインタイプ別</h3>
+                        <canvas id="typeChart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>月別記録数</h3>
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                    <div class="analytics-card">
+                        <h3>価格帯別</h3>
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Ultra Advanced Wine Form -->
+        <div class="ultra-advanced-form" id="ultraAdvancedForm" style="display: none;">
+            <div class="form-header">
+                <h2>超詳細ワイン記録</h2>
+                <button type="button" class="close-form-btn" onclick="hideUltraAdvancedForm()">&times;</button>
             </div>
             
-            <div id="userView" class="hidden">
-                <h2>ようこそ、<span id="userName"></span>さん</h2>
-                <div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: center;">
-                    <button class="btn" onclick="showWineForm()">新しいワインを記録</button>
-                    <button class="btn" onclick="goToQuiz()">🧠 ワインクイズ</button>
-                    <button class="btn" onclick="signOut()">ログアウト</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- ワイン記録フォーム -->
-        <div class="wine-form" id="wineForm">
-            <h2>ワイン記録</h2>
-            <form id="wineRecordForm" onsubmit="saveWineRecord(event)">
-                <div class="form-group">
-                    <label for="wineName">ワイン名:</label>
-                    <input type="text" id="wineName" name="wineName" required>
+            <form id="ultraWineForm" onsubmit="saveUltraWineRecord(event)" class="ultra-form">
+                <!-- 基本情報セクション -->
+                <div class="form-section">
+                    <h3>ワイン基本情報</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="wineName">ワイン名:</label>
+                            <input type="text" id="wineName" name="wineName" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="producer">生産者:</label>
+                            <input type="text" id="producer" name="producer" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="region">産地:</label>
+                            <input type="text" id="region" name="region" placeholder="フランス ボルドー">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="vintage">ヴィンテージ:</label>
+                            <input type="number" id="vintage" name="vintage" min="1900" max="2030">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="price">価格 (円):</label>
+                            <input type="number" id="price" name="price" min="0">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="purchaseDate">購入日:</label>
+                            <input type="date" id="purchaseDate" name="purchaseDate">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>ワインタイプ:</label>
+                        <div class="radio-grid">
+                            <label class="radio-item">
+                                <input type="radio" name="wineType" value="red" required>
+                                <span>赤ワイン</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="wineType" value="white">
+                                <span>白ワイン</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="wineType" value="rose">
+                                <span>ロゼワイン</span>
+                            </label>
+                            <label class="radio-item">
+                                <input type="radio" name="wineType" value="sparkling">
+                                <span>スパークリング</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="grapes">ブドウ品種:</label>
+                            <input type="text" id="grapes" name="grapes" placeholder="カベルネ・ソーヴィニヨン 70%, メルロー 30%">
+                        </div>
+                        <div class="form-group">
+                            <label for="alcohol">アルコール度数 (%):</label>
+                            <input type="number" id="alcohol" name="alcohol" min="0" max="20" step="0.1">
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="producer">生産者:</label>
-                    <input type="text" id="producer" name="producer" required>
+                <!-- 外観分析セクション -->
+                <div class="form-section">
+                    <h3>外観分析</h3>
+                    <div class="analysis-grid">
+                        <div class="analysis-item">
+                            <h4>色調</h4>
+                            <div class="radio-grid">
+                                <label class="radio-item">
+                                    <input type="radio" name="colorTone" value="purple">
+                                    <span>紫がかった</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="colorTone" value="ruby">
+                                    <span>ルビー色</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="colorTone" value="garnet">
+                                    <span>ガーネット色</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="colorTone" value="golden">
+                                    <span>金色</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <h4>濃淡</h4>
+                            <div class="radio-grid">
+                                <label class="radio-item">
+                                    <input type="radio" name="colorIntensity" value="pale">
+                                    <span>淡い</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="colorIntensity" value="medium">
+                                    <span>中程度</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="colorIntensity" value="deep">
+                                    <span>濃い</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="analysis-item">
+                            <h4>透明度</h4>
+                            <div class="radio-grid">
+                                <label class="radio-item">
+                                    <input type="radio" name="clarity" value="clear">
+                                    <span>澄明</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="clarity" value="hazy">
+                                    <span>やや濁り</span>
+                                </label>
+                                <label class="radio-item">
+                                    <input type="radio" name="clarity" value="opaque">
+                                    <span>不透明</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="vintage">ヴィンテージ:</label>
-                    <input type="number" id="vintage" name="vintage" min="1900" max="2030">
+                <!-- 香り分析セクション -->
+                <div class="form-section">
+                    <h3>香り分析</h3>
+                    <div class="aroma-analysis">
+                        <div class="aroma-category">
+                            <h4>フルーツ系</h4>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aroma" value="blackberry">
+                                    <span>ブラックベリー</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aroma" value="cherry">
+                                    <span>チェリー</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aroma" value="plum">
+                                    <span>プラム</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aroma" value="citrus">
+                                    <span>柑橘系</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="aroma-category">
+                            <h4>スパイス系</h4>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aroma" value="vanilla">
+                                    <span>バニラ</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aroma" value="pepper">
+                                    <span>コショウ</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aroma" value="cinnamon">
+                                    <span>シナモン</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aroma" value="clove">
+                                    <span>クローブ</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="aroma-category">
+                            <h4>アーシー系</h4>
+                            <div class="checkbox-grid">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aroma" value="oak">
+                                    <span>オーク</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aroma" value="tobacco">
+                                    <span>タバコ</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aroma" value="leather">
+                                    <span>革</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" name="aroma" value="earth">
+                                    <span>土系</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="price">価格:</label>
-                    <input type="number" id="price" name="price" min="0">
+                <!-- 味わい分析セクション -->
+                <div class="form-section">
+                    <h3>味わい分析</h3>
+                    <div class="taste-analysis">
+                        <div class="taste-scale">
+                            <label>甘味 (1-5):</label>
+                            <div class="star-rating" data-rating="sweetness">
+                                <span class="star" data-value="1">★</span>
+                                <span class="star" data-value="2">★</span>
+                                <span class="star" data-value="3">★</span>
+                                <span class="star" data-value="4">★</span>
+                                <span class="star" data-value="5">★</span>
+                            </div>
+                            <input type="hidden" name="sweetness" value="0">
+                        </div>
+                        
+                        <div class="taste-scale">
+                            <label>酸味 (1-5):</label>
+                            <div class="star-rating" data-rating="acidity">
+                                <span class="star" data-value="1">★</span>
+                                <span class="star" data-value="2">★</span>
+                                <span class="star" data-value="3">★</span>
+                                <span class="star" data-value="4">★</span>
+                                <span class="star" data-value="5">★</span>
+                            </div>
+                            <input type="hidden" name="acidity" value="0">
+                        </div>
+                        
+                        <div class="taste-scale">
+                            <label>タンニン (1-5):</label>
+                            <div class="star-rating" data-rating="tannin">
+                                <span class="star" data-value="1">★</span>
+                                <span class="star" data-value="2">★</span>
+                                <span class="star" data-value="3">★</span>
+                                <span class="star" data-value="4">★</span>
+                                <span class="star" data-value="5">★</span>
+                            </div>
+                            <input type="hidden" name="tannin" value="0">
+                        </div>
+                        
+                        <div class="taste-scale">
+                            <label>ボディ (1-5):</label>
+                            <div class="star-rating" data-rating="body">
+                                <span class="star" data-value="1">★</span>
+                                <span class="star" data-value="2">★</span>
+                                <span class="star" data-value="3">★</span>
+                                <span class="star" data-value="4">★</span>
+                                <span class="star" data-value="5">★</span>
+                            </div>
+                            <input type="hidden" name="body" value="0">
+                        </div>
+                        
+                        <div class="taste-scale">
+                            <label>フィニッシュ (1-5):</label>
+                            <div class="star-rating" data-rating="finish">
+                                <span class="star" data-value="1">★</span>
+                                <span class="star" data-value="2">★</span>
+                                <span class="star" data-value="3">★</span>
+                                <span class="star" data-value="4">★</span>
+                                <span class="star" data-value="5">★</span>
+                            </div>
+                            <input type="hidden" name="finish" value="0">
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="wineRating">評価 (1-5):</label>
-                    <select id="wineRating" name="wineRating" required>
-                        <option value="">選択してください</option>
-                        <option value="1">1 - 不満</option>
-                        <option value="2">2 - 普通</option>
-                        <option value="3">3 - 良い</option>
-                        <option value="4">4 - 非常に良い</option>
-                        <option value="5">5 - 最高</option>
-                    </select>
+                <!-- 総合評価セクション -->
+                <div class="form-section">
+                    <h3>総合評価</h3>
+                    <div class="overall-rating">
+                        <label>総合評価 (1-5):</label>
+                        <div class="star-rating" data-rating="wineRating">
+                            <span class="star" data-value="1">★</span>
+                            <span class="star" data-value="2">★</span>
+                            <span class="star" data-value="3">★</span>
+                            <span class="star" data-value="4">★</span>
+                            <span class="star" data-value="5">★</span>
+                        </div>
+                        <input type="hidden" name="wineRating" value="0" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="notes">詳細メモ:</label>
+                        <textarea id="notes" name="notes" rows="4" placeholder="味わい、印象、ペアリング推奨などを記録"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="foodPairing">フードペアリング:</label>
+                        <input type="text" id="foodPairing" name="foodPairing" placeholder="ステーキ、チーズ、チョコレートなど">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="occasion">飲用シーン:</label>
+                        <input type="text" id="occasion" name="occasion" placeholder="誕生日、ディナー、パーティーなど">
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label for="notes">メモ:</label>
-                    <textarea id="notes" name="notes" rows="4" placeholder="味わいや印象を記録"></textarea>
+                <div class="form-actions">
+                    <button type="submit" class="btn primary-btn">詳細記録を保存</button>
+                    <button type="button" class="btn outline-btn" onclick="hideUltraAdvancedForm()">キャンセル</button>
                 </div>
-                
-                <button type="submit" class="btn">記録を保存</button>
-                <button type="button" class="btn" onclick="hideWineForm()">キャンセル</button>
             </form>
         </div>
 
         <!-- ワイン一覧 -->
-        <div class="wine-list">
+        <div class="wine-list" id="wineListSection" style="display: none;">
             <h2>記録されたワイン</h2>
             <div id="wineRecords">
                 <p>ログインしてワインを記録しましょう</p>
@@ -147,7 +574,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, where } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, where, limit } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         // Firebase設定
         const firebaseConfig = {
@@ -167,6 +594,98 @@
 
         // グローバル変数
         let currentUser = null;
+        let wineRecords = [];
+        let currentQuiz = null;
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let charts = {};
+
+        // クイズデータ
+        const quizData = {
+            basic: [
+                {
+                    question: "フランスの代表的なワイン産地はどれですか？",
+                    options: ["ボルドー", "トスカーナ", "ナパバレー", "モーゼル"],
+                    correct: 0
+                },
+                {
+                    question: "赤ワインの主な色素成分は何ですか？",
+                    options: ["タンニン", "アントシアニン", "レスベラトロール", "アルコール"],
+                    correct: 1
+                },
+                {
+                    question: "シャンパーニュの製法として正しいのはどれですか？",
+                    options: ["シャルマ方式", "メトード・シャンプノワーズ", "炭酸注入", "自然発酵"],
+                    correct: 1
+                }
+            ],
+            advanced: [
+                {
+                    question: "ボルドーの左岸で主に栽培されるブドウ品種は？",
+                    options: ["メルロー", "カベルネ・ソーヴィニヨン", "ピノ・ノワール", "シラー"],
+                    correct: 1
+                },
+                {
+                    question: "マロラクティック発酵の目的は？",
+                    options: ["糖分をアルコールに変換", "酸味を和らげる", "色素を抽出", "タンニンを除去"],
+                    correct: 1
+                }
+            ],
+            regions: [
+                {
+                    question: "ブルゴーニュの代表的な白ブドウ品種は？",
+                    options: ["シャルドネ", "ソーヴィニヨン・ブラン", "リースリング", "ゲヴュルツトラミナー"],
+                    correct: 0
+                },
+                {
+                    question: "キャンティはどの国のワインですか？",
+                    options: ["フランス", "イタリア", "スペイン", "ドイツ"],
+                    correct: 1
+                }
+            ],
+            tasting: [
+                {
+                    question: "ワインの「ボディ」とは何を表しますか？",
+                    options: ["色の濃さ", "香りの強さ", "味わいの厚み", "アルコール度数"],
+                    correct: 2
+                },
+                {
+                    question: "タンニンが多いワインの特徴は？",
+                    options: ["甘い", "渋い", "酸っぱい", "塩辛い"],
+                    correct: 1
+                }
+            ]
+        };
+
+        // ローディング画面の制御
+        function showLoadingOverlay(show, message = '') {
+            const overlay = document.getElementById('loadingOverlay');
+            if (show) {
+                overlay.style.display = 'flex';
+                if (message) {
+                    const subtext = overlay.querySelector('.loading-subtext');
+                    subtext.textContent = message;
+                }
+            } else {
+                overlay.style.display = 'none';
+            }
+        }
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🍷 MyWineMemory - Ultra Advanced版を初期化中...');
+            
+            showLoadingOverlay(true, 'アプリケーションを準備中...');
+            
+            // 最低3秒間はローディングを表示
+            setTimeout(() => {
+                showLoadingOverlay(false);
+            }, 3000);
+
+            initTheme();
+            initMobileMenu();
+            initStarRatings();
+        });
 
         // 認証状態の監視
         onAuthStateChanged(auth, (user) => {
@@ -174,6 +693,7 @@
             updateUI();
             if (user) {
                 loadWineRecords();
+                updateStats();
             }
         });
 
@@ -213,24 +733,47 @@
                 await firebaseSignOut(auth);
                 showStatus('ログアウトしました', 'success');
                 document.getElementById('wineRecords').innerHTML = '<p>ログインしてワインを記録しましょう</p>';
+                wineRecords = [];
+                updateStats();
             } catch (error) {
                 showStatus('ログアウトに失敗しました', 'error');
             }
         }
 
-        // フォーム表示/非表示
-        window.showWineForm = function() {
-            console.log('📝 Show wine form clicked');
-            document.getElementById('wineForm').style.display = 'block';
+        // セクション表示切り替え
+        window.showSection = function(sectionName) {
+            const sections = document.querySelectorAll('.section');
+            sections.forEach(section => section.classList.remove('active'));
+            
+            const targetSection = document.getElementById(sectionName + 'Section');
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+
+            // アナリティクスセクションの場合、チャートを初期化
+            if (sectionName === 'analytics') {
+                initAnalytics();
+            }
         }
 
-        window.hideWineForm = function() {
-            document.getElementById('wineForm').style.display = 'none';
-            document.getElementById('wineRecordForm').reset();
+        // 超詳細フォーム表示
+        window.showUltraAdvancedForm = function() {
+            if (!currentUser) {
+                showStatus('ログインが必要です', 'error');
+                return;
+            }
+            document.getElementById('ultraAdvancedForm').style.display = 'block';
         }
 
-        // ワイン記録保存
-        window.saveWineRecord = async function(event) {
+        // 超詳細フォーム非表示
+        window.hideUltraAdvancedForm = function() {
+            document.getElementById('ultraAdvancedForm').style.display = 'none';
+            document.getElementById('ultraWineForm').reset();
+            resetStarRatings();
+        }
+
+        // 超詳細ワイン記録保存
+        window.saveUltraWineRecord = async function(event) {
             event.preventDefault();
             
             if (!currentUser) {
@@ -242,19 +785,36 @@
             const wineData = {
                 wineName: formData.get('wineName'),
                 producer: formData.get('producer'),
+                region: formData.get('region'),
                 vintage: parseInt(formData.get('vintage')) || null,
                 price: parseInt(formData.get('price')) || null,
+                purchaseDate: formData.get('purchaseDate'),
+                wineType: formData.get('wineType'),
+                grapes: formData.get('grapes'),
+                alcohol: parseFloat(formData.get('alcohol')) || null,
+                colorTone: formData.get('colorTone'),
+                colorIntensity: formData.get('colorIntensity'),
+                clarity: formData.get('clarity'),
+                aroma: formData.getAll('aroma'),
+                sweetness: parseInt(formData.get('sweetness')),
+                acidity: parseInt(formData.get('acidity')),
+                tannin: parseInt(formData.get('tannin')),
+                body: parseInt(formData.get('body')),
+                finish: parseInt(formData.get('finish')),
                 wineRating: parseInt(formData.get('wineRating')),
                 notes: formData.get('notes'),
+                foodPairing: formData.get('foodPairing'),
+                occasion: formData.get('occasion'),
                 userId: currentUser.uid,
                 createdAt: new Date()
             };
 
             try {
                 await addDoc(collection(db, 'wine_records'), wineData);
-                showStatus('ワインを記録しました！', 'success');
-                hideWineForm();
+                showStatus('詳細ワイン記録を保存しました！', 'success');
+                hideUltraAdvancedForm();
                 loadWineRecords();
+                updateStats();
             } catch (error) {
                 showStatus('保存に失敗しました: ' + error.message, 'error');
             }
@@ -268,55 +828,235 @@
                 const q = query(
                     collection(db, 'wine_records'),
                     where('userId', '==', currentUser.uid),
-                    orderBy('createdAt', 'desc')
+                    orderBy('createdAt', 'desc'),
+                    limit(6)
                 );
                 
                 const querySnapshot = await getDocs(q);
-                const recordsContainer = document.getElementById('wineRecords');
+                const recentWinesContainer = document.getElementById('recentWines');
                 
                 if (querySnapshot.empty) {
-                    recordsContainer.innerHTML = '<p>まだワインが記録されていません。最初のワインを記録しましょう！</p>';
+                    recentWinesContainer.innerHTML = '<p class="empty-state">まだワインが記録されていません。最初のワインを記録しましょう！</p>';
                     return;
                 }
 
                 let html = '';
+                wineRecords = [];
                 querySnapshot.forEach((doc) => {
                     const data = doc.data();
+                    wineRecords.push(data);
                     html += `
-                        <div class="wine-item">
+                        <div class="wine-card">
                             <h3>${data.wineName}</h3>
-                            <p><strong>生産者:</strong> ${data.producer}</p>
-                            ${data.vintage ? `<p><strong>ヴィンテージ:</strong> ${data.vintage}</p>` : ''}
-                            ${data.price ? `<p><strong>価格:</strong> ¥${data.price}</p>` : ''}
-                            <p><strong>評価:</strong> ${'⭐'.repeat(data.wineRating)} (${data.wineRating}/5)</p>
-                            ${data.notes ? `<p><strong>メモ:</strong> ${data.notes}</p>` : ''}
-                            <p><small>記録日: ${data.createdAt.toDate().toLocaleDateString()}</small></p>
+                            <p class="producer">${data.producer}</p>
+                            ${data.region ? `<p class="region">${data.region}</p>` : ''}
+                            <div class="rating">${'⭐'.repeat(data.wineRating || 0)}</div>
+                            ${data.notes ? `<p class="notes">${data.notes.substring(0, 100)}...</p>` : ''}
                         </div>
                     `;
                 });
                 
-                recordsContainer.innerHTML = html;
+                recentWinesContainer.innerHTML = html;
             } catch (error) {
                 showStatus('データの読み込みに失敗しました: ' + error.message, 'error');
             }
         }
 
-        // ステータス表示
-        function showStatus(message, type) {
-            const statusEl = document.getElementById('authStatus');
-            statusEl.textContent = message;
-            statusEl.className = `status ${type}`;
-            statusEl.classList.remove('hidden');
+        // 統計情報更新
+        function updateStats() {
+            const totalWinesEl = document.getElementById('totalWines');
+            const avgRatingEl = document.getElementById('avgRating');
             
-            setTimeout(() => {
-                statusEl.classList.add('hidden');
-            }, 3000);
+            if (wineRecords.length > 0) {
+                totalWinesEl.textContent = wineRecords.length;
+                const avgRating = wineRecords.reduce((sum, wine) => sum + (wine.wineRating || 0), 0) / wineRecords.length;
+                avgRatingEl.textContent = avgRating.toFixed(1);
+            } else {
+                totalWinesEl.textContent = '0';
+                avgRatingEl.textContent = '0.0';
+            }
         }
 
-        // クイズページへ移動
-        window.goToQuiz = function() {
-            console.log('🧠 Quiz button clicked');
-            window.location.href = '/quiz.html';
+        // クイズ機能
+        window.startQuiz = function(type) {
+            currentQuiz = quizData[type];
+            currentQuestionIndex = 0;
+            score = 0;
+            
+            document.querySelector('.quiz-types').style.display = 'none';
+            document.getElementById('quizGame').classList.remove('hidden');
+            
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const question = currentQuiz[currentQuestionIndex];
+            document.getElementById('questionText').textContent = question.question;
+            
+            const optionsContainer = document.getElementById('questionOptions');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'quiz-option';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(button);
+            });
+            
+            updateProgress();
+            document.getElementById('nextButton').disabled = true;
+        }
+
+        function selectAnswer(selectedIndex) {
+            const question = currentQuiz[currentQuestionIndex];
+            const options = document.querySelectorAll('.quiz-option');
+            
+            options.forEach((option, index) => {
+                option.disabled = true;
+                if (index === question.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedIndex) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            if (selectedIndex === question.correct) {
+                score++;
+            }
+            
+            document.getElementById('nextButton').disabled = false;
+        }
+
+        window.nextQuestion = function() {
+            currentQuestionIndex++;
+            
+            if (currentQuestionIndex >= currentQuiz.length) {
+                showQuizResults();
+            } else {
+                showQuestion();
+            }
+        }
+
+        function showQuizResults() {
+            document.getElementById('quizGame').classList.add('hidden');
+            const resultsContainer = document.getElementById('quizResults');
+            resultsContainer.classList.remove('hidden');
+            
+            document.getElementById('finalScore').textContent = score;
+            
+            let message = '';
+            const percentage = (score / currentQuiz.length) * 100;
+            if (percentage >= 80) {
+                message = 'すばらしい！ワインエキスパートですね！';
+            } else if (percentage >= 60) {
+                message = 'よくできました！もう少しで完璧です。';
+            } else {
+                message = '頑張りました！さらに学習を続けましょう。';
+            }
+            
+            document.getElementById('resultMessage').textContent = message;
+        }
+
+        window.restartQuiz = function() {
+            document.getElementById('quizResults').classList.add('hidden');
+            document.querySelector('.quiz-types').style.display = 'grid';
+        }
+
+        window.endQuiz = function() {
+            document.getElementById('quizGame').classList.add('hidden');
+            document.querySelector('.quiz-types').style.display = 'grid';
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / currentQuiz.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `${currentQuestionIndex + 1}/${currentQuiz.length}`;
+        }
+
+        // アナリティクス初期化
+        function initAnalytics() {
+            if (wineRecords.length === 0) return;
+
+            // 評価分布チャート
+            if (charts.ratingChart) charts.ratingChart.destroy();
+            const ratingCtx = document.getElementById('ratingChart').getContext('2d');
+            const ratingData = [1, 2, 3, 4, 5].map(rating => 
+                wineRecords.filter(wine => wine.wineRating === rating).length
+            );
+            
+            charts.ratingChart = new Chart(ratingCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['1⭐', '2⭐', '3⭐', '4⭐', '5⭐'],
+                    datasets: [{
+                        label: '記録数',
+                        data: ratingData,
+                        backgroundColor: 'rgba(102, 126, 234, 0.7)'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // ワインタイプ別チャート
+            if (charts.typeChart) charts.typeChart.destroy();
+            const typeCtx = document.getElementById('typeChart').getContext('2d');
+            const types = ['red', 'white', 'rose', 'sparkling'];
+            const typeData = types.map(type => 
+                wineRecords.filter(wine => wine.wineType === type).length
+            );
+            
+            charts.typeChart = new Chart(typeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['赤ワイン', '白ワイン', 'ロゼ', 'スパークリング'],
+                    datasets: [{
+                        data: typeData,
+                        backgroundColor: ['#dc2626', '#fbbf24', '#f472b6', '#60a5fa']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // スター評価システム初期化
+        function initStarRatings() {
+            const starRatings = document.querySelectorAll('.star-rating');
+            
+            starRatings.forEach(rating => {
+                const stars = rating.querySelectorAll('.star');
+                const ratingName = rating.getAttribute('data-rating');
+                const hiddenInput = document.querySelector(`input[name="${ratingName}"]`);
+                
+                stars.forEach(star => {
+                    star.addEventListener('click', function() {
+                        const value = this.getAttribute('data-value');
+                        hiddenInput.value = value;
+                        
+                        stars.forEach((s, index) => {
+                            if (index < value) {
+                                s.classList.add('active');
+                            } else {
+                                s.classList.remove('active');
+                            }
+                        });
+                    });
+                });
+            });
+        }
+
+        function resetStarRatings() {
+            const stars = document.querySelectorAll('.star');
+            const hiddenInputs = document.querySelectorAll('.star-rating + input[type="hidden"]');
+            
+            stars.forEach(star => star.classList.remove('active'));
+            hiddenInputs.forEach(input => input.value = '0');
         }
 
         // テーマ切り替え機能
@@ -324,7 +1064,6 @@
             const themeToggle = document.getElementById('theme-toggle');
             const themeIcon = document.querySelector('.theme-icon');
             
-            // 保存されたテーマまたはシステム設定を読み込み
             const savedTheme = localStorage.getItem('theme') || 
                 (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
             
@@ -354,7 +1093,6 @@
                     navbarMenu.classList.toggle('active');
                 });
                 
-                // メニューリンクがクリックされたらメニューを閉じる
                 const navLinks = navbarMenu.querySelectorAll('.nav-link');
                 navLinks.forEach(link => {
                     link.addEventListener('click', () => {
@@ -363,7 +1101,6 @@
                     });
                 });
                 
-                // 画面外クリックでメニューを閉じる
                 document.addEventListener('click', (e) => {
                     if (!mobileMenuToggle.contains(e.target) && !navbarMenu.contains(e.target)) {
                         mobileMenuToggle.classList.remove('active');
@@ -373,13 +1110,19 @@
             }
         }
 
-        // テーマ初期化
-        initTheme();
-        
-        // モバイルメニュー初期化
-        initMobileMenu();
+        // ステータス表示
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('authStatus');
+            statusEl.textContent = message;
+            statusEl.className = `status ${type}`;
+            statusEl.classList.remove('hidden');
+            
+            setTimeout(() => {
+                statusEl.classList.add('hidden');
+            }, 3000);
+        }
 
-        console.log('🍷 MyWineMemory initialized successfully');
+        console.log('🍷 MyWineMemory Ultra Advanced initialized successfully');
     </script>
 
     <!-- Service Worker登録 -->
@@ -389,12 +1132,10 @@
                 .then((registration) => {
                     console.log('Service Worker registered');
                     
-                    // アップデート検知
                     registration.addEventListener('updatefound', () => {
                         const newWorker = registration.installing;
                         newWorker.addEventListener('statechange', () => {
                             if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                // 新しいバージョンが利用可能
                                 showUpdateAvailable();
                             }
                         });
@@ -403,7 +1144,6 @@
                 .catch(err => console.log('Service Worker registration failed:', err));
         }
 
-        // 更新通知表示
         function showUpdateAvailable() {
             const updateBanner = document.createElement('div');
             updateBanner.style.cssText = `
@@ -430,7 +1170,6 @@
             document.body.appendChild(updateBanner);
         }
 
-        // アプリ更新
         window.updateApp = function() {
             if (navigator.serviceWorker.controller) {
                 navigator.serviceWorker.controller.postMessage({ action: 'skipWaiting' });
