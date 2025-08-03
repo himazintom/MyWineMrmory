@@ -1,0 +1,113 @@
+{
+  "name": "MyWineMemory - ワイン記録アプリ",
+  "short_name": "WineMemory",
+  "description": "超詳細ワイン記録帳とクイズアプリ",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#667eea",
+  "theme_color": "#667eea",
+  "categories": ["food", "lifestyle", "education"],
+  "icons": [
+    {
+      "src": "/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-152.png",
+      "sizes": "152x152",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/mobile-1.png",
+      "sizes": "750x1334",
+      "type": "image/png",
+      "form_factor": "narrow"
+    },
+    {
+      "src": "/screenshots/desktop-1.png",
+      "sizes": "1920x1080",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "新しいワインを記録",
+      "short_name": "新規記録",
+      "description": "新しいワインのテイスティング記録を追加",
+      "url": "/?action=new-wine",
+      "icons": [
+        {
+          "src": "/icons/shortcut-new.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "ワインクイズ",
+      "short_name": "クイズ",
+      "description": "ワイン知識クイズに挑戦",
+      "url": "/quiz",
+      "icons": [
+        {
+          "src": "/icons/shortcut-quiz.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "記録一覧",
+      "short_name": "一覧",
+      "description": "過去のワイン記録を確認",
+      "url": "/?view=list",
+      "icons": [
+        {
+          "src": "/icons/shortcut-list.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
+}

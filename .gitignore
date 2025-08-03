@@ -12,6 +12,8 @@ dist/
 .env.production.local
 .env.development.local
 
+firebase-adminsdk.json
+
 # OS generated files
 .DS_Store
 .DS_Store?
@@ -38,6 +40,21 @@ Thumbs.db
 .firebase/
 firebase-debug.log
 firestore-debug.log
+
+# Service Account Keys (NEVER COMMIT THESE)
+service-account-key.json
+*service-account*.json
+*.key.json
+firebase-adminsdk-*.json
+
+# Firebase directory with secrets
+.firebase/
+firebase-debug.log*
+
+# Prevent any JSON keys in sensitive locations
+**/*service-account*.json
+**/*firebase-adminsdk*.json
+**/credentials*.json
 
 # Other
 *.tgz

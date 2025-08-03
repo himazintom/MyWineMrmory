@@ -1,0 +1,14 @@
+{
+  "projects": {
+    "default": "mywinememory"
+  },
+  "targets": {
+    "mywinememory": {
+      "hosting": {
+        "wine-app": [
+          "mywinememory"
+        ]
+      }
+    }
+  }
+}
