@@ -14,277 +14,20 @@
     <meta name="apple-mobile-web-app-title" content="WineMemory">
     <link rel="apple-touch-icon" href="/icons/icon-192.png">
     
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            color: #333;
-        }
-
-        .container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        .header {
-            text-align: center;
-            color: white;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-        }
-
-        .quiz-container {
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 15px;
-            padding: 30px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-            margin-bottom: 20px;
-        }
-
-        .quiz-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 2px solid #eee;
-        }
-
-        .quiz-progress {
-            background: #f0f0f0;
-            border-radius: 10px;
-            height: 8px;
-            flex: 1;
-            margin: 0 20px;
-            overflow: hidden;
-        }
-
-        .quiz-progress-bar {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100%;
-            transition: width 0.3s ease;
-            border-radius: 10px;
-        }
-
-        .quiz-question {
-            margin-bottom: 30px;
-        }
-
-        .question-text {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 20px;
-            line-height: 1.5;
-        }
-
-        .wine-info {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .wine-info h3 {
-            color: #667eea;
-            margin-bottom: 10px;
-        }
-
-        .answer-options {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .answer-option {
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-align: left;
-        }
-
-        .answer-option:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
-        }
-
-        .answer-option.selected {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-
-        .answer-option.correct {
-            border-color: #4CAF50;
-            background: #4CAF50;
-            color: white;
-        }
-
-        .answer-option.incorrect {
-            border-color: #f44336;
-            background: #f44336;
-            color: white;
-        }
-
-        .text-input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #ddd;
-            border-radius: 10px;
-            font-size: 16px;
-            margin-bottom: 15px;
-        }
-
-        .text-input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px;
-            transition: transform 0.2s;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-
-        .btn:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        .quiz-feedback {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-top: 20px;
-            border-left: 4px solid #667eea;
-        }
-
-        .quiz-feedback.correct {
-            border-color: #4CAF50;
-            background: #e8f5e8;
-        }
-
-        .quiz-feedback.incorrect {
-            border-color: #f44336;
-            background: #ffeaea;
-        }
-
-        .quiz-results {
-            text-align: center;
-        }
-
-        .score-display {
-            font-size: 3rem;
-            font-weight: bold;
-            color: #667eea;
-            margin: 20px 0;
-        }
-
-        .streak-info {
-            background: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            border: 2px solid #667eea;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 40px;
-        }
-
-        .spinner {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #667eea;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        .quiz-types {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .quiz-type-card {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .quiz-type-card:hover {
-            transform: translateY(-5px);
-            border-color: #667eea;
-        }
-
-        .quiz-type-icon {
-            font-size: 3rem;
-            margin-bottom: 15px;
-        }
-
-        .back-btn {
-            background: transparent;
-            color: white;
-            border: 2px solid white;
-            padding: 8px 16px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-        }
-
-        .back-btn:hover {
-            background: white;
-            color: #667eea;
-        }
-    </style>
+    <!-- 高度なスタイル -->
+    <link rel="stylesheet" href="/advanced-style.css">
 </head>
 <body>
     <div class="container">
-        <div class="header">
-            <button class="back-btn" onclick="goHome()">← ホームに戻る</button>
+        <div class="header-with-theme">
+            <div class="header-controls">
+                <button class="back-btn" onclick="goHome()">← ホームに戻る</button>
+                <div class="theme-controls">
+                    <button id="theme-toggle" class="theme-toggle" aria-label="テーマ切り替え">
+                        <span class="theme-icon">🌙</span>
+                    </button>
+                </div>
+            </div>
             <h1>🍷 ワインクイズ</h1>
             <p>知識を深めて、ワインマスターを目指しましょう！</p>
         </div>
@@ -746,6 +489,35 @@
         window.goHome = function() {
             window.location.href = '/';
         }
+
+        // テーマ切り替え機能
+        function initTheme() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.querySelector('.theme-icon');
+            
+            if (!themeToggle || !themeIcon) return;
+            
+            // 保存されたテーマまたはシステム設定を読み込み
+            const savedTheme = localStorage.getItem('theme') || 
+                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            
+            setTheme(savedTheme);
+            
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                setTheme(newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+            
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
+        }
+
+        // テーマ初期化
+        initTheme();
 
         console.log('🍷 Quiz system initialized');
     </script>

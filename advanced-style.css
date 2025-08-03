@@ -1,0 +1,2661 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+:root {
+    /* ライトモード */
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --accent-color: #28a745;
+    --text-color: #333;
+    --text-light: #666;
+    --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --card-background: #ffffff;
+    --card-border: #e9ecef;
+    --input-background: #ffffff;
+    --input-border: #ddd;
+    --button-hover: rgba(0,0,0,0.1);
+    --shadow: rgba(0,0,0,0.1);
+    --shadow-hover: rgba(0,0,0,0.2);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        /* ダークモード */
+        --primary-color: #667eea;
+        --secondary-color: #764ba2;
+        --accent-color: #28a745;
+        --text-color: #ffffff;
+        --text-light: #b0b0b0;
+        --background-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+        --card-background: #2d2d2d;
+        --card-border: #404040;
+        --input-background: #3a3a3a;
+        --input-border: #555;
+        --button-hover: rgba(255,255,255,0.1);
+        --shadow: rgba(0,0,0,0.3);
+        --shadow-hover: rgba(0,0,0,0.4);
+    }
+}
+
+[data-theme="dark"] {
+    /* 強制ダークモード */
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --accent-color: #28a745;
+    --text-color: #ffffff;
+    --text-light: #b0b0b0;
+    --background-gradient: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    --card-background: #2d2d2d;
+    --card-border: #404040;
+    --input-background: #3a3a3a;
+    --input-border: #555;
+    --button-hover: rgba(255,255,255,0.1);
+    --shadow: rgba(0,0,0,0.3);
+    --shadow-hover: rgba(0,0,0,0.4);
+}
+
+[data-theme="light"] {
+    /* 強制ライトモード */
+    --primary-color: #667eea;
+    --secondary-color: #764ba2;
+    --accent-color: #28a745;
+    --text-color: #333;
+    --text-light: #666;
+    --background-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    --card-background: #ffffff;
+    --card-border: #e9ecef;
+    --input-background: #ffffff;
+    --input-border: #ddd;
+    --button-hover: rgba(0,0,0,0.1);
+    --shadow: rgba(0,0,0,0.1);
+    --shadow-hover: rgba(0,0,0,0.2);
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: var(--background-gradient);
+    min-height: 100vh;
+    padding: 20px;
+    color: var(--text-color);
+    line-height: 1.6;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+.container {
+    max-width: 1600px;
+    margin: 0 auto;
+}
+
+/* ヘッダーとテーマ切り替え */
+.header-with-theme {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+h1 {
+    color: white;
+    font-size: 2.8em;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    margin: 0;
+}
+
+.theme-toggle-container {
+    position: relative;
+}
+
+.theme-toggle {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.theme-toggle:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+
+.theme-icon {
+    font-size: 24px;
+    transition: transform 0.3s ease;
+}
+
+h2 {
+    color: var(--text-color);
+    margin-bottom: 25px;
+    font-size: 2em;
+}
+
+h3 {
+    color: var(--text-color);
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    border-bottom: 3px solid var(--primary-color);
+    padding-bottom: 8px;
+}
+
+h4 {
+    color: var(--text-light);
+    margin-bottom: 15px;
+    font-size: 1.2em;
+    font-weight: 600;
+}
+
+/* 直近ワイン選択セクション */
+.recent-wines-section {
+    background: var(--card-background);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px var(--shadow);
+    margin-bottom: 40px;
+    transition: background 0.3s ease;
+}
+
+.recent-wines-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.recent-wine-card {
+    background: var(--card-background);
+    border: 3px solid var(--card-border);
+    border-radius: 15px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+    color: var(--text-color);
+}
+
+.recent-wine-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px var(--shadow-hover);
+    border-color: var(--primary-color);
+}
+
+.recent-wine-card.selected {
+    border-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+}
+
+.recent-wine-card h4 {
+    margin-bottom: 10px;
+    color: inherit;
+}
+
+.recent-wine-card p {
+    margin: 8px 0;
+    font-size: 0.95em;
+    opacity: 0.9;
+}
+
+.recent-wine-card:not(.selected) p {
+    color: var(--text-light);
+}
+
+.recent-wine-card:not(.selected) h4 {
+    color: var(--text-color);
+}
+
+.new-wine-btn {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 18px 35px;
+    border: none;
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-top: 15px;
+}
+
+.new-wine-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+/* フォームスタイル */
+.wine-form {
+    background: var(--card-background);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px var(--shadow);
+    margin-bottom: 40px;
+    display: none;
+    transition: background 0.3s ease;
+}
+
+.wine-form.active {
+    display: block;
+}
+
+.form-section {
+    margin-bottom: 40px;
+    padding: 25px;
+    background: var(--card-background);
+    border-radius: 15px;
+    border-left: 5px solid var(--primary-color);
+    border: 1px solid var(--card-border);
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+/* フォームグリッド */
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-bottom: 25px;
+}
+
+.form-group {
+    margin-bottom: 25px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 1.1em;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 15px;
+    border: 2px solid var(--input-border);
+    border-radius: 10px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: var(--input-background);
+    color: var(--text-color);
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-group input[type="file"] {
+    padding: 12px;
+    border: 2px dashed var(--input-border);
+    background: var(--input-background);
+    cursor: pointer;
+}
+
+.form-group input[type="file"]:hover {
+    border-color: var(--primary-color);
+    background: var(--input-background);
+}
+
+/* ラジオボタンとチェックボックスのグリッド */
+.radio-grid,
+.checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 15px;
+    margin-top: 10px;
+}
+
+.radio-item,
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    background: var(--input-background);
+    border: 2px solid var(--card-border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: 500;
+    min-height: 50px;
+    color: var(--text-color);
+}
+
+.radio-item:hover,
+.checkbox-item:hover {
+    background: var(--input-background);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.radio-item input[type="radio"],
+.checkbox-item input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 10px;
+    accent-color: var(--primary-color);
+}
+
+.radio-item input[type="radio"]:checked + span,
+.checkbox-item input[type="checkbox"]:checked + span {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.radio-item input[type="radio"]:checked,
+.checkbox-item input[type="checkbox"]:checked {
+    background: var(--primary-color);
+}
+
+/* 香りスコア */
+.aroma-scores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.aroma-score-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background: var(--card-background);
+    border-radius: 10px;
+    box-shadow: 0 2px 8px var(--shadow);
+    min-height: 70px;
+    transition: background 0.3s ease;
+}
+
+.aroma-score-item label {
+    min-width: 100px;
+    margin-bottom: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.score-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+}
+
+.aroma-score-item input[type="range"] {
+    flex: 1;
+    height: 8px;
+    background: var(--input-border);
+    border-radius: 5px;
+    outline: none;
+    margin: 0;
+}
+
+.aroma-score-item input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.aroma-score-item input[type="range"]::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+}
+
+.score-value {
+    font-weight: bold;
+    color: var(--primary-color);
+    font-size: 18px;
+    min-width: 25px;
+    text-align: center;
+    background: var(--card-background);
+    padding: 5px 10px;
+    border-radius: 20px;
+    border: 1px solid var(--card-border);
+}
+
+/* 香りカテゴリ */
+.aroma-categories {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 25px;
+}
+
+.aroma-category {
+    background: var(--card-background);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--shadow);
+    border-top: 4px solid var(--primary-color);
+    transition: background 0.3s ease;
+}
+
+.aroma-category h4 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 1.3em;
+}
+
+/* カスタム香り入力 */
+.custom-aroma-input {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #f0f0f0;
+}
+
+.custom-aroma-input label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--text-color);
+    font-size: 1em;
+}
+
+.custom-aroma-input textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    font-size: 14px;
+    resize: vertical;
+    min-height: 60px;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    background: var(--input-background);
+    color: var(--text-color);
+}
+
+.custom-aroma-input textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.custom-aroma-input small {
+    display: block;
+    margin-top: 5px;
+    color: var(--text-light);
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* 分析グリッド */
+.analysis-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.analysis-item {
+    background: var(--card-background);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--shadow);
+    border-top: 4px solid var(--primary-color);
+    transition: background 0.3s ease;
+}
+
+.analysis-item h4 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 1.3em;
+}
+
+/* フェーズ分析 */
+.aroma-phases,
+.taste-phases {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 30px;
+}
+
+.phase-item {
+    background: var(--card-background);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 4px 12px var(--shadow);
+    border-left: 5px solid var(--primary-color);
+    transition: background 0.3s ease;
+}
+
+.phase-item h4 {
+    color: var(--primary-color);
+    margin-bottom: 20px;
+    font-size: 1.4em;
+    text-align: center;
+}
+
+/* 構成要素グリッド */
+.components-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 25px;
+}
+
+.component-item {
+    background: var(--card-background);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px var(--shadow);
+    border-top: 4px solid var(--primary-color);
+    transition: background 0.3s ease;
+}
+
+.component-item h4 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    text-align: center;
+    font-size: 1.3em;
+}
+
+/* ペイントゾーン */
+.paint-zone {
+    background: var(--card-background);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    border: 2px solid var(--card-border);
+    transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.paint-zone h4 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.paint-controls {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+}
+
+.paint-controls button {
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+#clearCanvas {
+    background: #dc3545;
+    color: white;
+}
+
+#clearCanvas:hover {
+    background: #c82333;
+}
+
+#saveDrawing {
+    background: #28a745;
+    color: white;
+}
+
+#saveDrawing:hover {
+    background: #218838;
+}
+
+.paint-controls label {
+    font-weight: 600;
+    color: var(--text-color);
+    margin: 0;
+}
+
+.paint-controls input[type="range"] {
+    width: 100px;
+}
+
+.paint-controls input[type="color"] {
+    width: 40px;
+    height: 30px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#brushSizeValue {
+    font-weight: bold;
+    color: var(--primary-color);
+    min-width: 20px;
+}
+
+#paintCanvas {
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    background: var(--input-background);
+    cursor: crosshair;
+    display: block;
+    margin: 0 auto;
+    max-width: 100%;
+    height: auto;
+    transition: border-color 0.3s ease, background 0.3s ease;
+}
+
+#paintCanvas:active {
+    cursor: crosshair;
+}
+
+.saved-drawings {
+    margin-top: 20px;
+}
+
+.saved-drawings h5 {
+    color: var(--text-color);
+    margin-bottom: 10px;
+}
+
+.drawing-item {
+    display: inline-block;
+    margin: 5px;
+    position: relative;
+}
+
+.drawing-item img {
+    max-width: 150px;
+    max-height: 150px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+}
+
+.drawing-item img:hover {
+    transform: scale(1.05);
+}
+
+.drawing-item .delete-drawing {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    cursor: pointer;
+    font-size: 12px;
+    line-height: 1;
+}
+
+/* 複数画像プレビュー */
+.multiple-image-preview {
+    margin-top: 15px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    min-height: 60px;
+    border: 2px dashed var(--input-border);
+    border-radius: 10px;
+    padding: 10px;
+    background: var(--input-background);
+    transition: all 0.3s ease;
+}
+
+.multiple-image-preview:not(:empty) {
+    border-color: var(--primary-color);
+    background: var(--card-background);
+}
+
+.multiple-image-preview.empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-light);
+    font-style: italic;
+}
+
+.multiple-image-preview.empty::before {
+    content: "画像が選択されていません";
+}
+
+.image-preview-item {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px var(--shadow);
+    transition: transform 0.3s ease;
+}
+
+.image-preview-item:hover {
+    transform: scale(1.05);
+}
+
+.image-preview-item img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+}
+
+.image-preview-item .remove-image {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    background: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-preview-item:hover .remove-image {
+    opacity: 1;
+}
+
+/* 従来の画像プレビュー */
+.image-preview-container {
+    margin-top: 15px;
+    min-height: 60px;
+    border: 2px dashed #ddd;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f9f9f9;
+    transition: all 0.3s ease;
+}
+
+.image-preview-container:not(:empty) {
+    border-color: #667eea;
+    background: white;
+}
+
+.image-preview {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* フォームアクション */
+.form-actions {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 2px solid #eee;
+}
+
+.form-actions button {
+    padding: 18px 40px;
+    border: none;
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    min-width: 150px;
+}
+
+#submitBtn {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+#cancelBtn {
+    background: #6c757d;
+    color: white;
+}
+
+.form-actions button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
+
+/* チャートセクション */
+.chart-section {
+    background: var(--card-background);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px var(--shadow);
+    margin-bottom: 40px;
+    transition: background 0.3s ease;
+}
+
+.chart-container {
+    position: relative;
+    height: 500px;
+    margin: 30px 0;
+}
+
+.chart-controls {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.hide-chart-btn {
+    background: var(--card-border);
+    color: var(--text-color);
+    border: 2px solid var(--card-border);
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+.hide-chart-btn:hover {
+    background: var(--text-light);
+    transform: translateY(-2px);
+}
+
+/* 記録一覧 */
+.wine-list {
+    background: var(--card-background);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px var(--shadow);
+    transition: background 0.3s ease;
+}
+
+/* ワイングループ表示 */
+.wine-group {
+    background: var(--card-background);
+    border-radius: 15px;
+    margin-bottom: 25px;
+    overflow: hidden;
+    border: 2px solid var(--card-border);
+    transition: all 0.3s ease;
+}
+
+.wine-group:hover {
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+}
+
+.wine-group-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    color: white;
+    padding: 20px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+}
+
+.wine-group-header:hover {
+    background: linear-gradient(135deg, #5a67d8 0%, #6a5acd 100%);
+}
+
+.wine-group-info {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    flex: 1;
+}
+
+.wine-group-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    object-fit: cover;
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+.wine-group-details h3 {
+    margin: 0 0 5px 0;
+    font-size: 1.4em;
+    color: white;
+    border: none;
+    padding: 0;
+}
+
+.wine-group-details p {
+    margin: 2px 0;
+    opacity: 0.9;
+    font-size: 0.95em;
+}
+
+.wine-group-ratings {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+}
+
+.wine-group-ratings .rating-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9em;
+}
+
+.wine-group-ratings .rating-stars {
+    color: #ffd700;
+    font-size: 1.1em;
+}
+
+.wine-group-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.wine-group-actions button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.edit-wine-btn {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.edit-wine-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-1px);
+}
+
+.expand-toggle {
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 16px;
+    padding: 5px 10px;
+    border-radius: 50%;
+    min-width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+}
+
+.expand-toggle:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.expand-toggle.expanded {
+    transform: rotate(180deg);
+}
+
+.wine-group-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.wine-group-content.expanded {
+    max-height: 2000px;
+}
+
+.wine-records-timeline {
+    padding: 20px;
+}
+
+.timeline-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.timeline-header h4 {
+    color: var(--primary-color);
+    margin: 0;
+}
+
+.timeline-sort {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.timeline-sort select {
+    padding: 5px 10px;
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    font-size: 14px;
+    background: var(--input-background);
+    color: var(--text-color);
+}
+
+.timeline-record {
+    background: var(--input-background);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-left: 4px solid var(--primary-color);
+    box-shadow: 0 2px 8px var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.timeline-record:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px var(--shadow-hover);
+}
+
+.timeline-record-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.timeline-record-date {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 1.1em;
+}
+
+.timeline-record-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.timeline-record-actions button {
+    padding: 5px 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.3s ease;
+}
+
+.edit-record-btn {
+    background: var(--primary-color);
+    color: white;
+}
+
+.edit-record-btn:hover {
+    background: #5a67d8;
+    transform: translateY(-1px);
+}
+
+.delete-record-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.delete-record-btn:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+}
+
+.timeline-record-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.timeline-record-item {
+    background: var(--card-background);
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid var(--card-border);
+    color: var(--text-color);
+}
+
+.timeline-record-item strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 3px;
+    font-size: 0.9em;
+}
+
+.timeline-record-images {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.timeline-record-images img {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 6px;
+    border: 2px solid var(--card-border);
+    transition: transform 0.3s ease;
+}
+
+.timeline-record-images img:hover {
+    transform: scale(1.1);
+    border-color: var(--primary-color);
+}
+
+/* ページネーション */
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 2px solid #e9ecef;
+}
+
+.pagination-controls button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.pagination-controls button:not(:disabled) {
+    background: var(--primary-color);
+    color: white;
+}
+
+.pagination-controls button:not(:disabled):hover {
+    background: #5a67d8;
+    transform: translateY(-2px);
+}
+
+.pagination-controls button:disabled {
+    background: var(--card-border);
+    color: var(--text-light);
+    cursor: not-allowed;
+}
+
+#pageInfo {
+    font-weight: 600;
+    color: var(--primary-color);
+    font-size: 16px;
+}
+
+.filter-controls {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.filter-controls input,
+.filter-controls select {
+    padding: 12px 15px;
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    background: var(--input-background);
+    color: var(--text-color);
+}
+
+.filter-controls input {
+    flex: 1;
+    min-width: 250px;
+}
+
+.filter-controls input:focus,
+.filter-controls select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+#exportBtn {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+#exportBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.wine-record {
+    background: var(--card-background);
+    padding: 30px;
+    border-radius: 15px;
+    margin-bottom: 25px;
+    border-left: 6px solid var(--primary-color);
+    transition: all 0.3s ease;
+}
+
+.wine-record:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px var(--shadow);
+}
+
+.wine-record h3 {
+    color: var(--text-color);
+    margin-bottom: 15px;
+    font-size: 1.6em;
+    border-bottom: none;
+}
+
+.wine-info {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.wine-info-item {
+    background: var(--input-background);
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow);
+    border-left: 3px solid var(--primary-color);
+    color: var(--text-color);
+}
+
+.wine-info-item strong {
+    color: var(--primary-color);
+    display: block;
+    margin-bottom: 5px;
+    font-size: 1.1em;
+}
+
+.wine-images {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.wine-images img {
+    width: 100%;
+    max-height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px var(--shadow);
+    transition: transform 0.3s ease;
+}
+
+.wine-images img:hover {
+    transform: scale(1.05);
+}
+
+.aroma-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.aroma-tag {
+    background: var(--primary-color);
+    color: white;
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.aroma-tag.custom-aroma {
+    background: #28a745;
+    border: 2px solid #20c997;
+    font-weight: 600;
+}
+
+.rating-stars {
+    color: #ffc107;
+    font-size: 1.4em;
+}
+
+.delete-btn,
+.chart-btn {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    margin-top: 15px;
+    margin-right: 10px;
+    transition: all 0.3s ease;
+}
+
+.delete-btn {
+    background: #dc3545;
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #c82333;
+    transform: translateY(-2px);
+}
+
+.chart-btn {
+    background: var(--primary-color);
+    color: white;
+}
+
+.chart-btn:hover {
+    background: #5a67d8;
+    transform: translateY(-2px);
+}
+
+.no-records {
+    text-align: center;
+    color: var(--text-light);
+    font-style: italic;
+    padding: 60px;
+    font-size: 1.2em;
+}
+
+/* カスタム時間入力 */
+#customTime:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+/* ワイン編集専用通知 */
+.wine-edit-notice {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border: 2px solid #ffc107;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 12px rgba(255, 193, 7, 0.2);
+}
+
+[data-theme="dark"] .wine-edit-notice {
+    background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
+    border: 2px solid #ffc107;
+    color: var(--text-color);
+}
+
+.wine-edit-notice .notice-content h4 {
+    color: #856404;
+    margin-bottom: 10px;
+    font-size: 1.2em;
+    display: flex;
+    align-items: center;
+}
+
+[data-theme="dark"] .wine-edit-notice .notice-content h4 {
+    color: #ffc107;
+}
+
+.wine-edit-notice .notice-content h4::before {
+    content: "⚠️";
+    margin-right: 10px;
+    font-size: 1.1em;
+}
+
+.wine-edit-notice .notice-content p {
+    color: #856404;
+    margin-bottom: 5px;
+    font-size: 0.95em;
+    line-height: 1.4;
+}
+
+[data-theme="dark"] .wine-edit-notice .notice-content p {
+    color: var(--text-light);
+}
+
+.wine-edit-notice .notice-content p:last-child {
+    margin-bottom: 0;
+}
+
+/* レスポンシブデザイン */
+@media (max-width: 1200px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .header-with-theme {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    h1 {
+        font-size: 2.4em;
+    }
+    
+    .theme-toggle {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .theme-icon {
+        font-size: 20px;
+    }
+    
+    .form-grid {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+    }
+    
+    .radio-grid,
+    .checkbox-grid {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    h1 {
+        font-size: 2.2em;
+        text-align: center;
+    }
+    
+    .header-with-theme {
+        align-items: center;
+    }
+    
+    .recent-wines-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .radio-grid,
+    .checkbox-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .aroma-scores {
+        grid-template-columns: 1fr;
+    }
+    
+    .aroma-categories {
+        grid-template-columns: 1fr;
+    }
+    
+    .analysis-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .aroma-phases,
+    .taste-phases {
+        grid-template-columns: 1fr;
+    }
+    
+    .components-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .wine-info {
+        grid-template-columns: 1fr;
+    }
+    
+    .wine-images {
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+    
+    .filter-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .filter-controls input {
+        min-width: auto;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .chart-container {
+        height: 350px;
+    }
+}
+
+/* アニメーション */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.wine-record {
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* スクロールバーのスタイル */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #667eea;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #5a67d8;
+}
+
+/* 隠しクラス */
+.hidden {
+    display: none;
+}
+
+/* 読み込み中のスタイル */
+.loading {
+    text-align: center;
+    padding: 40px;
+    color: #666;
+    font-size: 1.2em;
+}
+
+.loading::after {
+    content: '...';
+    animation: loading 1s infinite;
+}
+
+@keyframes loading {
+    0% { content: ''; }
+    25% { content: '.'; }
+    50% { content: '..'; }
+    75% { content: '...'; }
+    100% { content: ''; }
+}
+
+/* =============================================
+   Firebase認証UI関連のスタイル
+   ============================================= */
+
+/* ヘッダーコントロール */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* プライバシー設定 */
+.privacy-section {
+    display: flex;
+    align-items: center;
+}
+
+.privacy-toggle {
+    display: flex;
+    align-items: center;
+}
+
+.privacy-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 30px;
+    padding: 8px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    color: var(--text-color);
+    font-size: 0.9em;
+    font-weight: 500;
+}
+
+.privacy-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.05);
+}
+
+.privacy-btn.private {
+    background: rgba(255, 59, 48, 0.2);
+    border-color: rgba(255, 59, 48, 0.4);
+}
+
+.privacy-btn.public {
+    background: rgba(52, 199, 89, 0.2);
+    border-color: rgba(52, 199, 89, 0.4);
+}
+
+.privacy-btn.private:hover {
+    background: rgba(255, 59, 48, 0.3);
+}
+
+.privacy-btn.public:hover {
+    background: rgba(52, 199, 89, 0.3);
+}
+
+.privacy-icon {
+    font-size: 16px;
+}
+
+.privacy-text {
+    font-size: 0.85em;
+}
+
+.auth-section {
+    display: flex;
+    align-items: center;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.9em;
+    color: var(--text-color);
+}
+
+.login-btn,
+.logout-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: all 0.3s ease;
+}
+
+.login-btn:hover,
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+/* 認証モーダル */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    background: var(--card-background);
+    border-radius: 15px;
+    padding: 0;
+    width: 90%;
+    max-width: 450px;
+    position: relative;
+    box-shadow: 0 20px 40px var(--shadow-hover);
+    animation: modalFadeIn 0.3s ease;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9) translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+.close-modal {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-light);
+    z-index: 1001;
+    transition: color 0.3s ease;
+}
+
+.close-modal:hover {
+    color: var(--text-color);
+}
+
+.auth-container {
+    padding: 30px;
+    padding-top: 50px;
+}
+
+/* 認証タブ */
+.auth-tabs {
+    display: flex;
+    border-bottom: 2px solid var(--card-border);
+    margin-bottom: 30px;
+}
+
+.auth-tab {
+    flex: 1;
+    padding: 15px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1em;
+    color: var(--text-light);
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.auth-tab.active {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.auth-tab.active::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--primary-color);
+}
+
+.auth-tab:hover {
+    color: var(--text-color);
+}
+
+/* 認証フォーム */
+.auth-form {
+    display: none;
+}
+
+.auth-form.active {
+    display: block;
+}
+
+.auth-form h3 {
+    text-align: center;
+    margin-bottom: 25px;
+    color: var(--text-color);
+    font-size: 1.3em;
+}
+
+.auth-form .form-group {
+    margin-bottom: 20px;
+}
+
+.auth-form label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--text-color);
+    font-weight: 500;
+}
+
+.auth-form input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    background: var(--input-background);
+    color: var(--text-color);
+    font-size: 1em;
+    transition: border-color 0.3s ease;
+}
+
+.auth-form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.auth-submit-btn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border: none;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 1.1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.auth-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px var(--shadow-hover);
+}
+
+.auth-submit-btn:active {
+    transform: translateY(0);
+}
+
+/* Google認証ボタン */
+.google-login-btn {
+    width: 100%;
+    background: white;
+    color: #333;
+    border: 2px solid #ddd;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 1em;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.google-login-btn:hover {
+    background: #f8f9fa;
+    border-color: #bbb;
+    transform: translateY(-1px);
+}
+
+.google-icon {
+    font-weight: bold;
+    color: #4285f4;
+    font-size: 1.2em;
+}
+
+[data-theme="dark"] .google-login-btn {
+    background: var(--card-background);
+    color: var(--text-color);
+    border-color: var(--input-border);
+}
+
+[data-theme="dark"] .google-login-btn:hover {
+    background: var(--input-background);
+}
+
+/* 認証区切り線 */
+.auth-divider {
+    text-align: center;
+    margin: 20px 0;
+    position: relative;
+    color: var(--text-light);
+}
+
+.auth-divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--card-border);
+    z-index: 1;
+}
+
+.auth-divider {
+    background: var(--card-background);
+    padding: 0 15px;
+    position: relative;
+    z-index: 2;
+}
+
+/* 認証リンク */
+.auth-links {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.auth-links a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-size: 0.9em;
+    transition: color 0.3s ease;
+}
+
+.auth-links a:hover {
+    color: var(--secondary-color);
+    text-decoration: underline;
+}
+
+/* ローディングオーバーレイ */
+.loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    backdrop-filter: blur(10px);
+}
+
+/* ワイングラス注ぐアニメーション */
+.wine-loading-animation {
+    position: relative;
+    width: 200px;
+    height: 200px;
+    margin-bottom: 30px;
+}
+
+.wine-glass {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 120px;
+}
+
+.glass-rim {
+    position: absolute;
+    top: 0;
+    width: 80px;
+    height: 3px;
+    background: linear-gradient(90deg, #e3f2fd 0%, #ffffff 50%, #e3f2fd 100%);
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(255, 255, 255, 0.4);
+}
+
+.glass-bowl {
+    position: absolute;
+    top: 3px;
+    width: 80px;
+    height: 80px;
+    background: transparent;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    border-top: none;
+    border-radius: 0 0 40px 40px;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.glass-stem {
+    position: absolute;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 25px;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.7) 100%);
+}
+
+.glass-base {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 40px;
+    height: 15px;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.9) 50%, rgba(255, 255, 255, 0.7) 100%);
+    border-radius: 20px;
+    box-shadow: 0 2px 5px rgba(255, 255, 255, 0.3);
+}
+
+/* ワインボトル */
+.wine-bottle {
+    position: absolute;
+    top: 10px;
+    right: 30px;
+    width: 22px;
+    height: 75px;
+    background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 50%, #4caf50 100%);
+    border-radius: 3px 3px 0 0;
+    transform: rotate(-25deg);
+    transform-origin: bottom;
+    box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.bottle-neck {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 15px;
+    background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+    border-radius: 1px;
+}
+
+.bottle-cork {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 10px;
+    height: 8px;
+    background: linear-gradient(135deg, #d4af37 0%, #ffd700 100%);
+    border-radius: 2px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+/* ワインの流れ - 位置を正確に調整 */
+.wine-stream {
+    position: absolute;
+    top: 60px;
+    left: 75px;
+    width: 3px;
+    height: 0;
+    background: linear-gradient(180deg, #e91e63 0%, #c2185b 30%, #880e4f 70%, #4a148c 100%);
+    border-radius: 2px;
+    animation: pourWine 3s ease-in-out infinite;
+    transform-origin: top;
+    transform: rotate(-25deg);
+}
+
+/* グラス内のワイン - より鮮やかに */
+.wine-in-glass {
+    position: absolute;
+    bottom: 0;
+    left: 3px;
+    width: 74px;
+    height: 0;
+    background: linear-gradient(180deg, #e91e63 0%, #c2185b 40%, #880e4f 80%, #4a148c 100%);
+    border-radius: 0 0 37px 37px;
+    animation: fillGlass 3s ease-in-out infinite;
+    animation-delay: 0.5s;
+    box-shadow: inset 0 0 15px rgba(233, 30, 99, 0.4);
+}
+
+/* ワインの波紋効果 - 位置とサイズ調整 */
+.wine-ripple {
+    position: absolute;
+    top: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70px;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 192, 203, 0.6) 50%, transparent 100%);
+    border-radius: 50%;
+    opacity: 0;
+    animation: wineRipple 3s ease-in-out infinite;
+    animation-delay: 1s;
+}
+
+/* 香りの線 - グラスの上から立ち上がるように調整 */
+.aroma-lines {
+    position: absolute;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 50px;
+}
+
+.aroma-line {
+    position: absolute;
+    width: 3px;
+    height: 18px;
+    background: linear-gradient(180deg, rgba(255, 182, 193, 0.8) 0%, rgba(255, 105, 180, 0.6) 50%, rgba(138, 43, 226, 0.4) 100%);
+    border-radius: 2px;
+    opacity: 0;
+    animation: aromaFloat 2.5s ease-in-out infinite;
+    box-shadow: 0 0 6px rgba(255, 105, 180, 0.3);
+}
+
+.aroma-line:nth-child(1) {
+    left: 15px;
+    animation-delay: 0.3s;
+    transform: rotate(-5deg);
+}
+
+.aroma-line:nth-child(2) {
+    left: 32px;
+    animation-delay: 0.7s;
+    transform: rotate(2deg);
+}
+
+.aroma-line:nth-child(3) {
+    left: 48px;
+    animation-delay: 1.1s;
+    transform: rotate(-3deg);
+}
+
+.aroma-line:nth-child(4) {
+    left: 65px;
+    animation-delay: 1.5s;
+    transform: rotate(4deg);
+}
+
+/* キラキラ効果 - より鮮やかに */
+.sparkle {
+    position: absolute;
+    width: 5px;
+    height: 5px;
+    background: radial-gradient(circle, #ffd700 0%, #ffeb3b 40%, #ff9800 80%, transparent 100%);
+    border-radius: 50%;
+    opacity: 0;
+    animation: sparkleEffect 2.5s ease-in-out infinite;
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+}
+
+.sparkle:nth-child(1) {
+    top: 25px;
+    left: 35px;
+    animation-delay: 0.4s;
+}
+
+.sparkle:nth-child(2) {
+    top: 45px;
+    right: 45px;
+    animation-delay: 0.9s;
+}
+
+.sparkle:nth-child(3) {
+    bottom: 35px;
+    left: 45%;
+    animation-delay: 1.3s;
+}
+
+/* アニメーションキーフレーム */
+@keyframes pourWine {
+    0%, 15% {
+        height: 0;
+        opacity: 0;
+    }
+    20% {
+        opacity: 0.8;
+    }
+    25%, 70% {
+        height: 40px;
+        opacity: 1;
+    }
+    75% {
+        opacity: 0.6;
+    }
+    80%, 100% {
+        height: 0;
+        opacity: 0;
+    }
+}
+
+@keyframes fillGlass {
+    0%, 25% {
+        height: 0;
+    }
+    30% {
+        height: 10px;
+    }
+    35%, 75% {
+        height: 55px;
+    }
+    80%, 100% {
+        height: 0;
+    }
+}
+
+@keyframes wineRipple {
+    0%, 35% {
+        opacity: 0;
+        transform: translateX(-50%) scale(0.3);
+    }
+    40% {
+        opacity: 0.8;
+        transform: translateX(-50%) scale(0.8);
+    }
+    50%, 70% {
+        opacity: 0.6;
+        transform: translateX(-50%) scale(1);
+    }
+    75%, 100% {
+        opacity: 0;
+        transform: translateX(-50%) scale(1.3);
+    }
+}
+
+@keyframes aromaFloat {
+    0% {
+        opacity: 0;
+        transform: translateY(0) scale(0.8);
+    }
+    20% {
+        opacity: 0.7;
+        transform: translateY(-5px) scale(1);
+    }
+    60% {
+        opacity: 0.5;
+        transform: translateY(-15px) scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-30px) scale(0.6);
+    }
+}
+
+@keyframes sparkleEffect {
+    0%, 60% {
+        opacity: 0;
+        transform: scale(0) rotate(0deg);
+    }
+    70% {
+        opacity: 0.8;
+        transform: scale(0.8) rotate(180deg);
+    }
+    80% {
+        opacity: 1;
+        transform: scale(1) rotate(270deg);
+    }
+    90% {
+        opacity: 0.6;
+        transform: scale(1.2) rotate(360deg);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(0) rotate(450deg);
+    }
+}
+
+.loading-overlay p {
+    color: white;
+    font-size: 1.2em;
+    font-weight: 500;
+    text-align: center;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    margin-top: 10px;
+}
+
+/* 通知メッセージ */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 500;
+    z-index: 3000;
+    animation: notificationSlideIn 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    max-width: 350px;
+}
+
+@keyframes notificationSlideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.notification-success {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+.notification-error {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+}
+
+.notification-info {
+    background: linear-gradient(135deg, #17a2b8, #3498db);
+}
+
+.notification-warning {
+    background: linear-gradient(135deg, #ffc107, #f39c12);
+    color: #333;
+}
+
+/* スマホ対応の強化 */
+@media (max-width: 768px) {
+    /* ヘッダーのモバイル最適化 */
+    .header-with-theme {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    h1 {
+        font-size: 2.2em;
+    }
+    
+    .header-controls {
+        flex-direction: row;
+        justify-content: center;
+        width: 100%;
+        gap: 15px;
+    }
+    
+    /* 認証ボタンのモバイル最適化 */
+    .login-btn,
+    .logout-btn {
+        padding: 12px 20px;
+        font-size: 1em;
+        border-radius: 25px;
+        min-width: 100px;
+        touch-action: manipulation;
+    }
+    
+    .user-info {
+        flex-direction: column;
+        gap: 8px;
+        align-items: center;
+    }
+    
+    /* テーマ切り替えボタンのサイズ調整 */
+    .theme-toggle {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .theme-icon {
+        font-size: 20px;
+    }
+    
+    /* フォームのモバイル最適化 */
+    .wine-form {
+        padding: 20px;
+        margin: 10px;
+        border-radius: 15px;
+    }
+    
+    .form-section {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    /* 入力フィールドのタッチ最適化 */
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+        padding: 16px;
+        font-size: 16px; /* iOS Safari のズームを防ぐ */
+        border-radius: 8px;
+        touch-action: manipulation;
+    }
+    
+    /* ラジオボタンとチェックボックスのタッチ領域拡大 */
+    .radio-item,
+    .checkbox-item {
+        padding: 16px;
+        min-height: 60px;
+        font-size: 1em;
+        touch-action: manipulation;
+    }
+    
+    .radio-item input[type="radio"],
+    .checkbox-item input[type="checkbox"] {
+        width: 24px;
+        height: 24px;
+        margin-right: 12px;
+    }
+    
+    /* フォームボタンのモバイル最適化 */
+    .form-actions {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .form-actions button {
+        padding: 18px;
+        font-size: 1.1em;
+        border-radius: 25px;
+        min-height: 56px;
+        touch-action: manipulation;
+    }
+    
+    .new-wine-btn {
+        padding: 18px;
+        font-size: 1.1em;
+        border-radius: 25px;
+        min-height: 56px;
+        touch-action: manipulation;
+    }
+    
+    /* 香りスコアのモバイル最適化 */
+    .aroma-score-item {
+        flex-direction: column;
+        gap: 10px;
+        padding: 20px;
+        min-height: auto;
+    }
+    
+    .aroma-score-item label {
+        min-width: auto;
+        text-align: center;
+        font-size: 1.1em;
+    }
+    
+    .score-selector {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .aroma-score-item input[type="range"] {
+        height: 12px;
+        min-width: 200px;
+    }
+    
+    .score-value {
+        font-size: 1.2em;
+        padding: 8px 12px;
+        min-width: 40px;
+    }
+    
+    /* ペイントコントロールのモバイル最適化 */
+    .paint-controls {
+        flex-direction: column;
+        gap: 10px;
+        align-items: stretch;
+    }
+    
+    .paint-controls button {
+        padding: 12px;
+        font-size: 1em;
+        min-height: 48px;
+        touch-action: manipulation;
+    }
+    
+    .paint-controls input[type="range"] {
+        width: 100%;
+    }
+    
+    /* ワイン記録カードのモバイル最適化 */
+    .recent-wine-card {
+        padding: 20px;
+        border-radius: 12px;
+        margin-bottom: 15px;
+        touch-action: manipulation;
+    }
+    
+    .recent-wine-card h4 {
+        font-size: 1.3em;
+        margin-bottom: 12px;
+    }
+    
+    .recent-wine-card p {
+        font-size: 1em;
+        margin: 10px 0;
+    }
+    
+    /* フィルターコントロールのモバイル最適化 */
+    .filter-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .filter-controls input,
+    .filter-controls select {
+        padding: 16px;
+        font-size: 16px;
+        border-radius: 8px;
+        touch-action: manipulation;
+    }
+    
+    #exportBtn {
+        padding: 16px;
+        font-size: 1.1em;
+        border-radius: 25px;
+        min-height: 56px;
+        touch-action: manipulation;
+    }
+    
+    /* ページネーションのモバイル最適化 */
+    .pagination-controls button {
+        padding: 12px 16px;
+        font-size: 1em;
+        min-height: 48px;
+        touch-action: manipulation;
+    }
+    
+    /* 通知のモバイル最適化 */
+    .notification {
+        right: 10px;
+        left: 10px;
+        max-width: none;
+        padding: 16px;
+        font-size: 1em;
+        border-radius: 8px;
+    }
+}
+
+/* 極小画面（320px以下）への対応 */
+@media (max-width: 480px) {
+    body {
+        padding: 10px;
+    }
+    
+    .container {
+        padding: 0;
+    }
+    
+    .modal-content {
+        width: 95%;
+        margin: 10px;
+    }
+    
+    .auth-container {
+        padding: 15px;
+        padding-top: 35px;
+    }
+    
+    h1 {
+        font-size: 1.8em;
+    }
+    
+    /* フォームをさらにコンパクトに */
+    .wine-form {
+        padding: 15px;
+        margin: 5px;
+    }
+    
+    .form-section {
+        padding: 12px;
+        margin-bottom: 15px;
+    }
+    
+    /* グリッドを1列に強制 */
+    .form-grid,
+    .aroma-scores,
+    .aroma-categories,
+    .analysis-grid,
+    .aroma-phases,
+    .taste-phases,
+    .components-grid,
+    .wine-info,
+    .recent-wines-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+    }
+    
+    /* 複数画像プレビューのモバイル最適化 */
+    .multiple-image-preview {
+        grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+        gap: 8px;
+        padding: 8px;
+    }
+    
+    .image-preview-item img {
+        height: 80px;
+    }
+    
+    /* ローディングアニメーションのモバイル最適化 */
+    .wine-loading-animation {
+        width: 150px;
+        height: 150px;
+        margin-bottom: 20px;
+    }
+    
+    .wine-glass {
+        width: 60px;
+        height: 90px;
+    }
+    
+    .glass-rim {
+        width: 60px;
+    }
+    
+    .glass-bowl {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .wine-in-glass {
+        width: 54px;
+    }
+    
+    .wine-bottle {
+        width: 16px;
+        height: 55px;
+        right: 22px;
+    }
+    
+    .wine-stream {
+        top: 45px;
+        left: 56px;
+        width: 2px;
+    }
+    
+    .aroma-lines {
+        top: 60px;
+        width: 60px;
+        height: 35px;
+    }
+    
+    .aroma-line {
+        width: 2px;
+        height: 12px;
+    }
+    
+    .sparkle {
+        width: 3px;
+        height: 3px;
+    }
+    
+    .loading-overlay p {
+        font-size: 1em;
+        padding: 0 20px;
+    }
+}
