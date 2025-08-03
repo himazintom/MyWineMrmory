@@ -57,16 +57,16 @@
                         </button>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link nav-button" onclick="showSection('quiz')">
+                        <a href="/quiz.html" class="nav-link">
                             <span class="nav-icon">🧠</span>
                             <span class="nav-text">クイズ</span>
-                        </button>
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <button class="nav-link nav-button" onclick="showSection('analytics')">
+                        <a href="/analytics.html" class="nav-link">
                             <span class="nav-icon">📊</span>
                             <span class="nav-text">分析</span>
-                        </button>
+                        </a>
                     </li>
                     <li class="nav-item">
                         <button class="nav-link nav-button" onclick="showUltraAdvancedForm()">
@@ -81,10 +81,33 @@
                         </button>
                     </li>
                     <li class="nav-item auth-nav" id="authNavItem">
-                        <button class="nav-link nav-button" id="authNavButton" onclick="signInWithGoogle()">
-                            <span class="nav-icon">👤</span>
-                            <span class="nav-text">ログイン</span>
-                        </button>
+                        <!-- ログイン前表示 -->
+                        <div id="loginNavView" class="auth-nav-content">
+                            <button class="nav-link nav-button auth-button" onclick="signInWithGoogle()">
+                                <span class="nav-icon">👤</span>
+                                <span class="nav-text">ログイン</span>
+                            </button>
+                        </div>
+                        
+                        <!-- ログイン後表示 -->
+                        <div id="userNavView" class="auth-nav-content hidden">
+                            <div class="user-nav-info">
+                                <img id="userAvatar" class="user-avatar" src="" alt="ユーザーアバター" style="display: none;">
+                                <div class="user-details">
+                                    <span class="user-name" id="userNavName">ユーザー</span>
+                                    <span class="user-email" id="userNavEmail"></span>
+                                </div>
+                                <button id="privacyToggle" class="privacy-toggle-btn" onclick="togglePrivacy()" title="記録の公開/非公開を切り替え">
+                                    <span id="privacyIcon">🔒</span>
+                                </button>
+                                <button class="logout-btn" onclick="confirmSignOut()" title="ログアウト">
+                                    <span>🚪</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- ステータス表示 -->
+                        <div id="authNavStatus" class="auth-status hidden"></div>
                     </li>
                 </ul>
             </div>
@@ -116,17 +139,17 @@
 
             <!-- ワイン機能セクション -->
             <div class="wine-features" id="wineFeaturesSection">
+                <div class="welcome-message">
+                    <h2>🍷 ワインの世界へようこそ</h2>
+                    <p>詳細な記録で、あなたのワイン体験をより豊かに</p>
+                </div>
+                
                 <div class="feature-cards">
-                    <div class="feature-card" onclick="showUltraAdvancedForm()">
+                    <div class="feature-card primary-card" onclick="showUltraAdvancedForm()">
                         <div class="feature-icon">📝</div>
                         <h3>詳細ワイン記録</h3>
                         <p>プロレベルのテイスティングノートを記録</p>
-                    </div>
-                    
-                    <div class="feature-card" onclick="showSection('analytics')">
-                        <div class="feature-icon">📊</div>
-                        <h3>分析ダッシュボード</h3>
-                        <p>あなたのワイン傾向を詳しく分析</p>
+                        <div class="card-action">記録を開始</div>
                     </div>
                 </div>
                 
@@ -143,103 +166,14 @@
             </div>
         </div>
 
-        <!-- Quiz Section -->
-        <div id="quizSection" class="section">
-            <div class="quiz-container">
-                <div class="quiz-header">
-                    <h1>🧠 ワイン知識クイズ</h1>
-                    <p>あなたのワイン知識をテストし、スキルを向上させましょう</p>
-                </div>
-                
-                <div class="quiz-types">
-                    <div class="quiz-type-card" onclick="startQuiz('basic')">
-                        <div class="quiz-icon">🍇</div>
-                        <h3>基本クイズ</h3>
-                        <p>ワインの基礎知識をテスト</p>
-                    </div>
-                    <div class="quiz-type-card" onclick="startQuiz('advanced')">
-                        <div class="quiz-icon">🏆</div>
-                        <h3>上級クイズ</h3>
-                        <p>上級者向けの難しい問題</p>
-                    </div>
-                    <div class="quiz-type-card" onclick="startQuiz('regions')">
-                        <div class="quiz-icon">🌍</div>
-                        <h3>産地クイズ</h3>
-                        <p>世界のワイン産地について</p>
-                    </div>
-                    <div class="quiz-type-card" onclick="startQuiz('tasting')">
-                        <div class="quiz-icon">👅</div>
-                        <h3>テイスティング</h3>
-                        <p>味わいや香りの特徴</p>
-                    </div>
-                </div>
-                
-                <div id="quizGame" class="quiz-game hidden">
-                    <div class="quiz-progress">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="progressFill"></div>
-                        </div>
-                        <span class="progress-text" id="progressText">1/10</span>
-                    </div>
-                    
-                    <div class="quiz-question">
-                        <h2 id="questionText"></h2>
-                        <div id="questionOptions" class="quiz-options"></div>
-                    </div>
-                    
-                    <div class="quiz-controls">
-                        <button id="nextButton" class="btn primary-btn" onclick="nextQuestion()" disabled>次へ</button>
-                        <button class="btn outline-btn" onclick="endQuiz()">終了</button>
-                    </div>
-                </div>
-                
-                <div id="quizResults" class="quiz-results hidden">
-                    <h2>クイズ結果</h2>
-                    <div class="result-score">
-                        <span class="score-number" id="finalScore">0</span>
-                        <span class="score-total">/10</span>
-                    </div>
-                    <div class="result-message" id="resultMessage"></div>
-                    <div class="result-actions">
-                        <button class="btn primary-btn" onclick="restartQuiz()">もう一度</button>
-                        <button class="btn outline-btn" onclick="showSection('home')">ホームへ</button>
-                    </div>
-                </div>
-            </div>
-        </div>
 
-        <!-- Analytics Section -->
-        <div id="analyticsSection" class="section">
-            <div class="analytics-container">
-                <h1>📊 ワイン分析ダッシュボード</h1>
-                
-                <div class="analytics-grid">
-                    <div class="analytics-card">
-                        <h3>評価分布</h3>
-                        <canvas id="ratingChart"></canvas>
-                    </div>
-                    <div class="analytics-card">
-                        <h3>ワインタイプ別</h3>
-                        <canvas id="typeChart"></canvas>
-                    </div>
-                    <div class="analytics-card">
-                        <h3>月別記録数</h3>
-                        <canvas id="monthlyChart"></canvas>
-                    </div>
-                    <div class="analytics-card">
-                        <h3>価格帯別</h3>
-                        <canvas id="priceChart"></canvas>
-                    </div>
+        <!-- Ultra Advanced Wine Form Modal -->
+        <div class="form-modal-overlay" id="ultraAdvancedForm" style="display: none;">
+            <div class="form-modal">
+                <div class="form-header">
+                    <h2>超詳細ワイン記録</h2>
+                    <button type="button" class="close-form-btn" onclick="hideUltraAdvancedForm()">&times;</button>
                 </div>
-            </div>
-        </div>
-
-        <!-- Ultra Advanced Wine Form -->
-        <div class="ultra-advanced-form" id="ultraAdvancedForm" style="display: none;">
-            <div class="form-header">
-                <h2>超詳細ワイン記録</h2>
-                <button type="button" class="close-form-btn" onclick="hideUltraAdvancedForm()">&times;</button>
-            </div>
             
             <form id="ultraWineForm" onsubmit="saveUltraWineRecord(event)" class="ultra-form">
                 <!-- 基本情報セクション -->
@@ -549,6 +483,7 @@
                     <button type="button" class="btn outline-btn" onclick="hideUltraAdvancedForm()">キャンセル</button>
                 </div>
             </form>
+            </div>
         </div>
 
         <!-- ワイン一覧 -->
@@ -564,7 +499,7 @@
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
         import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, query, orderBy, where, limit } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, where, limit, doc, setDoc, updateDoc, getDoc } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
 
         // Firebase設定
         const firebaseConfig = {
@@ -585,67 +520,8 @@
         // グローバル変数
         let currentUser = null;
         let wineRecords = [];
-        let currentQuiz = null;
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let charts = {};
+        let userProfile = null;
 
-        // クイズデータ
-        const quizData = {
-            basic: [
-                {
-                    question: "フランスの代表的なワイン産地はどれですか？",
-                    options: ["ボルドー", "トスカーナ", "ナパバレー", "モーゼル"],
-                    correct: 0
-                },
-                {
-                    question: "赤ワインの主な色素成分は何ですか？",
-                    options: ["タンニン", "アントシアニン", "レスベラトロール", "アルコール"],
-                    correct: 1
-                },
-                {
-                    question: "シャンパーニュの製法として正しいのはどれですか？",
-                    options: ["シャルマ方式", "メトード・シャンプノワーズ", "炭酸注入", "自然発酵"],
-                    correct: 1
-                }
-            ],
-            advanced: [
-                {
-                    question: "ボルドーの左岸で主に栽培されるブドウ品種は？",
-                    options: ["メルロー", "カベルネ・ソーヴィニヨン", "ピノ・ノワール", "シラー"],
-                    correct: 1
-                },
-                {
-                    question: "マロラクティック発酵の目的は？",
-                    options: ["糖分をアルコールに変換", "酸味を和らげる", "色素を抽出", "タンニンを除去"],
-                    correct: 1
-                }
-            ],
-            regions: [
-                {
-                    question: "ブルゴーニュの代表的な白ブドウ品種は？",
-                    options: ["シャルドネ", "ソーヴィニヨン・ブラン", "リースリング", "ゲヴュルツトラミナー"],
-                    correct: 0
-                },
-                {
-                    question: "キャンティはどの国のワインですか？",
-                    options: ["フランス", "イタリア", "スペイン", "ドイツ"],
-                    correct: 1
-                }
-            ],
-            tasting: [
-                {
-                    question: "ワインの「ボディ」とは何を表しますか？",
-                    options: ["色の濃さ", "香りの強さ", "味わいの厚み", "アルコール度数"],
-                    correct: 2
-                },
-                {
-                    question: "タンニンが多いワインの特徴は？",
-                    options: ["甘い", "渋い", "酸っぱい", "塩辛い"],
-                    correct: 1
-                }
-            ]
-        };
 
         // ローディング画面の制御
         function showLoadingOverlay(show, message = '') {
@@ -667,6 +543,13 @@
             
             showLoadingOverlay(true, 'アプリケーションを準備中...');
             
+            // 共有URLかどうかチェック
+            const pathParts = window.location.pathname.split('/');
+            if (pathParts[1] === 'shared' && pathParts[2]) {
+                // 共有ページの場合
+                loadSharedProfile(pathParts[2]);
+            }
+            
             // 最低3秒間はローディングを表示
             setTimeout(() => {
                 showLoadingOverlay(false);
@@ -680,46 +563,363 @@
         // 認証状態の監視
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
-            updateUI();
             if (user) {
+                loadUserProfile();
                 loadWineRecords();
                 updateStats();
             }
+            updateUI();
         });
 
         // UI更新
         function updateUI() {
-            const authNavButton = document.getElementById('authNavButton');
-            const authNavIcon = authNavButton.querySelector('.nav-icon');
-            const authNavText = authNavButton.querySelector('.nav-text');
+            const loginNavView = document.getElementById('loginNavView');
+            const userNavView = document.getElementById('userNavView');
+            const userNavName = document.getElementById('userNavName');
+            const userNavEmail = document.getElementById('userNavEmail');
+            const userAvatar = document.getElementById('userAvatar');
             const wineFeaturesSection = document.getElementById('wineFeaturesSection');
 
             if (currentUser) {
-                // ヘッダーをユーザー情報＋ログアウトに変更
-                authNavIcon.textContent = '👋';
-                authNavText.textContent = currentUser.displayName?.split(' ')[0] || 'ユーザー';
-                authNavButton.onclick = () => {
-                    if (confirm('ログアウトしますか？')) {
-                        signOut();
-                    }
-                };
+                // ログイン後のナビ表示
+                loginNavView.classList.add('hidden');
+                userNavView.classList.remove('hidden');
+                
+                // ユーザー情報を設定
+                userNavName.textContent = currentUser.displayName || 'ユーザー';
+                userNavEmail.textContent = currentUser.email || '';
+                
+                // アバター画像があれば表示
+                if (currentUser.photoURL) {
+                    userAvatar.src = currentUser.photoURL;
+                    userAvatar.style.display = 'block';
+                } else {
+                    userAvatar.style.display = 'none';
+                }
                 
                 // ワイン機能を表示
                 wineFeaturesSection.style.display = 'block';
             } else {
-                // ヘッダーをログインボタンに変更
-                authNavIcon.textContent = '👤';
-                authNavText.textContent = 'ログイン';
-                authNavButton.onclick = signInWithGoogle;
+                // ログイン前のナビ表示
+                loginNavView.classList.remove('hidden');
+                userNavView.classList.add('hidden');
                 
                 // ワイン機能を非表示（ログインが必要メッセージ表示）
                 wineFeaturesSection.innerHTML = `
                     <div class="login-required">
                         <h2>🍷 MyWineMemory</h2>
-                        <p>ワインの記録と分析を始めるには、ヘッダーからログインしてください</p>
+                        <p>ワインの記録を始めるには、ヘッダーからログインしてください</p>
+                        <div class="login-features">
+                            <div class="feature-preview">
+                                <span class="preview-icon">📝</span>
+                                <span>超詳細テイスティングノート</span>
+                            </div>
+                            <div class="feature-preview">
+                                <span class="preview-icon">🧠</span>
+                                <span>ワイン知識クイズ</span>
+                            </div>
+                            <div class="feature-preview">
+                                <span class="preview-icon">📊</span>
+                                <span>データ分析ダッシュボード</span>
+                            </div>
+                        </div>
                     </div>
                 `;
             }
+        }
+        
+        // ログアウト確認
+        window.confirmSignOut = function() {
+            if (confirm('ログアウトしますか？')) {
+                signOut();
+            }
+        }
+
+        // UUID生成
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+                const r = Math.random() * 16 | 0;
+                const v = c == 'x' ? r : (r & 0x3 | 0x8);
+                return v.toString(16);
+            });
+        }
+
+        // ユーザープロフィール読み込み
+        async function loadUserProfile() {
+            if (!currentUser) return;
+
+            try {
+                const userDocRef = doc(db, 'users', currentUser.uid);
+                const userDoc = await getDoc(userDocRef);
+                
+                if (userDoc.exists()) {
+                    userProfile = userDoc.data();
+                } else {
+                    // 初回ログイン時にユーザープロフィール作成
+                    userProfile = {
+                        displayName: currentUser.displayName,
+                        email: currentUser.email,
+                        photoURL: currentUser.photoURL,
+                        isPublic: false,
+                        shareToken: null,
+                        createdAt: new Date()
+                    };
+                    await setDoc(userDocRef, userProfile);
+                }
+                
+                // プライバシーボタンの状態を更新
+                updatePrivacyButton();
+            } catch (error) {
+                console.error('ユーザープロフィールの読み込みに失敗:', error);
+            }
+        }
+
+        // プライバシーボタンの状態更新
+        function updatePrivacyButton() {
+            const privacyIcon = document.getElementById('privacyIcon');
+            const privacyToggle = document.getElementById('privacyToggle');
+            
+            if (userProfile && privacyIcon && privacyToggle) {
+                if (userProfile.isPublic) {
+                    privacyIcon.textContent = '🌍';
+                    privacyToggle.title = '記録を非公開にする';
+                } else {
+                    privacyIcon.textContent = '🔒';
+                    privacyToggle.title = '記録を公開する';
+                }
+            }
+        }
+
+        // プライバシー切り替え
+        window.togglePrivacy = async function() {
+            if (!currentUser || !userProfile) {
+                showStatus('ユーザー情報が読み込まれていません', 'error');
+                return;
+            }
+
+            try {
+                const userDocRef = doc(db, 'users', currentUser.uid);
+                
+                if (userProfile.isPublic) {
+                    // 公開→非公開
+                    await updateDoc(userDocRef, {
+                        isPublic: false,
+                        shareToken: null
+                    });
+                    userProfile.isPublic = false;
+                    userProfile.shareToken = null;
+                    
+                    showStatus('記録を非公開にしました', 'success');
+                } else {
+                    // 非公開→公開
+                    const shareToken = generateUUID();
+                    await updateDoc(userDocRef, {
+                        isPublic: true,
+                        shareToken: shareToken
+                    });
+                    userProfile.isPublic = true;
+                    userProfile.shareToken = shareToken;
+                    
+                    // 共有URLをクリップボードにコピー
+                    const shareUrl = `${window.location.origin}/shared/${shareToken}`;
+                    try {
+                        await navigator.clipboard.writeText(shareUrl);
+                        showCenterMessage('クリップボードに共有URLをコピーしました');
+                    } catch (error) {
+                        // フォールバック: テキストエリアを使用
+                        const textarea = document.createElement('textarea');
+                        textarea.value = shareUrl;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        showCenterMessage('クリップボードに共有URLをコピーしました');
+                    }
+                    
+                    showStatus('記録を公開しました', 'success');
+                }
+                
+                updatePrivacyButton();
+            } catch (error) {
+                showStatus('設定の変更に失敗しました: ' + error.message, 'error');
+            }
+        }
+
+        // 画面中央にメッセージ表示
+        function showCenterMessage(message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'center-message';
+            messageDiv.textContent = message;
+            messageDiv.style.cssText = `
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: var(--primary-color);
+                color: white;
+                padding: 20px 30px;
+                border-radius: 12px;
+                font-size: 16px;
+                font-weight: 500;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+                z-index: 10000;
+                animation: fadeInOut 3s ease-in-out;
+            `;
+            
+            document.body.appendChild(messageDiv);
+            
+            // アニメーション追加
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes fadeInOut {
+                    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                    20% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                    100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // 3秒後に削除
+            setTimeout(() => {
+                if (document.body.contains(messageDiv)) {
+                    document.body.removeChild(messageDiv);
+                }
+                if (document.head.contains(style)) {
+                    document.head.removeChild(style);
+                }
+            }, 3000);
+        }
+
+        // 共有プロフィール読み込み
+        async function loadSharedProfile(shareToken) {
+            try {
+                // shareTokenでユーザーを検索
+                const usersRef = collection(db, 'users');
+                const q = query(usersRef, where('shareToken', '==', shareToken));
+                const querySnapshot = await getDocs(q);
+                
+                if (querySnapshot.empty) {
+                    showSharedError('共有URLが無効または期限切れです');
+                    return;
+                }
+                
+                const sharedUserDoc = querySnapshot.docs[0];
+                const sharedUserData = sharedUserDoc.data();
+                const sharedUserId = sharedUserDoc.id;
+                
+                if (!sharedUserData.isPublic) {
+                    showSharedError('この記録は非公開に設定されています');
+                    return;
+                }
+                
+                // 共有ユーザーのワイン記録を読み込み
+                await loadSharedWineRecords(sharedUserId, sharedUserData);
+                
+            } catch (error) {
+                console.error('共有プロフィールの読み込みに失敗:', error);
+                showSharedError('データの読み込みに失敗しました');
+            }
+        }
+
+        // 共有ワイン記録読み込み
+        async function loadSharedWineRecords(userId, userData) {
+            try {
+                const q = query(
+                    collection(db, 'wine_records'),
+                    where('userId', '==', userId),
+                    orderBy('createdAt', 'desc'),
+                    limit(20)
+                );
+                
+                const querySnapshot = await getDocs(q);
+                const sharedWines = [];
+                
+                querySnapshot.forEach((doc) => {
+                    sharedWines.push(doc.data());
+                });
+                
+                // 共有ページのUIを表示
+                showSharedProfile(userData, sharedWines);
+                
+            } catch (error) {
+                console.error('共有ワイン記録の読み込みに失敗:', error);
+                showSharedError('ワイン記録の読み込みに失敗しました');
+            }
+        }
+
+        // 共有プロフィール表示
+        function showSharedProfile(userData, wineRecords) {
+            const mainContainer = document.querySelector('.main-container');
+            const totalWines = wineRecords.length;
+            const avgRating = totalWines > 0 ? 
+                (wineRecords.reduce((sum, wine) => sum + (wine.wineRating || 0), 0) / totalWines).toFixed(1) : 0;
+            
+            mainContainer.innerHTML = `
+                <div class="shared-profile">
+                    <div class="shared-header">
+                        <div class="shared-user-info">
+                            ${userData.photoURL ? `<img src="${userData.photoURL}" alt="${userData.displayName}" class="shared-avatar">` : ''}
+                            <div class="shared-user-details">
+                                <h1>🍷 ${userData.displayName || 'ワイン愛好家'}さんのワイン記録</h1>
+                                <p>公開されたワインコレクションをご覧ください</p>
+                            </div>
+                        </div>
+                        
+                        <div class="shared-stats">
+                            <div class="shared-stat">
+                                <span class="stat-number">${totalWines}</span>
+                                <span class="stat-label">記録数</span>
+                            </div>
+                            <div class="shared-stat">
+                                <span class="stat-number">${avgRating}</span>
+                                <span class="stat-label">平均評価</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="shared-wines">
+                        <h2>ワイン記録</h2>
+                        <div class="shared-wine-grid">
+                            ${wineRecords.length > 0 ? wineRecords.map(wine => `
+                                <div class="shared-wine-card">
+                                    <h3>${wine.wineName}</h3>
+                                    <p class="producer">${wine.producer}</p>
+                                    ${wine.region ? `<p class="region">${wine.region}</p>` : ''}
+                                    ${wine.vintage ? `<p class="vintage">${wine.vintage}年</p>` : ''}
+                                    <div class="rating">${'⭐'.repeat(wine.wineRating || 0)} (${wine.wineRating}/5)</div>
+                                    ${wine.notes ? `<p class="notes">${wine.notes}</p>` : ''}
+                                    ${wine.foodPairing ? `<p class="pairing"><strong>ペアリング:</strong> ${wine.foodPairing}</p>` : ''}
+                                </div>
+                            `).join('') : '<p class="empty-shared">まだワインが記録されていません</p>'}
+                        </div>
+                    </div>
+                    
+                    <div class="shared-footer">
+                        <a href="/" class="back-to-app">MyWineMemoryを始める</a>
+                    </div>
+                </div>
+            `;
+            
+            // ナビバーを隠す
+            document.querySelector('.main-navbar').style.display = 'none';
+        }
+
+        // 共有エラー表示
+        function showSharedError(message) {
+            const mainContainer = document.querySelector('.main-container');
+            mainContainer.innerHTML = `
+                <div class="shared-error">
+                    <div class="error-content">
+                        <h1>🚫 アクセスできません</h1>
+                        <p>${message}</p>
+                        <a href="/" class="back-to-app">MyWineMemoryに戻る</a>
+                    </div>
+                </div>
+            `;
+            
+            // ナビバーを隠す
+            document.querySelector('.main-navbar').style.display = 'none';
         }
 
         // Googleログイン
@@ -749,21 +949,6 @@
             }
         }
 
-        // セクション表示切り替え
-        window.showSection = function(sectionName) {
-            const sections = document.querySelectorAll('.section');
-            sections.forEach(section => section.classList.remove('active'));
-            
-            const targetSection = document.getElementById(sectionName + 'Section');
-            if (targetSection) {
-                targetSection.classList.add('active');
-            }
-
-            // アナリティクスセクションの場合、チャートを初期化
-            if (sectionName === 'analytics') {
-                initAnalytics();
-            }
-        }
 
         // 超詳細フォーム表示
         window.showUltraAdvancedForm = function() {
@@ -886,153 +1071,6 @@
             }
         }
 
-        // クイズ機能
-        window.startQuiz = function(type) {
-            currentQuiz = quizData[type];
-            currentQuestionIndex = 0;
-            score = 0;
-            
-            document.querySelector('.quiz-types').style.display = 'none';
-            document.getElementById('quizGame').classList.remove('hidden');
-            
-            showQuestion();
-        }
-
-        function showQuestion() {
-            const question = currentQuiz[currentQuestionIndex];
-            document.getElementById('questionText').textContent = question.question;
-            
-            const optionsContainer = document.getElementById('questionOptions');
-            optionsContainer.innerHTML = '';
-            
-            question.options.forEach((option, index) => {
-                const button = document.createElement('button');
-                button.className = 'quiz-option';
-                button.textContent = option;
-                button.onclick = () => selectAnswer(index);
-                optionsContainer.appendChild(button);
-            });
-            
-            updateProgress();
-            document.getElementById('nextButton').disabled = true;
-        }
-
-        function selectAnswer(selectedIndex) {
-            const question = currentQuiz[currentQuestionIndex];
-            const options = document.querySelectorAll('.quiz-option');
-            
-            options.forEach((option, index) => {
-                option.disabled = true;
-                if (index === question.correct) {
-                    option.classList.add('correct');
-                } else if (index === selectedIndex) {
-                    option.classList.add('incorrect');
-                }
-            });
-            
-            if (selectedIndex === question.correct) {
-                score++;
-            }
-            
-            document.getElementById('nextButton').disabled = false;
-        }
-
-        window.nextQuestion = function() {
-            currentQuestionIndex++;
-            
-            if (currentQuestionIndex >= currentQuiz.length) {
-                showQuizResults();
-            } else {
-                showQuestion();
-            }
-        }
-
-        function showQuizResults() {
-            document.getElementById('quizGame').classList.add('hidden');
-            const resultsContainer = document.getElementById('quizResults');
-            resultsContainer.classList.remove('hidden');
-            
-            document.getElementById('finalScore').textContent = score;
-            
-            let message = '';
-            const percentage = (score / currentQuiz.length) * 100;
-            if (percentage >= 80) {
-                message = 'すばらしい！ワインエキスパートですね！';
-            } else if (percentage >= 60) {
-                message = 'よくできました！もう少しで完璧です。';
-            } else {
-                message = '頑張りました！さらに学習を続けましょう。';
-            }
-            
-            document.getElementById('resultMessage').textContent = message;
-        }
-
-        window.restartQuiz = function() {
-            document.getElementById('quizResults').classList.add('hidden');
-            document.querySelector('.quiz-types').style.display = 'grid';
-        }
-
-        window.endQuiz = function() {
-            document.getElementById('quizGame').classList.add('hidden');
-            document.querySelector('.quiz-types').style.display = 'grid';
-        }
-
-        function updateProgress() {
-            const progress = ((currentQuestionIndex + 1) / currentQuiz.length) * 100;
-            document.getElementById('progressFill').style.width = progress + '%';
-            document.getElementById('progressText').textContent = `${currentQuestionIndex + 1}/${currentQuiz.length}`;
-        }
-
-        // アナリティクス初期化
-        function initAnalytics() {
-            if (wineRecords.length === 0) return;
-
-            // 評価分布チャート
-            if (charts.ratingChart) charts.ratingChart.destroy();
-            const ratingCtx = document.getElementById('ratingChart').getContext('2d');
-            const ratingData = [1, 2, 3, 4, 5].map(rating => 
-                wineRecords.filter(wine => wine.wineRating === rating).length
-            );
-            
-            charts.ratingChart = new Chart(ratingCtx, {
-                type: 'bar',
-                data: {
-                    labels: ['1⭐', '2⭐', '3⭐', '4⭐', '5⭐'],
-                    datasets: [{
-                        label: '記録数',
-                        data: ratingData,
-                        backgroundColor: 'rgba(102, 126, 234, 0.7)'
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-
-            // ワインタイプ別チャート
-            if (charts.typeChart) charts.typeChart.destroy();
-            const typeCtx = document.getElementById('typeChart').getContext('2d');
-            const types = ['red', 'white', 'rose', 'sparkling'];
-            const typeData = types.map(type => 
-                wineRecords.filter(wine => wine.wineType === type).length
-            );
-            
-            charts.typeChart = new Chart(typeCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['赤ワイン', '白ワイン', 'ロゼ', 'スパークリング'],
-                    datasets: [{
-                        data: typeData,
-                        backgroundColor: ['#dc2626', '#fbbf24', '#f472b6', '#60a5fa']
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false
-                }
-            });
-        }
 
         // スター評価システム初期化
         function initStarRatings() {
@@ -1121,9 +1159,9 @@
 
         // ステータス表示
         function showStatus(message, type) {
-            const statusEl = document.getElementById('authStatus');
+            const statusEl = document.getElementById('authNavStatus');
             statusEl.textContent = message;
-            statusEl.className = `status ${type}`;
+            statusEl.className = `auth-status ${type}`;
             statusEl.classList.remove('hidden');
             
             setTimeout(() => {

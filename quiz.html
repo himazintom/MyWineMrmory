@@ -47,9 +47,9 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a href="/" class="nav-link">
-                            <span class="nav-icon">📝</span>
-                            <span class="nav-text">記録</span>
+                        <a href="/analytics.html" class="nav-link">
+                            <span class="nav-icon">📊</span>
+                            <span class="nav-text">分析</span>
                         </a>
                     </li>
                     <li class="nav-item">
@@ -63,478 +63,351 @@
         </div>
     </nav>
 
-    <div class="container">
-        <div class="hero-section">
-            <h1>🍷 ワインクイズ</h1>
-            <p>知識を深めて、ワインマスターを目指しましょう！</p>
-        </div>
-
-        <!-- クイズタイプ選択 -->
-        <div class="quiz-container" id="quizTypeSelection">
-            <h2>クイズの種類を選択してください</h2>
-            <div class="quiz-types">
-                <div class="quiz-type-card" onclick="startQuiz('general')">
-                    <div class="quiz-type-icon">🌍</div>
-                    <h3>一般ワイン知識</h3>
-                    <p>ワインの基本知識から専門的な内容まで</p>
-                </div>
-                
-                <div class="quiz-type-card" onclick="startQuiz('personal')">
-                    <div class="quiz-type-icon">📚</div>
-                    <h3>マイワインクイズ</h3>
-                    <p>あなたが記録したワインから出題</p>
-                </div>
-                
-                <div class="quiz-type-card" onclick="startQuiz('daily')">
-                    <div class="quiz-type-icon">📅</div>
-                    <h3>今日のクイズ</h3>
-                    <p>毎日更新される特別なクイズ</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- ローディング画面 -->
-        <div class="quiz-container loading hidden" id="loadingScreen">
-            <div class="spinner"></div>
-            <p>クイズを準備中...</p>
-        </div>
-
-        <!-- クイズ画面 -->
-        <div class="quiz-container hidden" id="quizContainer">
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="quiz-page">
             <div class="quiz-header">
-                <span id="questionNumber">問題 1/10</span>
-                <div class="quiz-progress">
-                    <div class="quiz-progress-bar" id="progressBar" style="width: 10%"></div>
+                <h1>🧠 ワイン知識クイズ</h1>
+                <p>あなたのワイン知識をテストし、スキルを向上させましょう</p>
+            </div>
+            
+            <!-- クイズ選択 -->
+            <div class="quiz-types" id="quizTypes">
+                <div class="quiz-type-card" onclick="startQuiz('basic')">
+                    <div class="quiz-icon">🍇</div>
+                    <h3>基本クイズ</h3>
+                    <p>ワインの基礎知識をテスト</p>
+                    <div class="card-action">開始する</div>
                 </div>
-                <span id="quizScore">スコア: 0</span>
-            </div>
-
-            <div class="quiz-question" id="questionContainer">
-                <!-- 問題がここに表示される -->
-            </div>
-
-            <div id="feedbackContainer" class="quiz-feedback hidden">
-                <!-- フィードバックがここに表示される -->
-            </div>
-
-            <div class="quiz-actions">
-                <button class="btn" id="nextBtn" onclick="nextQuestion()" disabled>次の問題</button>
-                <button class="btn" id="submitBtn" onclick="submitAnswer()" disabled>回答</button>
-            </div>
-        </div>
-
-        <!-- 結果画面 -->
-        <div class="quiz-container quiz-results hidden" id="resultsContainer">
-            <h2>クイズ完了！</h2>
-            <div class="score-display" id="finalScore">8/10</div>
-            <p id="scoreMessage">素晴らしい結果です！</p>
-            
-            <div class="streak-info">
-                <h3>🔥 連続記録</h3>
-                <p id="streakDisplay">7日連続でクイズに挑戦中！</p>
+                <div class="quiz-type-card" onclick="startQuiz('advanced')">
+                    <div class="quiz-icon">🏆</div>
+                    <h3>上級クイズ</h3>
+                    <p>上級者向けの難しい問題</p>
+                    <div class="card-action">挑戦する</div>
+                </div>
+                <div class="quiz-type-card" onclick="startQuiz('regions')">
+                    <div class="quiz-icon">🌍</div>
+                    <h3>産地クイズ</h3>
+                    <p>世界のワイン産地について</p>
+                    <div class="card-action">学習する</div>
+                </div>
+                <div class="quiz-type-card" onclick="startQuiz('tasting')">
+                    <div class="quiz-icon">👅</div>
+                    <h3>テイスティング</h3>
+                    <p>味わいや香りの特徴</p>
+                    <div class="card-action">試す</div>
+                </div>
             </div>
             
-            <div>
-                <button class="btn" onclick="startNewQuiz()">もう一度挑戦</button>
-                <button class="btn" onclick="goHome()">ホームに戻る</button>
+            <!-- クイズゲーム -->
+            <div id="quizGame" class="quiz-game hidden">
+                <div class="quiz-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span class="progress-text" id="progressText">1/10</span>
+                </div>
+                
+                <div class="quiz-content">
+                    <div class="quiz-question">
+                        <h2 id="questionText"></h2>
+                    </div>
+                    
+                    <div id="questionOptions" class="quiz-options"></div>
+                    
+                    <div class="quiz-controls">
+                        <button id="nextButton" class="btn primary-btn" onclick="nextQuestion()" disabled>次へ</button>
+                        <button class="btn outline-btn" onclick="endQuiz()">終了</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- クイズ結果 -->
+            <div id="quizResults" class="quiz-results hidden">
+                <div class="results-content">
+                    <h2>🎉 クイズ結果</h2>
+                    <div class="result-score">
+                        <span class="score-number" id="finalScore">0</span>
+                        <span class="score-total">/10</span>
+                        <span class="score-label">正解</span>
+                    </div>
+                    <div class="result-message" id="resultMessage"></div>
+                    <div class="result-actions">
+                        <button class="btn primary-btn" onclick="restartQuiz()">もう一度</button>
+                        <button class="btn secondary-btn" onclick="backToTypes()">別のクイズ</button>
+                        <button class="btn outline-btn" onclick="goHome()">ホームへ</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Firebase SDK (CDN) -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getAuth, onAuthStateChanged } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
-        import { getFirestore, collection, addDoc, getDocs, query, where, orderBy, limit } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
-
-        // Firebase設定
-        const firebaseConfig = {
-            apiKey: "AIzaSyB6jnGUsdR9JDTZoDUq_QhM4Gr_gLVp3qA",
-            authDomain: "mywinememory.firebaseapp.com",
-            projectId: "mywinememory",
-            storageBucket: "mywinememory.firebasestorage.app",
-            messagingSenderId: "179280253269",
-            appId: "1:179280253269:web:58330b5938412fafc21fdc",
-            measurementId: "G-PP1B5425FD"
+    <!-- JavaScript -->
+    <script>
+        // クイズデータ
+        const quizData = {
+            basic: [
+                {
+                    question: "フランスの代表的なワイン産地はどれですか？",
+                    options: ["ボルドー", "トスカーナ", "ナパバレー", "モーゼル"],
+                    correct: 0
+                },
+                {
+                    question: "赤ワインの主な色素成分は何ですか？",
+                    options: ["タンニン", "アントシアニン", "レスベラトロール", "アルコール"],
+                    correct: 1
+                },
+                {
+                    question: "シャンパーニュの製法として正しいのはどれですか？",
+                    options: ["シャルマ方式", "メトード・シャンプノワーズ", "炭酸注入", "自然発酵"],
+                    correct: 1
+                },
+                {
+                    question: "ワインの「テロワール」とは何を意味しますか？",
+                    options: ["ブドウの品種", "土壌・気候・風土", "醸造技術", "熟成期間"],
+                    correct: 1
+                },
+                {
+                    question: "「ヴィンテージ」とは何を表しますか？",
+                    options: ["ブドウの収穫年", "ワインの価格", "アルコール度数", "熟成期間"],
+                    correct: 0
+                }
+            ],
+            advanced: [
+                {
+                    question: "ボルドーの左岸で主に栽培されるブドウ品種は？",
+                    options: ["メルロー", "カベルネ・ソーヴィニヨン", "ピノ・ノワール", "シラー"],
+                    correct: 1
+                },
+                {
+                    question: "マロラクティック発酵の目的は？",
+                    options: ["糖分をアルコールに変換", "酸味を和らげる", "色素を抽出", "タンニンを除去"],
+                    correct: 1
+                },
+                {
+                    question: "「グラン・クリュ」の意味は？",
+                    options: ["大きな醸造所", "特級畑", "長期熟成", "高価格帯"],
+                    correct: 1
+                },
+                {
+                    question: "シャンパーニュの「デゴルジュマン」とは？",
+                    options: ["ボトル詰め", "澱の除去", "糖分添加", "ラベル貼り"],
+                    correct: 1
+                },
+                {
+                    question: "バロロワインの主要ブドウ品種は？",
+                    options: ["サンジョヴェーゼ", "ネッビオーロ", "バルベラ", "ドルチェット"],
+                    correct: 1
+                }
+            ],
+            regions: [
+                {
+                    question: "ブルゴーニュの代表的な白ブドウ品種は？",
+                    options: ["シャルドネ", "ソーヴィニヨン・ブラン", "リースリング", "ゲヴュルツトラミナー"],
+                    correct: 0
+                },
+                {
+                    question: "キャンティはどの国のワインですか？",
+                    options: ["フランス", "イタリア", "スペイン", "ドイツ"],
+                    correct: 1
+                },
+                {
+                    question: "リオハワインの主要産地国は？",
+                    options: ["ポルトガル", "スペイン", "アルゼンチン", "チリ"],
+                    correct: 1
+                },
+                {
+                    question: "ナパバレーがあるのはどの国？",
+                    options: ["カナダ", "オーストラリア", "アメリカ", "南アフリカ"],
+                    correct: 2
+                },
+                {
+                    question: "モーゼル地域で有名なブドウ品種は？",
+                    options: ["シャルドネ", "リースリング", "ピノ・グリ", "ゲヴュルツトラミナー"],
+                    correct: 1
+                }
+            ],
+            tasting: [
+                {
+                    question: "ワインの「ボディ」とは何を表しますか？",
+                    options: ["色の濃さ", "香りの強さ", "味わいの厚み", "アルコール度数"],
+                    correct: 2
+                },
+                {
+                    question: "タンニンが多いワインの特徴は？",
+                    options: ["甘い", "渋い", "酸っぱい", "塩辛い"],
+                    correct: 1
+                },
+                {
+                    question: "ワインテイスティングの正しい順序は？",
+                    options: ["香り→外観→味わい", "外観→香り→味わい", "味わい→香り→外観", "香り→味わい→外観"],
+                    correct: 1
+                },
+                {
+                    question: "ワインの「フィニッシュ」とは？",
+                    options: ["最初の香り", "口の中での余韻", "ワインの色", "アルコール感"],
+                    correct: 1
+                },
+                {
+                    question: "「レッグ」や「ティアーズ」と呼ばれるのは？",
+                    options: ["ワインの色", "グラスを回した時の雫", "香りの強さ", "泡の細かさ"],
+                    correct: 1
+                }
+            ]
         };
 
-        // Firebase初期化
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
         // グローバル変数
-        let currentUser = null;
         let currentQuiz = null;
         let currentQuestionIndex = 0;
-        let userAnswers = [];
-        let quizScore = 0;
-        let quizType = '';
-
-        // 認証状態の監視
-        onAuthStateChanged(auth, (user) => {
-            currentUser = user;
-            if (!user) {
-                // ログインしていない場合はホームページにリダイレクト
-                window.location.href = '/';
-            }
-        });
-
-        // 一般的なワイン知識問題データ
-        const generalQuestions = [
-            {
-                type: 'multiple_choice',
-                question: 'フランスのボルドー地方で最も有名な赤ワイン用ブドウ品種は？',
-                options: ['ピノ・ノワール', 'カベルネ・ソーヴィニヨン', 'シラー', 'サンジョヴェーゼ'],
-                correct: 1,
-                explanation: 'カベルネ・ソーヴィニヨンはボルドー地方の代表的な品種で、力強い赤ワインを生み出します。'
-            },
-            {
-                type: 'true_false',
-                question: 'シャンパーニュは、フランスのシャンパーニュ地方で作られたスパークリングワインのみを指す。',
-                correct: true,
-                explanation: 'シャンパーニュは原産地統制呼称で、フランスのシャンパーニュ地方で特定の製法で作られたもののみが名乗れます。'
-            },
-            {
-                type: 'multiple_choice',
-                question: 'ワインの「タンニン」とは何に由来する成分ですか？',
-                options: ['ブドウの実', 'ブドウの皮や種', '発酵過程で生まれる', '樽から抽出される'],
-                correct: 1,
-                explanation: 'タンニンは主にブドウの皮や種、茎から抽出される渋み成分です。樽からも抽出されることがあります。'
-            },
-            {
-                type: 'free_input',
-                question: 'イタリアのトスカーナ州で生産される、サンジョヴェーゼを主体とした有名な赤ワインの名前を答えてください。',
-                keywords: ['キャンティ', 'chianti'],
-                explanation: 'キャンティは、トスカーナ州のキャンティ地区で生産される、サンジョヴェーゼを主体とした赤ワインです。'
-            },
-            {
-                type: 'multiple_choice',
-                question: 'ワインの適切な保存温度は一般的に何度程度ですか？',
-                options: ['5-8℃', '12-15℃', '18-20℃', '25-28℃'],
-                correct: 1,
-                explanation: '12-15℃がワインの長期保存に最も適した温度です。温度が高すぎると劣化が進み、低すぎると味わいが閉じてしまいます。'
-            }
-        ];
+        let score = 0;
+        let selectedAnswers = [];
 
         // クイズ開始
-        window.startQuiz = async function(type) {
-            quizType = type;
+        function startQuiz(type) {
+            currentQuiz = quizData[type];
             currentQuestionIndex = 0;
-            userAnswers = [];
-            quizScore = 0;
-
-            document.getElementById('quizTypeSelection').classList.add('hidden');
-            document.getElementById('loadingScreen').classList.remove('hidden');
-
-            try {
-                if (type === 'personal') {
-                    currentQuiz = await generatePersonalQuiz();
-                } else if (type === 'daily') {
-                    currentQuiz = await generateDailyQuiz();
-                } else {
-                    currentQuiz = generateGeneralQuiz();
-                }
-
-                setTimeout(() => {
-                    document.getElementById('loadingScreen').classList.add('hidden');
-                    document.getElementById('quizContainer').classList.remove('hidden');
-                    showQuestion();
-                }, 1500);
-
-            } catch (error) {
-                console.error('クイズ生成エラー:', error);
-                alert('クイズの準備に失敗しました。もう一度お試しください。');
-                resetQuiz();
-            }
-        }
-
-        // 一般クイズ生成
-        function generateGeneralQuiz() {
-            return {
-                title: '一般ワイン知識クイズ',
-                questions: [...generalQuestions].sort(() => Math.random() - 0.5).slice(0, 5)
-            };
-        }
-
-        // 個人クイズ生成
-        async function generatePersonalQuiz() {
-            if (!currentUser) throw new Error('ログインが必要です');
-
-            const q = query(
-                collection(db, 'wine_records'),
-                where('userId', '==', currentUser.uid),
-                orderBy('createdAt', 'desc'),
-                limit(10)
-            );
-
-            const snapshot = await getDocs(q);
-            const wines = [];
-            snapshot.forEach(doc => wines.push(doc.data()));
-
-            if (wines.length < 3) {
-                throw new Error('クイズ生成には最低3本のワイン記録が必要です');
-            }
-
-            const questions = wines.slice(0, 5).map(wine => ({
-                type: 'multiple_choice',
-                question: `${wine.wineName}について、あなたはどんな評価をつけましたか？`,
-                wineInfo: {
-                    name: wine.wineName,
-                    producer: wine.producer,
-                    vintage: wine.vintage,
-                    notes: wine.notes
-                },
-                options: ['1点', '2点', '3点', '4点', '5点'],
-                correct: wine.wineRating - 1,
-                explanation: `あなたは${wine.wineName}に${wine.wineRating}点をつけました。${wine.notes ? `メモ: ${wine.notes}` : ''}`
-            }));
-
-            return {
-                title: 'マイワインクイズ',
-                questions: questions
-            };
-        }
-
-        // 今日のクイズ生成
-        async function generateDailyQuiz() {
-            // 日付をシードとしてランダム問題を選択
-            const today = new Date().toDateString();
-            const seed = today.split('').reduce((a, b) => a + b.charCodeAt(0), 0);
+            score = 0;
+            selectedAnswers = [];
             
-            const shuffled = [...generalQuestions];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                const j = (seed + i) % (i + 1);
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
-
-            return {
-                title: '今日のワインクイズ',
-                questions: shuffled.slice(0, 3)
-            };
+            document.getElementById('quizTypes').style.display = 'none';
+            document.getElementById('quizGame').classList.remove('hidden');
+            document.getElementById('quizResults').classList.add('hidden');
+            
+            showQuestion();
         }
 
         // 問題表示
         function showQuestion() {
-            if (currentQuestionIndex >= currentQuiz.questions.length) {
-                showResults();
-                return;
-            }
-
-            const question = currentQuiz.questions[currentQuestionIndex];
-            const questionContainer = document.getElementById('questionContainer');
+            const question = currentQuiz[currentQuestionIndex];
+            document.getElementById('questionText').textContent = question.question;
             
-            // プログレス更新
-            const progress = ((currentQuestionIndex + 1) / currentQuiz.questions.length) * 100;
-            document.getElementById('progressBar').style.width = `${progress}%`;
-            document.getElementById('questionNumber').textContent = 
-                `問題 ${currentQuestionIndex + 1}/${currentQuiz.questions.length}`;
-            document.getElementById('quizScore').textContent = `スコア: ${quizScore}`;
-
-            // 問題HTML生成
-            let questionHTML = '';
+            const optionsContainer = document.getElementById('questionOptions');
+            optionsContainer.innerHTML = '';
             
-            // ワイン情報があれば表示
-            if (question.wineInfo) {
-                questionHTML += `
-                    <div class="wine-info">
-                        <h3>${question.wineInfo.name}</h3>
-                        <p><strong>生産者:</strong> ${question.wineInfo.producer}</p>
-                        ${question.wineInfo.vintage ? `<p><strong>ヴィンテージ:</strong> ${question.wineInfo.vintage}</p>` : ''}
-                        ${question.wineInfo.notes ? `<p><strong>あなたのメモ:</strong> ${question.wineInfo.notes}</p>` : ''}
-                    </div>
-                `;
-            }
-
-            questionHTML += `<div class="question-text">${question.question}</div>`;
-
-            if (question.type === 'multiple_choice') {
-                questionHTML += '<div class="answer-options">';
-                question.options.forEach((option, index) => {
-                    questionHTML += `
-                        <div class="answer-option" onclick="selectAnswer(${index})">
-                            ${option}
-                        </div>
-                    `;
-                });
-                questionHTML += '</div>';
-            } else if (question.type === 'true_false') {
-                questionHTML += `
-                    <div class="answer-options">
-                        <div class="answer-option" onclick="selectAnswer(true)">正しい</div>
-                        <div class="answer-option" onclick="selectAnswer(false)">間違い</div>
-                    </div>
-                `;
-            } else if (question.type === 'free_input') {
-                questionHTML += `
-                    <textarea class="text-input" id="freeAnswer" placeholder="あなたの答えを入力してください..."></textarea>
-                `;
-            }
-
-            questionContainer.innerHTML = questionHTML;
-            
-            // ボタン状態リセット
-            document.getElementById('submitBtn').disabled = true;
-            document.getElementById('nextBtn').disabled = true;
-            document.getElementById('feedbackContainer').classList.add('hidden');
-        }
-
-        // 答え選択
-        window.selectAnswer = function(answer) {
-            // 前の選択をクリア
-            document.querySelectorAll('.answer-option').forEach(opt => {
-                opt.classList.remove('selected');
+            question.options.forEach((option, index) => {
+                const button = document.createElement('button');
+                button.className = 'quiz-option btn';
+                button.textContent = option;
+                button.onclick = () => selectAnswer(index);
+                optionsContainer.appendChild(button);
             });
-
-            // 新しい選択をマーク
-            if (typeof answer === 'number') {
-                document.querySelectorAll('.answer-option')[answer].classList.add('selected');
-            } else {
-                const options = document.querySelectorAll('.answer-option');
-                if (answer === true) options[0].classList.add('selected');
-                else options[1].classList.add('selected');
-            }
-
-            userAnswers[currentQuestionIndex] = answer;
-            document.getElementById('submitBtn').disabled = false;
+            
+            updateProgress();
+            document.getElementById('nextButton').disabled = true;
         }
 
-        // 回答提出
-        window.submitAnswer = async function() {
-            const question = currentQuiz.questions[currentQuestionIndex];
-            let userAnswer = userAnswers[currentQuestionIndex];
+        // 回答選択
+        function selectAnswer(selectedIndex) {
+            const question = currentQuiz[currentQuestionIndex];
+            const options = document.querySelectorAll('.quiz-option');
             
-            // 自由入力の場合
-            if (question.type === 'free_input') {
-                userAnswer = document.getElementById('freeAnswer').value.trim();
-                userAnswers[currentQuestionIndex] = userAnswer;
-            }
-
-            // 答えをチェック
-            let isCorrect = false;
-            if (question.type === 'multiple_choice') {
-                isCorrect = userAnswer === question.correct;
-            } else if (question.type === 'true_false') {
-                isCorrect = userAnswer === question.correct;
-            } else if (question.type === 'free_input') {
-                // キーワードマッチングで判定
-                const keywords = question.keywords || [];
-                isCorrect = keywords.some(keyword => 
-                    userAnswer.toLowerCase().includes(keyword.toLowerCase())
-                );
-            }
-
-            if (isCorrect) {
-                quizScore++;
-            }
-
-            // フィードバック表示
-            showFeedback(isCorrect, question);
+            // 選択状態をリセット
+            options.forEach(option => {
+                option.classList.remove('selected', 'correct', 'incorrect');
+                option.disabled = false;
+            });
             
-            // ボタン状態更新
-            document.getElementById('submitBtn').disabled = true;
-            document.getElementById('nextBtn').disabled = false;
-        }
-
-        // フィードバック表示
-        function showFeedback(isCorrect, question) {
-            const feedbackContainer = document.getElementById('feedbackContainer');
-            feedbackContainer.className = `quiz-feedback ${isCorrect ? 'correct' : 'incorrect'}`;
+            // 選択したオプションをハイライト
+            options[selectedIndex].classList.add('selected');
             
-            let feedbackHTML = `
-                <h4>${isCorrect ? '✅ 正解！' : '❌ 不正解'}</h4>
-                <p>${question.explanation}</p>
-            `;
-
-            // 選択肢の正解を表示
-            if (question.type === 'multiple_choice') {
-                document.querySelectorAll('.answer-option').forEach((opt, index) => {
+            // 答えを記録
+            selectedAnswers[currentQuestionIndex] = selectedIndex;
+            
+            // 正解判定（即座に表示）
+            setTimeout(() => {
+                options.forEach((option, index) => {
+                    option.disabled = true;
                     if (index === question.correct) {
-                        opt.classList.add('correct');
-                    } else if (opt.classList.contains('selected')) {
-                        opt.classList.add('incorrect');
+                        option.classList.add('correct');
+                    } else if (index === selectedIndex && selectedIndex !== question.correct) {
+                        option.classList.add('incorrect');
                     }
                 });
-            }
-
-            feedbackContainer.innerHTML = feedbackHTML;
-            feedbackContainer.classList.remove('hidden');
+                
+                if (selectedIndex === question.correct) {
+                    score++;
+                }
+                
+                document.getElementById('nextButton').disabled = false;
+            }, 500);
         }
 
         // 次の問題
-        window.nextQuestion = function() {
+        function nextQuestion() {
             currentQuestionIndex++;
-            showQuestion();
-        }
-
-        // 結果表示
-        function showResults() {
-            document.getElementById('quizContainer').classList.add('hidden');
-            document.getElementById('resultsContainer').classList.remove('hidden');
-
-            const totalQuestions = currentQuiz.questions.length;
-            const scorePercentage = Math.round((quizScore / totalQuestions) * 100);
-
-            document.getElementById('finalScore').textContent = `${quizScore}/${totalQuestions}`;
             
-            let message = '';
-            if (scorePercentage >= 90) message = '完璧です！ワインマスターレベルです！';
-            else if (scorePercentage >= 70) message = '素晴らしい結果です！';
-            else if (scorePercentage >= 50) message = '良い成績です。さらに学習を続けましょう！';
-            else message = '頑張りましょう！継続が大切です。';
-
-            document.getElementById('scoreMessage').textContent = message;
-
-            // 結果をFirestoreに保存
-            saveQuizResult();
-        }
-
-        // クイズ結果保存
-        async function saveQuizResult() {
-            if (!currentUser) return;
-
-            try {
-                await addDoc(collection(db, 'quiz_results'), {
-                    userId: currentUser.uid,
-                    quizType: quizType,
-                    score: quizScore,
-                    totalQuestions: currentQuiz.questions.length,
-                    percentage: Math.round((quizScore / currentQuiz.questions.length) * 100),
-                    answers: userAnswers,
-                    completedAt: new Date()
-                });
-
-                console.log('クイズ結果が保存されました');
-            } catch (error) {
-                console.error('結果保存エラー:', error);
+            if (currentQuestionIndex >= currentQuiz.length) {
+                showQuizResults();
+            } else {
+                showQuestion();
             }
         }
 
-        // 新しいクイズ開始
-        window.startNewQuiz = function() {
-            resetQuiz();
+        // 結果表示
+        function showQuizResults() {
+            document.getElementById('quizGame').classList.add('hidden');
+            document.getElementById('quizResults').classList.remove('hidden');
+            
+            document.getElementById('finalScore').textContent = score;
+            
+            let message = '';
+            const percentage = (score / currentQuiz.length) * 100;
+            if (percentage >= 90) {
+                message = '🌟 完璧！ワインエキスパートですね！';
+            } else if (percentage >= 80) {
+                message = '🎉 素晴らしい！とても詳しいですね！';
+            } else if (percentage >= 60) {
+                message = '👏 よくできました！もう少しで完璧です。';
+            } else if (percentage >= 40) {
+                message = '📚 なかなか！さらに学習を続けましょう。';
+            } else {
+                message = '🌱 頑張りました！基礎から復習してみましょう。';
+            }
+            
+            document.getElementById('resultMessage').textContent = message;
         }
 
-        // クイズリセット
-        function resetQuiz() {
-            document.getElementById('resultsContainer').classList.add('hidden');
-            document.getElementById('quizContainer').classList.add('hidden');
-            document.getElementById('quizTypeSelection').classList.remove('hidden');
+        // クイズ再開
+        function restartQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            selectedAnswers = [];
+            document.getElementById('quizResults').classList.add('hidden');
+            document.getElementById('quizGame').classList.remove('hidden');
+            showQuestion();
+        }
+
+        // クイズ選択に戻る
+        function backToTypes() {
+            document.getElementById('quizResults').classList.add('hidden');
+            document.getElementById('quizGame').classList.add('hidden');
+            document.getElementById('quizTypes').style.display = 'grid';
         }
 
         // ホームに戻る
-        window.goHome = function() {
+        function goHome() {
             window.location.href = '/';
         }
 
-        // テーマ切り替え機能
+        // クイズ終了
+        function endQuiz() {
+            if (confirm('クイズを終了しますか？')) {
+                backToTypes();
+            }
+        }
+
+        // プログレス更新
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / currentQuiz.length) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+            document.getElementById('progressText').textContent = `${currentQuestionIndex + 1}/${currentQuiz.length}`;
+        }
+
+        // テーマ切り替え
         function initTheme() {
             const themeToggle = document.getElementById('theme-toggle');
             const themeIcon = document.querySelector('.theme-icon');
             
-            if (!themeToggle || !themeIcon) return;
-            
-            // 保存されたテーマまたはシステム設定を読み込み
             const savedTheme = localStorage.getItem('theme') || 
                 (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
             
@@ -553,7 +426,7 @@
             }
         }
 
-        // モバイルメニュー制御
+        // モバイルメニュー
         function initMobileMenu() {
             const mobileMenuToggle = document.getElementById('mobileMenuToggle');
             const navbarMenu = document.getElementById('navbarMenu');
@@ -564,16 +437,6 @@
                     navbarMenu.classList.toggle('active');
                 });
                 
-                // メニューリンクがクリックされたらメニューを閉じる
-                const navLinks = navbarMenu.querySelectorAll('.nav-link');
-                navLinks.forEach(link => {
-                    link.addEventListener('click', () => {
-                        mobileMenuToggle.classList.remove('active');
-                        navbarMenu.classList.remove('active');
-                    });
-                });
-                
-                // 画面外クリックでメニューを閉じる
                 document.addEventListener('click', (e) => {
                     if (!mobileMenuToggle.contains(e.target) && !navbarMenu.contains(e.target)) {
                         mobileMenuToggle.classList.remove('active');
@@ -583,22 +446,11 @@
             }
         }
 
-        // テーマ初期化
-        initTheme();
-        
-        // モバイルメニュー初期化
-        initMobileMenu();
-
-        console.log('🍷 Quiz system initialized');
-    </script>
-
-    <!-- Service Worker登録 -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/service-worker.js')
-                .then(() => console.log('Service Worker registered'))
-                .catch(err => console.log('Service Worker registration failed'));
-        }
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            initMobileMenu();
+        });
     </script>
 </body>
 </html>
