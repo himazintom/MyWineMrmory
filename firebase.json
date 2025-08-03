@@ -17,19 +17,20 @@
     ],
     "headers": [
       {
-        "source": "/**",
+        "source": "**/*.@(html|js)",
         "headers": [
           {
             "key": "Cache-Control",
-            "value": "no-cache, no-store, must-revalidate"
-          },
+            "value": "public, max-age=3600, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(css|png|jpg|jpeg|gif|ico|svg)",
+        "headers": [
           {
-            "key": "Pragma",
-            "value": "no-cache"
-          },
-          {
-            "key": "Expires",
-            "value": "0"
+            "key": "Cache-Control",
+            "value": "public, max-age=86400"
           }
         ]
       },
@@ -38,7 +39,7 @@
         "headers": [
           {
             "key": "Cache-Control",
-            "value": "no-cache"
+            "value": "no-cache, must-revalidate"
           }
         ]
       },
@@ -47,7 +48,16 @@
         "headers": [
           {
             "key": "Cache-Control",
-            "value": "no-cache"
+            "value": "no-cache, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "/manifest.json",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600, must-revalidate"
           }
         ]
       }

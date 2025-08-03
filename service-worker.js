@@ -1,26 +1,35 @@
-const CACHE_NAME = 'wine-memory-v3';
-const urlsToCache = [
+const CACHE_NAME = 'wine-memory-v4';
+const STATIC_CACHE = 'wine-memory-static-v4';
+const DYNAMIC_CACHE = 'wine-memory-dynamic-v4';
+
+// 重要で変更頻度の低いファイル
+const staticAssets = [
   '/',
   '/index.html',
-  '/manifest.json',
   '/quiz.html',
+  '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png',
-  // Firebase SDKのキャッシュは動的に追加
+];
+
+// 動的にキャッシュするFirebase SDK等
+const dynamicAssets = [
+  /https:\/\/www\.gstatic\.com\/firebasejs/,
+  /https:\/\/.*\.googleapis\.com/,
 ];
 
 // Service Worker インストール
 self.addEventListener('install', (event) => {
   console.log('Service Worker installing');
   event.waitUntil(
-    caches.open(CACHE_NAME)
+    caches.open(STATIC_CACHE)
       .then((cache) => {
-        console.log('Cache opened');
-        return cache.addAll(urlsToCache);
+        console.log('Static cache opened');
+        return cache.addAll(staticAssets);
       })
   );
-  // 即座に新しいService Workerをアクティブにする
-  self.skipWaiting();
+  // 重要な更新の場合のみskipWaiting（開発中は有効）
+  // self.skipWaiting();
 });
 
 // Service Worker アクティベート（古いキャッシュを削除）
@@ -30,31 +39,67 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName !== STATIC_CACHE && cacheName !== DYNAMIC_CACHE) {
             console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
-    }).then(() => {
-      // 即座に新しいService Workerを全てのクライアントで使用開始
-      return self.clients.claim();
     })
   );
 });
 
-// キャッシュからリソースを取得
+// スマートなfetchストラテジー
 self.addEventListener('fetch', (event) => {
-  event.respondWith(
-    caches.match(event.request)
-      .then((response) => {
-        // キャッシュにある場合はキャッシュから、ない場合はネットワークから
-        if (response) {
-          return response;
-        }
-        return fetch(event.request);
+  const requestUrl = new URL(event.request.url);
+  
+  // 静的アセット: Cache First
+  if (staticAssets.includes(requestUrl.pathname)) {
+    event.respondWith(
+      caches.match(event.request).then((response) => {
+        return response || fetch(event.request).then((fetchResponse) => {
+          const responseClone = fetchResponse.clone();
+          caches.open(STATIC_CACHE).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+          return fetchResponse;
+        });
       })
+    );
+    return;
+  }
+  
+  // Firebase SDK: Stale While Revalidate
+  if (dynamicAssets.some(pattern => pattern.test(event.request.url))) {
+    event.respondWith(
+      caches.match(event.request).then((response) => {
+        const fetchPromise = fetch(event.request).then((fetchResponse) => {
+          const responseClone = fetchResponse.clone();
+          caches.open(DYNAMIC_CACHE).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+          return fetchResponse;
+        });
+        
+        return response || fetchPromise;
+      })
+    );
+    return;
+  }
+  
+  // その他: Network First
+  event.respondWith(
+    fetch(event.request).catch(() => {
+      return caches.match(event.request);
+    })
   );
+});
+
+// メッセージハンドラ（手動更新用）
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.action === 'skipWaiting') {
+    self.skipWaiting();
+  }
 });
 
 // プッシュ通知受信
