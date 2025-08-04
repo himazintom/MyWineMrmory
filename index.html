@@ -478,6 +478,117 @@
                         </div>
                         <input type="hidden" name="wineRating" value="0" required>
                     </div>
+                </div>
+                
+                <!-- 味わいの段階別分析 -->
+                <div class="form-section">
+                    <h3>味わいの段階別分析</h3>
+                    <div class="taste-phases">
+                        <div class="phase-item">
+                            <h4>アタック（第一印象）</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>強度:</label>
+                                    <div class="radio-grid">
+                                        <label class="radio-item">
+                                            <input type="radio" name="attackIntensity" value="1">
+                                            <span>弱い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="attackIntensity" value="2">
+                                            <span>やや弱い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="attackIntensity" value="3">
+                                            <span>中程度</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="attackIntensity" value="4">
+                                            <span>やや強い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="attackIntensity" value="5">
+                                            <span>強い</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="attackNotes">アタックのメモ:</label>
+                                    <textarea id="attackNotes" name="attackNotes" rows="2" placeholder="第一印象の味わいを記録"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="phase-item">
+                            <h4>中盤（発展）</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>複雑さ:</label>
+                                    <div class="radio-grid">
+                                        <label class="radio-item">
+                                            <input type="radio" name="middleComplexity" value="1">
+                                            <span>シンプル</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="middleComplexity" value="2">
+                                            <span>やや複雑</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="middleComplexity" value="3">
+                                            <span>複雑</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="middleComplexity" value="4">
+                                            <span>非常に複雑</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="middleComplexity" value="5">
+                                            <span>極めて複雑</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="middleNotes">中盤のメモ:</label>
+                                    <textarea id="middleNotes" name="middleNotes" rows="2" placeholder="中盤の味わいを記録"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="phase-item">
+                            <h4>フィニッシュ（余韻）</h4>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label>長さ:</label>
+                                    <div class="radio-grid">
+                                        <label class="radio-item">
+                                            <input type="radio" name="finishLength" value="1">
+                                            <span>短い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="finishLength" value="2">
+                                            <span>やや短い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="finishLength" value="3">
+                                            <span>中程度</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="finishLength" value="4">
+                                            <span>やや長い</span>
+                                        </label>
+                                        <label class="radio-item">
+                                            <input type="radio" name="finishLength" value="5">
+                                            <span>非常に長い</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="finishNotes">フィニッシュのメモ:</label>
+                                    <textarea id="finishNotes" name="finishNotes" rows="2" placeholder="余韻の印象を記録"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                     
                     <div class="form-group">
                         <label for="notes">詳細メモ:</label>
@@ -538,6 +649,7 @@
         let currentUser = null;
         let wineRecords = [];
         let userProfile = null;
+        let authInitialized = false;
 
 
         // ローディング画面の制御
@@ -580,6 +692,8 @@
         // 認証状態の監視
         onAuthStateChanged(auth, (user) => {
             currentUser = user;
+            authInitialized = true; // 認証初期化完了
+            
             if (user) {
                 loadUserProfile();
                 loadWineRecords();
@@ -596,6 +710,11 @@
             const userNavEmail = document.getElementById('userNavEmail');
             const wineFeaturesSection = document.getElementById('wineFeaturesSection');
 
+            // 認証が初期化されていない場合は何もしない
+            if (!authInitialized) {
+                return;
+            }
+
             if (currentUser) {
                 // ログイン後のナビ表示
                 loginNavView.classList.add('hidden');
@@ -605,35 +724,83 @@
                 userNavName.textContent = currentUser.displayName || 'ユーザー';
                 userNavEmail.textContent = currentUser.email || '';
                 
-                // ワイン機能を表示
-                wineFeaturesSection.style.display = 'block';
+                // 元のワイン機能コンテンツを復元
+                restoreWineFeatures();
             } else {
                 // ログイン前のナビ表示
                 loginNavView.classList.remove('hidden');
                 userNavView.classList.add('hidden');
                 
-                // ワイン機能を非表示（ログインが必要メッセージ表示）
-                wineFeaturesSection.innerHTML = `
-                    <div class="login-required">
-                        <h2>🍷 MyWineMemory</h2>
-                        <p>ワインの記録を始めるには、ヘッダーからログインしてください</p>
-                        <div class="login-features">
-                            <div class="feature-preview">
-                                <span class="preview-icon">📝</span>
-                                <span>超詳細テイスティングノート</span>
-                            </div>
-                            <div class="feature-preview">
-                                <span class="preview-icon">🧠</span>
-                                <span>ワイン知識クイズ</span>
-                            </div>
-                            <div class="feature-preview">
-                                <span class="preview-icon">📊</span>
-                                <span>データ分析ダッシュボード</span>
-                            </div>
+                // ログイン促進メッセージを表示
+                showLoginPrompt();
+            }
+        }
+
+        // ワイン機能の復元
+        function restoreWineFeatures() {
+            const wineFeaturesSection = document.getElementById('wineFeaturesSection');
+            
+            // 元のコンテンツが既にある場合はそのまま表示
+            if (!wineFeaturesSection.innerHTML.includes('login-required')) {
+                wineFeaturesSection.style.display = 'block';
+                return;
+            }
+
+            // 元のワイン機能コンテンツを復元
+            wineFeaturesSection.innerHTML = `
+                <div class="welcome-message">
+                    <h2>🍷 ワインの世界へようこそ</h2>
+                    <p>詳細な記録で、あなたのワイン体験をより豊かに</p>
+                </div>
+                
+                <div class="quick-actions">
+                    <button class="action-btn primary" onclick="showUltraAdvancedForm()">
+                        <span class="btn-icon">📝</span>
+                        <span class="btn-text">ワインを記録</span>
+                    </button>
+                    <a href="/quiz.html" class="action-btn secondary">
+                        <span class="btn-icon">🧠</span>
+                        <span class="btn-text">クイズに挑戦</span>
+                    </a>
+                    <a href="/analytics.html" class="action-btn tertiary">
+                        <span class="btn-icon">📊</span>
+                        <span class="btn-text">データ分析</span>
+                    </a>
+                </div>
+
+                <div class="recent-wines" id="recentWines">
+                    <h3>最近の記録</h3>
+                    <div class="wine-grid" id="wineGrid">
+                        <!-- ワイン記録がここに表示される -->
+                    </div>
+                </div>
+            `;
+            wineFeaturesSection.style.display = 'block';
+        }
+
+        // ログイン促進画面の表示
+        function showLoginPrompt() {
+            const wineFeaturesSection = document.getElementById('wineFeaturesSection');
+            wineFeaturesSection.innerHTML = `
+                <div class="login-required">
+                    <h2>🍷 MyWineMemory</h2>
+                    <p>ワインの記録を始めるには、ヘッダーからログインしてください</p>
+                    <div class="login-features">
+                        <div class="feature-preview">
+                            <span class="preview-icon">📝</span>
+                            <span>超詳細テイスティングノート</span>
+                        </div>
+                        <div class="feature-preview">
+                            <span class="preview-icon">🧠</span>
+                            <span>ワイン知識クイズ</span>
+                        </div>
+                        <div class="feature-preview">
+                            <span class="preview-icon">📊</span>
+                            <span>データ分析ダッシュボード</span>
                         </div>
                     </div>
-                `;
-            }
+                </div>
+            `;
         }
         
         // ログアウト確認
@@ -1004,6 +1171,14 @@
                 body: parseInt(formData.get('body')),
                 finish: parseInt(formData.get('finish')),
                 wineRating: parseInt(formData.get('wineRating')),
+                // 味わい段階別分析
+                attackIntensity: parseInt(formData.get('attackIntensity')) || null,
+                attackNotes: formData.get('attackNotes'),
+                middleComplexity: parseInt(formData.get('middleComplexity')) || null,
+                middleNotes: formData.get('middleNotes'),
+                finishLength: parseInt(formData.get('finishLength')) || null,
+                finishNotes: formData.get('finishNotes'),
+                // その他
                 notes: formData.get('notes'),
                 foodPairing: formData.get('foodPairing'),
                 occasion: formData.get('occasion'),

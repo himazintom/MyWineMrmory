@@ -3215,16 +3215,24 @@ h4 {
 }
 
 /* 認証ナビゲーション関連のスタイル */
+.auth-nav {
+    min-width: 200px; /* 最小幅を確保してレイアウト安定化 */
+    display: flex;
+    justify-content: flex-end;
+}
+
 .auth-nav-content {
     display: flex;
     align-items: center;
     gap: 8px;
+    justify-content: flex-end;
 }
 
 .user-nav-info {
     display: flex;
     align-items: center;
     gap: 8px;
+    flex-wrap: nowrap;
 }
 
 .user-details {
@@ -3233,16 +3241,25 @@ h4 {
     align-items: flex-start;
     font-size: 12px;
     line-height: 1.2;
+    min-width: 80px; /* ユーザー名部分の最小幅確保 */
 }
 
 .user-name {
     font-weight: 500;
     color: var(--text-color);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
 }
 
 .user-email {
     color: var(--text-light);
     font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 120px;
 }
 
 .privacy-toggle-btn,
@@ -3256,6 +3273,7 @@ h4 {
     cursor: pointer;
     transition: all 0.3s ease;
     white-space: nowrap;
+    flex-shrink: 0; /* ボタンが縮まないように */
 }
 
 .privacy-toggle-btn:hover,
@@ -3297,6 +3315,60 @@ h4 {
     border-left: 4px solid var(--primary-color);
 }
 
+/* 味わい段階別分析のスタイル */
+.taste-phases {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.phase-item {
+    background: var(--card-background);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.phase-item h4 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 1.1em;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.phase-item h4:before {
+    content: "▶";
+    color: var(--secondary-color);
+    font-size: 0.8em;
+}
+
+.phase-item .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.phase-item .radio-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.phase-item .radio-item {
+    flex: 1;
+    min-width: 80px;
+}
+
+.phase-item textarea {
+    width: 100%;
+    min-height: 60px;
+    resize: vertical;
+}
+
 @media (max-width: 768px) {
     .user-details {
         display: none;
@@ -3306,5 +3378,18 @@ h4 {
     .logout-btn {
         padding: 8px 12px;
         font-size: 13px;
+    }
+    
+    .phase-item .form-grid {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+    
+    .phase-item .radio-grid {
+        justify-content: center;
+    }
+    
+    .phase-item .radio-item {
+        min-width: 70px;
     }
 }
