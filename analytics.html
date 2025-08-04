@@ -91,16 +91,15 @@
                         <!-- ログイン後表示 -->
                         <div id="userNavView" class="auth-nav-content hidden">
                             <div class="user-nav-info">
-                                <img id="userAvatar" class="user-avatar" src="" alt="ユーザーアバター" style="display: none;">
                                 <div class="user-details">
                                     <span class="user-name" id="userNavName">ユーザー</span>
                                     <span class="user-email" id="userNavEmail"></span>
                                 </div>
                                 <button id="privacyToggle" class="privacy-toggle-btn" onclick="togglePrivacy()" title="記録の公開/非公開を切り替え">
-                                    <span id="privacyIcon">🔒</span>
+                                    <span id="privacyText">非公開</span>
                                 </button>
                                 <button class="logout-btn" onclick="confirmSignOut()" title="ログアウト">
-                                    <span>🚪</span>
+                                    ログアウト
                                 </button>
                             </div>
                         </div>
@@ -263,7 +262,6 @@
             const userNavView = document.getElementById('userNavView');
             const userNavName = document.getElementById('userNavName');
             const userNavEmail = document.getElementById('userNavEmail');
-            const userAvatar = document.getElementById('userAvatar');
             const loginRequired = document.getElementById('loginRequired');
             const analyticsContent = document.getElementById('analyticsContent');
 
@@ -275,14 +273,6 @@
                 // ユーザー情報を設定
                 userNavName.textContent = currentUser.displayName || 'ユーザー';
                 userNavEmail.textContent = currentUser.email || '';
-                
-                // アバター画像があれば表示
-                if (currentUser.photoURL) {
-                    userAvatar.src = currentUser.photoURL;
-                    userAvatar.style.display = 'block';
-                } else {
-                    userAvatar.style.display = 'none';
-                }
                 
                 // 分析コンテンツを表示
                 loginRequired.style.display = 'none';
@@ -317,15 +307,15 @@
 
         // プライバシーボタンの状態更新
         function updatePrivacyButton() {
-            const privacyIcon = document.getElementById('privacyIcon');
+            const privacyText = document.getElementById('privacyText');
             const privacyToggle = document.getElementById('privacyToggle');
             
-            if (userProfile && privacyIcon && privacyToggle) {
+            if (userProfile && privacyText && privacyToggle) {
                 if (userProfile.isPublic) {
-                    privacyIcon.textContent = '🌍';
+                    privacyText.textContent = '公開';
                     privacyToggle.title = '記録を非公開にする';
                 } else {
-                    privacyIcon.textContent = '🔒';
+                    privacyText.textContent = '非公開';
                     privacyToggle.title = '記録を公開する';
                 }
             }
@@ -713,17 +703,28 @@
             }
         }
 
+        // ステータス表示（画面中央）
         function showStatus(message, type) {
-            const statusEl = document.getElementById('authNavStatus');
-            if (statusEl) {
-                statusEl.textContent = message;
-                statusEl.className = `auth-status ${type}`;
-                statusEl.classList.remove('hidden');
-                
-                setTimeout(() => {
-                    statusEl.classList.add('hidden');
-                }, 3000);
+            // 既存のメッセージを削除
+            const existingMessage = document.querySelector('.center-message');
+            if (existingMessage) {
+                existingMessage.remove();
             }
+            
+            // 新しいメッセージ要素を作成
+            const messageEl = document.createElement('div');
+            messageEl.className = `center-message ${type}`;
+            messageEl.textContent = message;
+            
+            // bodyに追加
+            document.body.appendChild(messageEl);
+            
+            // 3秒後に削除
+            setTimeout(() => {
+                if (messageEl.parentNode) {
+                    messageEl.remove();
+                }
+            }, 3000);
         }
 
         // テーマとモバイルメニューの初期化

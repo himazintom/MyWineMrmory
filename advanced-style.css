@@ -78,15 +78,23 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: var(--background-gradient);
     min-height: 100vh;
-    padding: 20px;
+    padding: 0;
     color: var(--text-color);
     line-height: 1.6;
     transition: background 0.3s ease, color 0.3s ease;
 }
 
 .container {
-    max-width: 1600px;
+    max-width: 1200px;
     margin: 0 auto;
+    padding: 20px;
+}
+
+/* 全体的なコンテンツの幅制限 */
+.main-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
 }
 
 /* ヘッダーとテーマ切り替え */
@@ -3203,5 +3211,100 @@ h4 {
     
     .nav-text {
         font-size: 15px;
+    }
+}
+
+/* 認証ナビゲーション関連のスタイル */
+.auth-nav-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-nav-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-size: 12px;
+    line-height: 1.2;
+}
+
+.user-name {
+    font-weight: 500;
+    color: var(--text-color);
+}
+
+.user-email {
+    color: var(--text-light);
+    font-size: 11px;
+}
+
+.privacy-toggle-btn,
+.logout-btn {
+    background: transparent;
+    border: 1px solid rgba(102, 126, 234, 0.3);
+    color: var(--text-color);
+    padding: 6px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.privacy-toggle-btn:hover,
+.logout-btn:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: var(--primary-color);
+    transform: translateY(-1px);
+}
+
+/* 中央メッセージ表示のスタイル */
+.center-message {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--card-background);
+    color: var(--text-color);
+    padding: 20px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 10000;
+    font-size: 16px;
+    font-weight: 500;
+    min-width: 200px;
+    text-align: center;
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(10px);
+}
+
+.center-message.success {
+    border-left: 4px solid #10b981;
+}
+
+.center-message.error {
+    border-left: 4px solid #ef4444;
+}
+
+.center-message.info {
+    border-left: 4px solid var(--primary-color);
+}
+
+@media (max-width: 768px) {
+    .user-details {
+        display: none;
+    }
+    
+    .privacy-toggle-btn,
+    .logout-btn {
+        padding: 8px 12px;
+        font-size: 13px;
     }
 }
