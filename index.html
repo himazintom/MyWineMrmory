@@ -1197,16 +1197,38 @@
                 .then((registration) => {
                     console.log('Service Worker registered');
                     
+                    // 更新の確認
                     registration.addEventListener('updatefound', () => {
                         const newWorker = registration.installing;
+                        console.log('New Service Worker found, installing...');
+                        
                         newWorker.addEventListener('statechange', () => {
-                            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                                showUpdateAvailable();
+                            if (newWorker.state === 'installed') {
+                                if (navigator.serviceWorker.controller) {
+                                    // 既存のSWがある場合、更新を通知
+                                    console.log('New content available, showing update notification');
+                                    showUpdateAvailable();
+                                } else {
+                                    // 初回インストールの場合
+                                    console.log('Content cached for offline use');
+                                }
                             }
                         });
                     });
+                    
+                    // 定期的に更新をチェック
+                    setInterval(() => {
+                        registration.update();
+                    }, 60000); // 1分ごと
                 })
                 .catch(err => console.log('Service Worker registration failed:', err));
+                
+            // Service Workerからのメッセージを受信
+            navigator.serviceWorker.addEventListener('message', (event) => {
+                if (event.data && event.data.type === 'SKIP_WAITING') {
+                    window.location.reload();
+                }
+            });
         }
 
         function showUpdateAvailable() {
@@ -1236,10 +1258,31 @@
         }
 
         window.updateApp = function() {
-            if (navigator.serviceWorker.controller) {
-                navigator.serviceWorker.controller.postMessage({ action: 'skipWaiting' });
+            // キャッシュをクリア
+            if ('caches' in window) {
+                caches.keys().then(cacheNames => {
+                    return Promise.all(
+                        cacheNames.map(cacheName => {
+                            console.log('Deleting cache:', cacheName);
+                            return caches.delete(cacheName);
+                        })
+                    );
+                }).then(() => {
+                    console.log('All caches cleared');
+                    // Service Workerにskip waitingを指示
+                    if (navigator.serviceWorker.controller) {
+                        navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+                    }
+                    // 強制リロード
+                    window.location.reload(true);
+                });
+            } else {
+                // Service Workerにskip waitingを指示
+                if (navigator.serviceWorker.controller) {
+                    navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+                }
+                window.location.reload(true);
             }
-            window.location.reload();
         }
     </script>
 </body>

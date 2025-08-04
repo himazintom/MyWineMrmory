@@ -1,6 +1,6 @@
-const CACHE_NAME = 'wine-memory-v10';
-const STATIC_CACHE = 'wine-memory-static-v10';
-const DYNAMIC_CACHE = 'wine-memory-dynamic-v10';
+const CACHE_NAME = 'wine-memory-v11';
+const STATIC_CACHE = 'wine-memory-static-v11';
+const DYNAMIC_CACHE = 'wine-memory-dynamic-v11';
 
 // 重要で変更頻度の低いファイル
 const staticAssets = [
@@ -34,8 +34,8 @@ self.addEventListener('install', (event) => {
         return cache.addAll(staticAssets);
       })
   );
-  // 重要な更新の場合のみskipWaiting（開発中は有効）
-  // self.skipWaiting();
+  // 重要な更新の場合はskipWaitingを有効にして強制更新
+  self.skipWaiting();
 });
 
 // Service Worker アクティベート（古いキャッシュを削除）
@@ -53,6 +53,8 @@ self.addEventListener('activate', (event) => {
       );
     })
   );
+  // すべてのクライアントを即座に制御
+  self.clients.claim();
 });
 
 // スマートなfetchストラテジー
