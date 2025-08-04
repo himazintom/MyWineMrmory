@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>スキルツリー - MyWineMemory</title>
+    
+    <!-- PWA設定 -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="WineMemory">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    
+    <!-- 高度なスタイル -->
+    <link rel="stylesheet" href="/advanced-style.css">
+    
+    <style>
+        .skill-tree-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+        
+        .progress-header {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 30px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        .daily-goal {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .daily-goal h3 {
+            margin: 0 0 8px 0;
+            font-size: 18px;
+        }
+        
+        .goal-progress {
+            background: rgba(255, 255, 255, 0.2);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+        
+        .goal-fill {
+            background: white;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+        
+        .skill-tree {
+            position: relative;
+            padding: 40px 0;
+        }
+        
+        .skill-path {
+            position: relative;
+            margin-bottom: 60px;
+        }
+        
+        .path-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 30px;
+            padding: 16px;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+        }
+        
+        .skill-units {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 30px;
+            position: relative;
+        }
+        
+        .skill-unit {
+            position: relative;
+            width: 120px;
+            height: 120px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .skill-unit:hover {
+            transform: scale(1.05);
+        }
+        
+        .unit-circle {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 4px solid var(--border-color);
+            background: var(--card-bg);
+            transition: all 0.3s ease;
+        }
+        
+        .skill-unit.locked .unit-circle {
+            background: var(--disabled-bg);
+            border-color: var(--border-color);
+            opacity: 0.6;
+        }
+        
+        .skill-unit.available .unit-circle {
+            border-color: var(--primary-color);
+            background: linear-gradient(135deg, var(--primary-color) 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .skill-unit.completed .unit-circle {
+            border-color: var(--success-color);
+            background: var(--success-color);
+            color: white;
+        }
+        
+        .skill-unit.mastered .unit-circle {
+            border-color: #fbbf24;
+            background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+            color: white;
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
+        }
+        
+        .unit-icon {
+            font-size: 32px;
+            margin-bottom: 8px;
+        }
+        
+        .unit-title {
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            line-height: 1.2;
+        }
+        
+        .unit-progress {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 6px;
+            background: var(--border-color);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: var(--success-color);
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        
+        .skill-unit.completed .progress-fill,
+        .skill-unit.mastered .progress-fill {
+            width: 100% !important;
+        }
+        
+        .connection-line {
+            position: absolute;
+            height: 3px;
+            background: var(--border-color);
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: -1;
+        }
+        
+        .connection-line.active {
+            background: var(--success-color);
+        }
+        
+        .unit-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .unit-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .unit-modal.show .modal-content {
+            transform: scale(1);
+        }
+        
+        .modal-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        
+        .modal-icon {
+            font-size: 64px;
+            margin-bottom: 16px;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 8px;
+        }
+        
+        .modal-subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+        }
+        
+        .lesson-list {
+            margin: 24px 0;
+        }
+        
+        .lesson-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .lesson-item:hover {
+            background: var(--card-bg);
+            border-color: var(--primary-color);
+        }
+        
+        .lesson-item.completed {
+            background: rgba(16, 185, 129, 0.1);
+            border-color: var(--success-color);
+        }
+        
+        .lesson-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            background: var(--primary-color);
+            color: white;
+            font-size: 18px;
+        }
+        
+        .lesson-item.completed .lesson-icon {
+            background: var(--success-color);
+        }
+        
+        .lesson-info {
+            flex: 1;
+        }
+        
+        .lesson-title {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 4px;
+        }
+        
+        .lesson-description {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .lesson-xp {
+            color: var(--primary-color);
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+        
+        .btn-modal {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: var(--secondary-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-secondary:hover {
+            background: var(--card-bg);
+        }
+        
+        @media (max-width: 768px) {
+            .skill-units {
+                gap: 20px;
+            }
+            
+            .skill-unit {
+                width: 100px;
+                height: 100px;
+            }
+            
+            .unit-icon {
+                font-size: 28px;
+            }
+            
+            .unit-title {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Professional Navigation Header -->
+    <nav class="main-navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <span class="brand-icon">🍷</span>
+                <span class="brand-text">MyWineMemory</span>
+            </div>
+            
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="メニューを開く">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            
+            <div class="navbar-menu" id="navbarMenu">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link">
+                            <span class="nav-icon">🏠</span>
+                            <span class="nav-text">ホーム</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/quiz.html" class="nav-link">
+                            <span class="nav-icon">🧠</span>
+                            <span class="nav-text">クイズ</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/analytics.html" class="nav-link">
+                            <span class="nav-icon">📊</span>
+                            <span class="nav-text">分析</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/ai-evaluation.html" class="nav-link">
+                            <span class="nav-icon">🤖</span>
+                            <span class="nav-text">AI分析</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/learning-progress.html" class="nav-link">
+                            <span class="nav-icon">📈</span>
+                            <span class="nav-text">学習進捗</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/skill-tree.html" class="nav-link active">
+                            <span class="nav-icon">🌳</span>
+                            <span class="nav-text">スキルツリー</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <button id="theme-toggle" class="theme-toggle nav-link nav-button" aria-label="テーマ切り替え">
+                            <span class="theme-icon">🌙</span>
+                            <span class="nav-text">テーマ</span>
+                        </button>
+                    </li>
+                    <li class="nav-item auth-nav" id="authNavItem">
+                        <!-- ログイン前表示 -->
+                        <div id="loginNavView" class="auth-nav-content">
+                            <button class="nav-link nav-button auth-button" onclick="signInWithGoogle()">
+                                <span class="nav-icon">👤</span>
+                                <span class="nav-text">ログイン</span>
+                            </button>
+                        </div>
+                        
+                        <!-- ログイン後表示 -->
+                        <div id="userNavView" class="auth-nav-content hidden">
+                            <div class="user-nav-info">
+                                <img id="userAvatar" class="user-avatar" src="" alt="ユーザーアバター" style="display: none;">
+                                <div class="user-details">
+                                    <span class="user-name" id="userNavName">ユーザー</span>
+                                    <span class="user-email" id="userNavEmail"></span>
+                                </div>
+                                <button id="privacyToggle" class="privacy-toggle-btn" onclick="togglePrivacy()" title="記録の公開/非公開を切り替え">
+                                    <span id="privacyIcon">🔒</span>
+                                </button>
+                                <button class="logout-btn" onclick="confirmSignOut()" title="ログアウト">
+                                    <span>🚪</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- ステータス表示 -->
+                        <div id="authNavStatus" class="auth-status hidden"></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="skill-tree-container">
+            <h1>🌳 ワインスキルツリー</h1>
+            
+            <!-- ログイン必要メッセージ -->
+            <div id="loginRequired" class="ai-card" style="text-align: center;">
+                <h2>🔐 ログインが必要です</h2>
+                <p>スキルツリーを利用するには、ログインしてください</p>
+                <button class="btn primary-btn" onclick="signInWithGoogle()">
+                    <span class="btn-icon">G</span>
+                    Googleでログイン
+                </button>
+            </div>
+            
+            <!-- スキルツリーコンテンツ -->
+            <div id="skillTreeContent" class="hidden">
+                <!-- 進捗ヘッダー -->
+                <div class="progress-header">
+                    <div class="user-stats">
+                        <div class="stat-item">
+                            <span class="stat-value" id="totalXP">0</span>
+                            <span class="stat-label">総XP</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="currentLevel">1</span>
+                            <span class="stat-label">レベル</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="currentStreak">0</span>
+                            <span class="stat-label">連続日</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value" id="completedUnits">0</span>
+                            <span class="stat-label">完了ユニット</span>
+                        </div>
+                    </div>
+                    <div class="daily-goal">
+                        <h3>今日の目標</h3>
+                        <p id="dailyGoalText">3レッスン完了 (0/3)</p>
+                        <div class="goal-progress">
+                            <div class="goal-fill" id="dailyGoalFill" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- スキルツリー -->
+                <div class="skill-tree" id="skillTree">
+                    <!-- スキルパスが動的に生成される -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ユニット詳細モーダル -->
+    <div class="unit-modal" id="unitModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-icon" id="modalIcon">🍇</div>
+                <h2 class="modal-title" id="modalTitle">ワインの基礎</h2>
+                <p class="modal-subtitle" id="modalSubtitle">ワインについて学ぼう</p>
+            </div>
+            
+            <div class="lesson-list" id="lessonList">
+                <!-- レッスンが動的に生成される -->
+            </div>
+            
+            <div class="modal-actions">
+                <button class="btn-modal btn-secondary" onclick="closeUnitModal()">閉じる</button>
+                <button class="btn-modal btn-primary" id="startLessonBtn" onclick="startLesson()">レッスン開始</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK と JavaScript -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, query, where, getDocs, doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6jnGUsdR9JDTZoDUq_QhM4Gr_gLVp3qA",
+            authDomain: "mywinememory.firebaseapp.com",
+            projectId: "mywinememory",
+            storageBucket: "mywinememory.firebasestorage.app",
+            messagingSenderId: "179280253269",
+            appId: "1:179280253269:web:58330b5938412fafc21fdc",
+            measurementId: "G-PP1B5425FD"
+        };
+
+        // Firebase初期化
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // グローバル変数
+        let currentUser = null;
+        let userProgress = null;
+        let currentUnit = null;
+        let skillTreeData = null;
+
+        // スキルツリーデータ定義
+        const skillPaths = [
+            {
+                id: 'basics',
+                title: 'ワインの基礎',
+                units: [
+                    {
+                        id: 'wine-types',
+                        title: 'ワインの種類',
+                        icon: '🍇',
+                        description: 'ワインの基本的な分類を学ぶ',
+                        lessons: [
+                            { id: 'red-wine', title: '赤ワインの基礎', description: '赤ワインの特徴と製造方法', xp: 10 },
+                            { id: 'white-wine', title: '白ワインの基礎', description: '白ワインの特徴と製造方法', xp: 10 },
+                            { id: 'rose-wine', title: 'ロゼワインの基礎', description: 'ロゼワインの特徴と製造方法', xp: 10 },
+                            { id: 'sparkling-wine', title: 'スパークリングワイン', description: '泡の世界を探る', xp: 15 }
+                        ]
+                    },
+                    {
+                        id: 'grape-varieties',
+                        title: 'ブドウ品種',
+                        icon: '🍾',
+                        description: '主要なブドウ品種を学ぶ',
+                        lessons: [
+                            { id: 'cabernet-sauvignon', title: 'カベルネ・ソーヴィニヨン', description: '赤ワインの王様', xp: 12 },
+                            { id: 'chardonnay', title: 'シャルドネ', description: '白ワインの女王', xp: 12 },
+                            { id: 'pinot-noir', title: 'ピノ・ノワール', description: 'エレガントな赤ワイン', xp: 15 },
+                            { id: 'sauvignon-blanc', title: 'ソーヴィニヨン・ブラン', description: 'フレッシュな白ワイン', xp: 12 }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'regions',
+                title: 'ワイン産地',
+                units: [
+                    {
+                        id: 'france',
+                        title: 'フランス',
+                        icon: '🇫🇷',
+                        description: 'ワインの故郷フランスを学ぶ',
+                        lessons: [
+                            { id: 'bordeaux', title: 'ボルドー', description: '左岸と右岸の違い', xp: 15 },
+                            { id: 'burgundy', title: 'ブルゴーニュ', description: 'テロワールの真髄', xp: 18 },
+                            { id: 'champagne', title: 'シャンパーニュ', description: '泡の王様', xp: 20 },
+                            { id: 'loire', title: 'ロワール', description: '城とワインの谷', xp: 15 }
+                        ]
+                    },
+                    {
+                        id: 'italy',
+                        title: 'イタリア',
+                        icon: '🇮🇹',
+                        description: 'イタリアワインの多様性',
+                        lessons: [
+                            { id: 'tuscany', title: 'トスカーナ', description: 'キャンティとスーパータスカン', xp: 15 },
+                            { id: 'piedmont', title: 'ピエモンテ', description: 'バローロとバルバレスコ', xp: 18 },
+                            { id: 'veneto', title: 'ヴェネト', description: 'アマローネとプロセッコ', xp: 15 }
+                        ]
+                    }
+                ]
+            },
+            {
+                id: 'tasting',
+                title: 'テイスティング',
+                units: [
+                    {
+                        id: 'tasting-basics',
+                        title: 'テイスティング基礎',
+                        icon: '👃',
+                        description: 'テイスティングの基本技術',
+                        lessons: [
+                            { id: 'visual-analysis', title: '外観の分析', description: '色と透明度を読む', xp: 12 },
+                            { id: 'aroma-analysis', title: '香りの分析', description: 'アロマの世界', xp: 15 },
+                            { id: 'taste-analysis', title: '味わいの分析', description: '口の中での体験', xp: 15 },
+                            { id: 'finish-analysis', title: 'フィニッシュの評価', description: '余韻を楽しむ', xp: 18 }
+                        ]
+                    },
+                    {
+                        id: 'advanced-tasting',
+                        title: '上級テイスティング',
+                        icon: '🏆',
+                        description: 'プロレベルのテイスティング',
+                        lessons: [
+                            { id: 'blind-tasting', title: 'ブラインドテイスティング', description: '情報なしで評価する', xp: 25 },
+                            { id: 'defect-detection', title: '欠陥の検出', description: 'ワインの問題を見つける', xp: 20 },
+                            { id: 'aging-potential', title: '熟成ポテンシャル', description: '将来を予測する', xp: 30 }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // 認証状態の監視
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                loadUserProgress();
+            }
+            updateUI();
+        });
+
+        // UI更新
+        function updateUI() {
+            const loginNavView = document.getElementById('loginNavView');
+            const userNavView = document.getElementById('userNavView');
+            const userNavName = document.getElementById('userNavName');
+            const userNavEmail = document.getElementById('userNavEmail');
+            const userAvatar = document.getElementById('userAvatar');
+            const loginRequired = document.getElementById('loginRequired');
+            const skillTreeContent = document.getElementById('skillTreeContent');
+
+            if (currentUser) {
+                // ログイン後のナビ表示
+                loginNavView.classList.add('hidden');
+                userNavView.classList.remove('hidden');
+                
+                // ユーザー情報を設定
+                userNavName.textContent = currentUser.displayName || 'ユーザー';
+                userNavEmail.textContent = currentUser.email || '';
+                
+                // アバター画像があれば表示
+                if (currentUser.photoURL) {
+                    userAvatar.src = currentUser.photoURL;
+                    userAvatar.style.display = 'block';
+                } else {
+                    userAvatar.style.display = 'none';
+                }
+                
+                // スキルツリーコンテンツを表示
+                loginRequired.style.display = 'none';
+                skillTreeContent.classList.remove('hidden');
+            } else {
+                // ログイン前のナビ表示
+                loginNavView.classList.remove('hidden');
+                userNavView.classList.add('hidden');
+                
+                // ログイン要求を表示
+                loginRequired.style.display = 'block';
+                skillTreeContent.classList.add('hidden');
+            }
+        }
+
+        // ユーザー進捗読み込み
+        async function loadUserProgress() {
+            if (!currentUser) return;
+
+            try {
+                const userProgressRef = doc(db, 'user_skill_progress', currentUser.uid);
+                const userProgressDoc = await getDoc(userProgressRef);
+                
+                if (userProgressDoc.exists()) {
+                    userProgress = userProgressDoc.data();
+                } else {
+                    // 初回ユーザーの場合、初期データを作成
+                    userProgress = {
+                        totalXP: 0,
+                        currentLevel: 1,
+                        currentStreak: 0,
+                        completedUnits: 0,
+                        unlockedUnits: ['wine-types'], // 最初のユニットのみアンロック
+                        completedLessons: [],
+                        dailyProgress: 0,
+                        lastStudyDate: null,
+                        createdAt: serverTimestamp()
+                    };
+                    await setDoc(userProgressRef, userProgress);
+                }
+
+                updateProgressDisplay();
+                generateSkillTree();
+                
+            } catch (error) {
+                console.error('ユーザー進捗の読み込みに失敗:', error);
+                showStatus('データの読み込みに失敗しました', 'error');
+            }
+        }
+
+        // 進捗表示更新
+        function updateProgressDisplay() {
+            document.getElementById('totalXP').textContent = userProgress.totalXP;
+            document.getElementById('currentLevel').textContent = userProgress.currentLevel;
+            document.getElementById('currentStreak').textContent = userProgress.currentStreak;
+            document.getElementById('completedUnits').textContent = userProgress.completedUnits;
+            
+            // 今日の目標更新
+            const dailyGoal = 3;
+            const progress = Math.min(userProgress.dailyProgress || 0, dailyGoal);
+            const progressPercent = (progress / dailyGoal) * 100;
+            
+            document.getElementById('dailyGoalText').textContent = `${dailyGoal}レッスン完了 (${progress}/${dailyGoal})`;
+            document.getElementById('dailyGoalFill').style.width = `${progressPercent}%`;
+        }
+
+        // スキルツリー生成
+        function generateSkillTree() {
+            const skillTreeEl = document.getElementById('skillTree');
+            skillTreeEl.innerHTML = '';
+
+            skillPaths.forEach(path => {
+                const pathEl = document.createElement('div');
+                pathEl.className = 'skill-path';
+                
+                pathEl.innerHTML = `
+                    <h2 class="path-title">${path.title}</h2>
+                    <div class="skill-units" id="units-${path.id}"></div>
+                `;
+                
+                const unitsContainer = pathEl.querySelector(`#units-${path.id}`);
+                
+                path.units.forEach((unit, index) => {
+                    const unitEl = createUnitElement(unit, index, path.units.length);
+                    unitsContainer.appendChild(unitEl);
+                    
+                    // 接続線を追加（最後のユニット以外）
+                    if (index < path.units.length - 1) {
+                        const connectionEl = document.createElement('div');
+                        connectionEl.className = 'connection-line';
+                        connectionEl.style.width = '30px';
+                        connectionEl.style.left = `${120 + 30}px`; // ユニット幅 + ギャップの半分
+                        
+                        if (isUnitCompleted(unit.id)) {
+                            connectionEl.classList.add('active');
+                        }
+                        
+                        unitEl.appendChild(connectionEl);
+                    }
+                });
+                
+                skillTreeEl.appendChild(pathEl);
+            });
+        }
+
+        // ユニット要素作成
+        function createUnitElement(unit, index, totalUnits) {
+            const unitEl = document.createElement('div');
+            unitEl.className = 'skill-unit';
+            
+            // ユニットの状態を判定
+            const isUnlocked = userProgress.unlockedUnits.includes(unit.id);
+            const isCompleted = isUnitCompleted(unit.id);
+            const isMastered = isUnitMastered(unit.id);
+            
+            if (!isUnlocked) {
+                unitEl.classList.add('locked');
+            } else if (isMastered) {
+                unitEl.classList.add('mastered');
+            } else if (isCompleted) {
+                unitEl.classList.add('completed');
+            } else {
+                unitEl.classList.add('available');
+            }
+            
+            const progress = getUnitProgress(unit.id);
+            
+            unitEl.innerHTML = `
+                <div class="unit-circle">
+                    <div class="unit-icon">${unit.icon}</div>
+                    <div class="unit-title">${unit.title}</div>
+                </div>
+                <div class="unit-progress">
+                    <div class="progress-fill" style="width: ${progress}%"></div>
+                </div>
+            `;
+            
+            if (isUnlocked) {
+                unitEl.addEventListener('click', () => openUnitModal(unit));
+            }
+            
+            return unitEl;
+        }
+
+        // ユニット完了判定
+        function isUnitCompleted(unitId) {
+            const unit = findUnitById(unitId);
+            if (!unit) return false;
+            
+            return unit.lessons.every(lesson => 
+                userProgress.completedLessons.includes(lesson.id)
+            );
+        }
+
+        // ユニットマスター判定
+        function isUnitMastered(unitId) {
+            // マスターは完了後に追加の条件（例：満点取得）を満たした場合
+            return isUnitCompleted(unitId) && Math.random() > 0.7; // 仮実装
+        }
+
+        // ユニット進捗取得
+        function getUnitProgress(unitId) {
+            const unit = findUnitById(unitId);
+            if (!unit) return 0;
+            
+            const completedLessons = unit.lessons.filter(lesson => 
+                userProgress.completedLessons.includes(lesson.id)
+            ).length;
+            
+            return (completedLessons / unit.lessons.length) * 100;
+        }
+
+        // ユニット検索
+        function findUnitById(unitId) {
+            for (const path of skillPaths) {
+                const unit = path.units.find(u => u.id === unitId);
+                if (unit) return unit;
+            }
+            return null;
+        }
+
+        // ユニットモーダル開く
+        function openUnitModal(unit) {
+            currentUnit = unit;
+            const modal = document.getElementById('unitModal');
+            
+            document.getElementById('modalIcon').textContent = unit.icon;
+            document.getElementById('modalTitle').textContent = unit.title;
+            document.getElementById('modalSubtitle').textContent = unit.description;
+            
+            // レッスンリスト生成
+            const lessonListEl = document.getElementById('lessonList');
+            lessonListEl.innerHTML = '';
+            
+            unit.lessons.forEach(lesson => {
+                const isCompleted = userProgress.completedLessons.includes(lesson.id);
+                const lessonEl = document.createElement('div');
+                lessonEl.className = `lesson-item ${isCompleted ? 'completed' : ''}`;
+                
+                lessonEl.innerHTML = `
+                    <div class="lesson-icon">${isCompleted ? '✓' : '📚'}</div>
+                    <div class="lesson-info">
+                        <div class="lesson-title">${lesson.title}</div>
+                        <div class="lesson-description">${lesson.description}</div>
+                    </div>
+                    <div class="lesson-xp">+${lesson.xp} XP</div>
+                `;
+                
+                if (!isCompleted) {
+                    lessonEl.addEventListener('click', () => {
+                        startSpecificLesson(lesson);
+                    });
+                }
+                
+                lessonListEl.appendChild(lessonEl);
+            });
+            
+            // ボタン状態更新
+            const startBtn = document.getElementById('startLessonBtn');
+            const nextLesson = unit.lessons.find(lesson => 
+                !userProgress.completedLessons.includes(lesson.id)
+            );
+            
+            if (nextLesson) {
+                startBtn.textContent = `${nextLesson.title}を開始`;
+                startBtn.onclick = () => startSpecificLesson(nextLesson);
+            } else {
+                startBtn.textContent = '復習する';
+                startBtn.onclick = () => reviewUnit(unit);
+            }
+            
+            modal.classList.add('show');
+        }
+
+        // ユニットモーダル閉じる
+        window.closeUnitModal = function() {
+            document.getElementById('unitModal').classList.remove('show');
+        }
+
+        // レッスン開始
+        window.startLesson = function() {
+            if (!currentUnit) return;
+            
+            const nextLesson = currentUnit.lessons.find(lesson => 
+                !userProgress.completedLessons.includes(lesson.id)
+            );
+            
+            if (nextLesson) {
+                startSpecificLesson(nextLesson);
+            } else {
+                reviewUnit(currentUnit);
+            }
+        }
+
+        // 特定レッスン開始
+        function startSpecificLesson(lesson) {
+            closeUnitModal();
+            // クイズページにリダイレクト（レッスンIDを含む）
+            window.location.href = `/quiz.html?lesson=${lesson.id}&unit=${currentUnit.id}`;
+        }
+
+        // ユニット復習
+        function reviewUnit(unit) {
+            closeUnitModal();
+            // ランダムなレッスンで復習
+            const randomLesson = unit.lessons[Math.floor(Math.random() * unit.lessons.length)];
+            window.location.href = `/quiz.html?lesson=${randomLesson.id}&unit=${unit.id}&mode=review`;
+        }
+
+        // 共通のユーティリティ関数
+        window.signInWithGoogle = async function() {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+                showStatus('ログインに成功しました', 'success');
+            } catch (error) {
+                console.error('Google login failed:', error);
+                showStatus('ログインに失敗しました: ' + error.message, 'error');
+            }
+        }
+
+        window.confirmSignOut = function() {
+            if (confirm('ログアウトしますか？')) {
+                firebaseSignOut(auth);
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('authNavStatus');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.className = `auth-status ${type}`;
+                statusEl.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    statusEl.classList.add('hidden');
+                }, 3000);
+            }
+        }
+
+        // テーマとモバイルメニューの初期化
+        function initTheme() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.querySelector('.theme-icon');
+            
+            const savedTheme = localStorage.getItem('theme') || 
+                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            
+            setTheme(savedTheme);
+            
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                setTheme(newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+            
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
+        }
+
+        function initMobileMenu() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const navbarMenu = document.getElementById('navbarMenu');
+            
+            if (mobileMenuToggle && navbarMenu) {
+                mobileMenuToggle.addEventListener('click', () => {
+                    mobileMenuToggle.classList.toggle('active');
+                    navbarMenu.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!mobileMenuToggle.contains(e.target) && !navbarMenu.contains(e.target)) {
+                        mobileMenuToggle.classList.remove('active');
+                        navbarMenu.classList.remove('active');
+                    }
+                });
+            }
+        }
+
+        // モーダル外クリックで閉じる
+        document.getElementById('unitModal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) {
+                closeUnitModal();
+            }
+        });
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            initMobileMenu();
+        });
+    </script>
+</body>
+</html>

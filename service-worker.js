@@ -1,6 +1,6 @@
-const CACHE_NAME = 'wine-memory-v9';
-const STATIC_CACHE = 'wine-memory-static-v9';
-const DYNAMIC_CACHE = 'wine-memory-dynamic-v9';
+const CACHE_NAME = 'wine-memory-v10';
+const STATIC_CACHE = 'wine-memory-static-v10';
+const DYNAMIC_CACHE = 'wine-memory-dynamic-v10';
 
 // 重要で変更頻度の低いファイル
 const staticAssets = [
@@ -10,6 +10,8 @@ const staticAssets = [
   '/analytics.html',
   '/ai-evaluation.html',
   '/learning-progress.html',
+  '/skill-tree.html',
+  '/admin-panel.html',
   '/advanced-style.css',
   '/manifest.json',
   '/icons/icon-192.png',

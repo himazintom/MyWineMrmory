@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理パネル - MyWineMemory</title>
+    
+    <!-- PWA設定 -->
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="WineMemory">
+    <link rel="apple-touch-icon" href="/icons/icon-192.png">
+    
+    <!-- 高度なスタイル -->
+    <link rel="stylesheet" href="/advanced-style.css">
+    
+    <style>
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .admin-tabs {
+            display: flex;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow);
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 12px 24px;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .tab-btn.active {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+        
+        .admin-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-color);
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .card-icon {
+            font-size: 24px;
+        }
+        
+        .question-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex: 1;
+        }
+        
+        .form-label {
+            font-weight: 600;
+            color: var(--text-color);
+            font-size: 14px;
+        }
+        
+        .form-input {
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-color);
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+        
+        .form-textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .form-select {
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text-color);
+        }
+        
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .option-input {
+            flex: 1;
+        }
+        
+        .correct-indicator {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+        
+        .correct-indicator.selected {
+            border-color: var(--success-color);
+            background: var(--success-color);
+        }
+        
+        .correct-indicator.selected::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5a67d8;
+        }
+        
+        .btn-secondary {
+            background: var(--secondary-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+        
+        .btn-danger {
+            background: var(--error-color);
+            color: white;
+        }
+        
+        .questions-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .question-item {
+            background: var(--secondary-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            transition: all 0.2s ease;
+        }
+        
+        .question-item:hover {
+            border-color: var(--primary-color);
+        }
+        
+        .question-header {
+            display: flex;
+            justify-content: between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+        
+        .question-text {
+            flex: 1;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .question-meta {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .question-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary-color);
+            display: block;
+        }
+        
+        .stat-label {
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        .difficulty-slider {
+            width: 100%;
+            margin: 16px 0;
+        }
+        
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+        
+        .user-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .user-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .user-name {
+            font-weight: 600;
+            color: var(--text-color);
+        }
+        
+        .user-stats {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-secondary);
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .admin-tabs {
+                flex-direction: column;
+                gap: 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Professional Navigation Header -->
+    <nav class="main-navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <span class="brand-icon">🍷</span>
+                <span class="brand-text">MyWineMemory</span>
+            </div>
+            
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="メニューを開く">
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+                <span class="hamburger-line"></span>
+            </button>
+            
+            <div class="navbar-menu" id="navbarMenu">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a href="/" class="nav-link">
+                            <span class="nav-icon">🏠</span>
+                            <span class="nav-text">ホーム</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/quiz.html" class="nav-link">
+                            <span class="nav-icon">🧠</span>
+                            <span class="nav-text">クイズ</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/analytics.html" class="nav-link">
+                            <span class="nav-icon">📊</span>
+                            <span class="nav-text">分析</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/ai-evaluation.html" class="nav-link">
+                            <span class="nav-icon">🤖</span>
+                            <span class="nav-text">AI分析</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/learning-progress.html" class="nav-link">
+                            <span class="nav-icon">📈</span>
+                            <span class="nav-text">学習進捗</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/skill-tree.html" class="nav-link">
+                            <span class="nav-icon">🌳</span>
+                            <span class="nav-text">スキルツリー</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/admin-panel.html" class="nav-link active">
+                            <span class="nav-icon">⚙️</span>
+                            <span class="nav-text">管理</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <button id="theme-toggle" class="theme-toggle nav-link nav-button" aria-label="テーマ切り替え">
+                            <span class="theme-icon">🌙</span>
+                            <span class="nav-text">テーマ</span>
+                        </button>
+                    </li>
+                    <li class="nav-item auth-nav" id="authNavItem">
+                        <!-- ログイン前表示 -->
+                        <div id="loginNavView" class="auth-nav-content">
+                            <button class="nav-link nav-button auth-button" onclick="signInWithGoogle()">
+                                <span class="nav-icon">👤</span>
+                                <span class="nav-text">ログイン</span>
+                            </button>
+                        </div>
+                        
+                        <!-- ログイン後表示 -->
+                        <div id="userNavView" class="auth-nav-content hidden">
+                            <div class="user-nav-info">
+                                <img id="userAvatar" class="user-avatar" src="" alt="ユーザーアバター" style="display: none;">
+                                <div class="user-details">
+                                    <span class="user-name" id="userNavName">ユーザー</span>
+                                    <span class="user-email" id="userNavEmail"></span>
+                                </div>
+                                <button id="privacyToggle" class="privacy-toggle-btn" onclick="togglePrivacy()" title="記録の公開/非公開を切り替え">
+                                    <span id="privacyIcon">🔒</span>
+                                </button>
+                                <button class="logout-btn" onclick="confirmSignOut()" title="ログアウト">
+                                    <span>🚪</span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- ステータス表示 -->
+                        <div id="authNavStatus" class="auth-status hidden"></div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="main-container">
+        <div class="admin-container">
+            <h1>⚙️ 管理パネル</h1>
+            <p>問題管理とシステム設定を行います</p>
+            
+            <!-- ログイン必要メッセージ -->
+            <div id="loginRequired" class="ai-card" style="text-align: center;">
+                <h2>🔐 管理者権限が必要です</h2>
+                <p>管理パネルにアクセスするには、管理者としてログインしてください</p>
+                <button class="btn primary-btn" onclick="signInWithGoogle()">
+                    <span class="btn-icon">G</span>
+                    Googleでログイン
+                </button>
+            </div>
+            
+            <!-- 管理コンテンツ -->
+            <div id="adminContent" class="hidden">
+                <!-- タブナビゲーション -->
+                <div class="admin-tabs">
+                    <button class="tab-btn active" onclick="switchTab('questions')">問題管理</button>
+                    <button class="tab-btn" onclick="switchTab('difficulty')">難易度調整</button>
+                    <button class="tab-btn" onclick="switchTab('analytics')">システム分析</button>
+                    <button class="tab-btn" onclick="switchTab('users')">ユーザー管理</button>
+                </div>
+                
+                <!-- 問題管理タブ -->
+                <div id="questionsTab" class="tab-content active">
+                    <div class="admin-grid">
+                        <!-- 問題作成フォーム -->
+                        <div class="admin-card">
+                            <h2 class="card-title">
+                                <span class="card-icon">➕</span>
+                                新しい問題を作成
+                            </h2>
+                            
+                            <form class="question-form" id="questionForm">
+                                <div class="form-field">
+                                    <label class="form-label">問題文</label>
+                                    <textarea class="form-input form-textarea" id="questionText" placeholder="問題文を入力してください" required></textarea>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-field">
+                                        <label class="form-label">カテゴリ</label>
+                                        <select class="form-select" id="questionCategory" required>
+                                            <option value="">選択してください</option>
+                                            <option value="basic">基本知識</option>
+                                            <option value="regions">産地</option>
+                                            <option value="grapes">ブドウ品種</option>
+                                            <option value="tasting">テイスティング</option>
+                                            <option value="production">醸造</option>
+                                            <option value="pairing">ペアリング</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-field">
+                                        <label class="form-label">難易度</label>
+                                        <select class="form-select" id="questionDifficulty" required>
+                                            <option value="">選択してください</option>
+                                            <option value="beginner">初級</option>
+                                            <option value="intermediate">中級</option>
+                                            <option value="advanced">上級</option>
+                                            <option value="expert">エキスパート</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-field">
+                                    <label class="form-label">選択肢（正解をクリックで選択）</label>
+                                    <div class="options-container">
+                                        <div class="option-row">
+                                            <input type="text" class="form-input option-input" placeholder="選択肢1" required>
+                                            <div class="correct-indicator" onclick="selectCorrectAnswer(0)"></div>
+                                        </div>
+                                        <div class="option-row">
+                                            <input type="text" class="form-input option-input" placeholder="選択肢2" required>
+                                            <div class="correct-indicator" onclick="selectCorrectAnswer(1)"></div>
+                                        </div>
+                                        <div class="option-row">
+                                            <input type="text" class="form-input option-input" placeholder="選択肢3" required>
+                                            <div class="correct-indicator" onclick="selectCorrectAnswer(2)"></div>
+                                        </div>
+                                        <div class="option-row">
+                                            <input type="text" class="form-input option-input" placeholder="選択肢4" required>
+                                            <div class="correct-indicator" onclick="selectCorrectAnswer(3)"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="form-field">
+                                    <label class="form-label">解説</label>
+                                    <textarea class="form-input form-textarea" id="questionExplanation" placeholder="正解の解説を入力してください"></textarea>
+                                </div>
+                                
+                                <div class="btn-group">
+                                    <button type="submit" class="btn btn-primary">問題を追加</button>
+                                    <button type="button" class="btn btn-secondary" onclick="clearQuestionForm()">クリア</button>
+                                </div>
+                            </form>
+                        </div>
+                        
+                        <!-- 問題一覧 -->
+                        <div class="admin-card">
+                            <h2 class="card-title">
+                                <span class="card-icon">📋</span>
+                                問題一覧
+                            </h2>
+                            
+                            <div class="questions-list" id="questionsList">
+                                <!-- 問題が動的に表示される -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 難易度調整タブ -->
+                <div id="difficultyTab" class="tab-content">
+                    <div class="admin-card">
+                        <h2 class="card-title">
+                            <span class="card-icon">🎯</span>
+                            アダプティブ難易度設定
+                        </h2>
+                        
+                        <div class="form-field">
+                            <label class="form-label">難易度調整の感度</label>
+                            <input type="range" class="difficulty-slider" id="adaptiveStrength" min="1" max="10" value="5">
+                            <div class="slider-labels">
+                                <span>保守的</span>
+                                <span>バランス</span>
+                                <span>積極的</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="form-label">最小正答率（問題が簡単すぎる判定）</label>
+                            <input type="range" class="difficulty-slider" id="minAccuracy" min="60" max="90" value="80">
+                            <div class="slider-labels">
+                                <span>60%</span>
+                                <span>75%</span>
+                                <span>90%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="form-field">
+                            <label class="form-label">最大正答率（問題が難しすぎる判定）</label>
+                            <input type="range" class="difficulty-slider" id="maxAccuracy" min="20" max="50" value="35">
+                            <div class="slider-labels">
+                                <span>20%</span>
+                                <span>35%</span>
+                                <span>50%</span>
+                            </div>
+                        </div>
+                        
+                        <div class="btn-group">
+                            <button class="btn btn-primary" onclick="saveAdaptiveSettings()">設定を保存</button>
+                            <button class="btn btn-secondary" onclick="resetAdaptiveSettings()">デフォルトに戻す</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- システム分析タブ -->
+                <div id="analyticsTab" class="tab-content">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <span class="stat-number" id="totalQuestions">0</span>
+                            <span class="stat-label">総問題数</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number" id="totalUsers">0</span>
+                            <span class="stat-label">総ユーザー数</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number" id="averageAccuracy">0%</span>
+                            <span class="stat-label">全体平均正答率</span>
+                        </div>
+                        <div class="stat-card">
+                            <span class="stat-number" id="activeUsers">0</span>
+                            <span class="stat-label">アクティブユーザー</span>
+                        </div>
+                    </div>
+                    
+                    <div class="admin-card">
+                        <h2 class="card-title">
+                            <span class="card-icon">📊</span>
+                            問題別統計
+                        </h2>
+                        <div id="questionStats">
+                            <!-- 問題統計が表示される -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- ユーザー管理タブ -->
+                <div id="usersTab" class="tab-content">
+                    <div class="admin-card">
+                        <h2 class="card-title">
+                            <span class="card-icon">👥</span>
+                            ユーザー一覧
+                        </h2>
+                        
+                        <div class="user-list" id="usersList">
+                            <!-- ユーザー一覧が表示される -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK と JavaScript -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut as firebaseSignOut } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js';
+        import { getFirestore, collection, addDoc, getDocs, query, orderBy, where, updateDoc, deleteDoc, doc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js';
+
+        // Firebase設定
+        const firebaseConfig = {
+            apiKey: "AIzaSyB6jnGUsdR9JDTZoDUq_QhM4Gr_gLVp3qA",
+            authDomain: "mywinememory.firebaseapp.com",
+            projectId: "mywinememory",
+            storageBucket: "mywinememory.firebasestorage.app",
+            messagingSenderId: "179280253269",
+            appId: "1:179280253269:web:58330b5938412fafc21fdc",
+            measurementId: "G-PP1B5425FD"
+        };
+
+        // Firebase初期化
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // グローバル変数
+        let currentUser = null;
+        let isAdmin = false;
+        let correctAnswerIndex = -1;
+        let questions = [];
+        let users = [];
+
+        // 管理者メールアドレス（実際の実装では環境変数や設定ファイルから取得）
+        const adminEmails = ['admin@example.com', 'himazintom@gmail.com']; // 実際のメールアドレスに変更
+
+        // 認証状態の監視
+        onAuthStateChanged(auth, async (user) => {
+            currentUser = user;
+            if (user) {
+                isAdmin = adminEmails.includes(user.email);
+                if (isAdmin) {
+                    await loadAdminData();
+                }
+            }
+            updateUI();
+        });
+
+        // UI更新
+        function updateUI() {
+            const loginNavView = document.getElementById('loginNavView');
+            const userNavView = document.getElementById('userNavView');
+            const userNavName = document.getElementById('userNavName');
+            const userNavEmail = document.getElementById('userNavEmail');
+            const userAvatar = document.getElementById('userAvatar');
+            const loginRequired = document.getElementById('loginRequired');
+            const adminContent = document.getElementById('adminContent');
+
+            if (currentUser && isAdmin) {
+                // 管理者のナビ表示
+                loginNavView.classList.add('hidden');
+                userNavView.classList.remove('hidden');
+                
+                // ユーザー情報を設定
+                userNavName.textContent = currentUser.displayName || 'ユーザー';
+                userNavEmail.textContent = currentUser.email || '';
+                
+                if (currentUser.photoURL) {
+                    userAvatar.src = currentUser.photoURL;
+                    userAvatar.style.display = 'block';
+                } else {
+                    userAvatar.style.display = 'none';
+                }
+                
+                // 管理コンテンツを表示
+                loginRequired.style.display = 'none';
+                adminContent.classList.remove('hidden');
+            } else {
+                // 非管理者または未ログイン
+                if (currentUser) {
+                    loginNavView.classList.add('hidden');
+                    userNavView.classList.remove('hidden');
+                    userNavName.textContent = currentUser.displayName || 'ユーザー';
+                    userNavEmail.textContent = currentUser.email || '';
+                } else {
+                    loginNavView.classList.remove('hidden');
+                    userNavView.classList.add('hidden');
+                }
+                
+                loginRequired.style.display = 'block';
+                adminContent.classList.add('hidden');
+            }
+        }
+
+        // 管理データ読み込み
+        async function loadAdminData() {
+            try {
+                await Promise.all([
+                    loadQuestions(),
+                    loadSystemStats(),
+                    loadUsers()
+                ]);
+            } catch (error) {
+                console.error('管理データの読み込みに失敗:', error);
+                showStatus('データの読み込みに失敗しました', 'error');
+            }
+        }
+
+        // 問題一覧読み込み
+        async function loadQuestions() {
+            try {
+                const q = query(collection(db, 'quiz_questions'), orderBy('createdAt', 'desc'));
+                const querySnapshot = await getDocs(q);
+                questions = [];
+                
+                querySnapshot.forEach((doc) => {
+                    questions.push({ id: doc.id, ...doc.data() });
+                });
+                
+                displayQuestions();
+            } catch (error) {
+                console.error('問題読み込みエラー:', error);
+            }
+        }
+
+        // 問題表示
+        function displayQuestions() {
+            const questionsList = document.getElementById('questionsList');
+            questionsList.innerHTML = '';
+            
+            if (questions.length === 0) {
+                questionsList.innerHTML = '<div class="loading">問題がありません</div>';
+                return;
+            }
+            
+            questions.forEach(question => {
+                const questionItem = document.createElement('div');
+                questionItem.className = 'question-item';
+                
+                questionItem.innerHTML = `
+                    <div class="question-header">
+                        <div class="question-text">${question.question}</div>
+                    </div>
+                    <div class="question-meta">
+                        カテゴリ: ${getCategoryName(question.category)} | 
+                        難易度: ${getDifficultyName(question.difficulty)} | 
+                        作成日: ${formatDate(question.createdAt)}
+                    </div>
+                    <div class="question-actions">
+                        <button class="btn btn-secondary btn-small" onclick="editQuestion('${question.id}')">編集</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteQuestion('${question.id}')">削除</button>
+                    </div>
+                `;
+                
+                questionsList.appendChild(questionItem);
+            });
+        }
+
+        // システム統計読み込み
+        async function loadSystemStats() {
+            try {
+                // 問題数
+                const questionsQuery = query(collection(db, 'quiz_questions'));
+                const questionsSnapshot = await getDocs(questionsQuery);
+                document.getElementById('totalQuestions').textContent = questionsSnapshot.size;
+                
+                // ユーザー数
+                const usersQuery = query(collection(db, 'users'));
+                const usersSnapshot = await getDocs(usersQuery);
+                document.getElementById('totalUsers').textContent = usersSnapshot.size;
+                
+                // 平均正答率（サンプルデータ）
+                document.getElementById('averageAccuracy').textContent = '73%';
+                document.getElementById('activeUsers').textContent = Math.floor(usersSnapshot.size * 0.3);
+                
+            } catch (error) {
+                console.error('統計読み込みエラー:', error);
+            }
+        }
+
+        // ユーザー一覧読み込み
+        async function loadUsers() {
+            try {
+                const q = query(collection(db, 'users'), orderBy('createdAt', 'desc'));
+                const querySnapshot = await getDocs(q);
+                users = [];
+                
+                querySnapshot.forEach((doc) => {
+                    users.push({ id: doc.id, ...doc.data() });
+                });
+                
+                displayUsers();
+            } catch (error) {
+                console.error('ユーザー読み込みエラー:', error);
+            }
+        }
+
+        // ユーザー表示
+        function displayUsers() {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+            
+            if (users.length === 0) {
+                usersList.innerHTML = '<div class="loading">ユーザーがいません</div>';
+                return;
+            }
+            
+            users.forEach(user => {
+                const userItem = document.createElement('div');
+                userItem.className = 'user-item';
+                
+                const initial = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+                
+                userItem.innerHTML = `
+                    <div class="user-avatar">${initial}</div>
+                    <div class="user-info">
+                        <div class="user-name">${user.displayName || 'Unknown User'}</div>
+                        <div class="user-stats">${user.email} | 登録日: ${formatDate(user.createdAt)}</div>
+                    </div>
+                `;
+                
+                usersList.appendChild(userItem);
+            });
+        }
+
+        // タブ切り替え
+        window.switchTab = function(tabName) {
+            // タブボタンの状態更新
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // タブコンテンツの表示切り替え
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            document.getElementById(tabName + 'Tab').classList.add('active');
+        }
+
+        // 正解選択
+        window.selectCorrectAnswer = function(index) {
+            document.querySelectorAll('.correct-indicator').forEach(indicator => {
+                indicator.classList.remove('selected');
+            });
+            event.target.classList.add('selected');
+            correctAnswerIndex = index;
+        }
+
+        // 問題フォームクリア
+        window.clearQuestionForm = function() {
+            document.getElementById('questionForm').reset();
+            document.querySelectorAll('.correct-indicator').forEach(indicator => {
+                indicator.classList.remove('selected');
+            });
+            correctAnswerIndex = -1;
+        }
+
+        // 問題追加
+        document.getElementById('questionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (correctAnswerIndex === -1) {
+                showStatus('正解を選択してください', 'error');
+                return;
+            }
+            
+            const formData = new FormData(e.target);
+            const options = Array.from(document.querySelectorAll('.option-input')).map(input => input.value);
+            
+            const questionData = {
+                question: document.getElementById('questionText').value,
+                category: document.getElementById('questionCategory').value,
+                difficulty: document.getElementById('questionDifficulty').value,
+                options: options,
+                correct: correctAnswerIndex,
+                explanation: document.getElementById('questionExplanation').value,
+                createdAt: serverTimestamp(),
+                createdBy: currentUser.uid
+            };
+            
+            try {
+                await addDoc(collection(db, 'quiz_questions'), questionData);
+                showStatus('問題を追加しました', 'success');
+                clearQuestionForm();
+                await loadQuestions();
+            } catch (error) {
+                console.error('問題追加エラー:', error);
+                showStatus('問題の追加に失敗しました', 'error');
+            }
+        });
+
+        // 問題削除
+        window.deleteQuestion = async function(questionId) {
+            if (confirm('この問題を削除しますか？')) {
+                try {
+                    await deleteDoc(doc(db, 'quiz_questions', questionId));
+                    showStatus('問題を削除しました', 'success');
+                    await loadQuestions();
+                } catch (error) {
+                    console.error('問題削除エラー:', error);
+                    showStatus('問題の削除に失敗しました', 'error');
+                }
+            }
+        }
+
+        // アダプティブ設定保存
+        window.saveAdaptiveSettings = function() {
+            const settings = {
+                adaptiveStrength: document.getElementById('adaptiveStrength').value,
+                minAccuracy: document.getElementById('minAccuracy').value,
+                maxAccuracy: document.getElementById('maxAccuracy').value
+            };
+            
+            localStorage.setItem('adaptiveSettings', JSON.stringify(settings));
+            showStatus('設定を保存しました', 'success');
+        }
+
+        // アダプティブ設定リセット
+        window.resetAdaptiveSettings = function() {
+            document.getElementById('adaptiveStrength').value = 5;
+            document.getElementById('minAccuracy').value = 80;
+            document.getElementById('maxAccuracy').value = 35;
+            showStatus('設定をリセットしました', 'success');
+        }
+
+        // ヘルパー関数
+        function getCategoryName(category) {
+            const names = {
+                basic: '基本知識',
+                regions: '産地',
+                grapes: 'ブドウ品種',
+                tasting: 'テイスティング',
+                production: '醸造',
+                pairing: 'ペアリング'
+            };
+            return names[category] || category;
+        }
+
+        function getDifficultyName(difficulty) {
+            const names = {
+                beginner: '初級',
+                intermediate: '中級',
+                advanced: '上級',
+                expert: 'エキスパート'
+            };
+            return names[difficulty] || difficulty;
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return '不明';
+            if (timestamp.toDate) {
+                return timestamp.toDate().toLocaleDateString('ja-JP');
+            }
+            return new Date(timestamp).toLocaleDateString('ja-JP');
+        }
+
+        // 共通のユーティリティ関数
+        window.signInWithGoogle = async function() {
+            const provider = new GoogleAuthProvider();
+            try {
+                await signInWithPopup(auth, provider);
+                showStatus('ログインに成功しました', 'success');
+            } catch (error) {
+                console.error('Google login failed:', error);
+                showStatus('ログインに失敗しました: ' + error.message, 'error');
+            }
+        }
+
+        window.confirmSignOut = function() {
+            if (confirm('ログアウトしますか？')) {
+                firebaseSignOut(auth);
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusEl = document.getElementById('authNavStatus');
+            if (statusEl) {
+                statusEl.textContent = message;
+                statusEl.className = `auth-status ${type}`;
+                statusEl.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    statusEl.classList.add('hidden');
+                }, 3000);
+            }
+        }
+
+        // テーマとモバイルメニューの初期化
+        function initTheme() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = document.querySelector('.theme-icon');
+            
+            const savedTheme = localStorage.getItem('theme') || 
+                (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+            
+            setTheme(savedTheme);
+            
+            themeToggle.addEventListener('click', () => {
+                const currentTheme = document.documentElement.getAttribute('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                setTheme(newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+            
+            function setTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                themeIcon.textContent = theme === 'dark' ? '☀️' : '🌙';
+            }
+        }
+
+        function initMobileMenu() {
+            const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+            const navbarMenu = document.getElementById('navbarMenu');
+            
+            if (mobileMenuToggle && navbarMenu) {
+                mobileMenuToggle.addEventListener('click', () => {
+                    mobileMenuToggle.classList.toggle('active');
+                    navbarMenu.classList.toggle('active');
+                });
+                
+                document.addEventListener('click', (e) => {
+                    if (!mobileMenuToggle.contains(e.target) && !navbarMenu.contains(e.target)) {
+                        mobileMenuToggle.classList.remove('active');
+                        navbarMenu.classList.remove('active');
+                    }
+                });
+            }
+        }
+
+        // 初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            initTheme();
+            initMobileMenu();
+        });
+    </script>
+</body>
+</html>
